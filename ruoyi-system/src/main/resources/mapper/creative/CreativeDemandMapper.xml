@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.creative.CreativeDemandMapper">
+
+    <resultMap id="CreativeDemandResult" type="com.ruoyi.system.domain.creative.CreativeDemand">
+        <result property="demandId" column="demand_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="demandTitle" column="demand_title"/>
+        <result property="budgetAmount" column="budget_amount"/>
+        <result property="demandStatus" column="demand_status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectCreativeDemandVo">
+        select demand_id, user_id, category_id, demand_title, budget_amount, demand_status, create_by, create_time, update_by, update_time, remark
+        from creative_demand
+    </sql>
+
+    <select id="selectCreativeDemandByDemandId" parameterType="Long" resultMap="CreativeDemandResult">
+        <include refid="selectCreativeDemandVo"/>
+        where demand_id = #{demandId}
+    </select>
+
+    <select id="selectCreativeDemandList" parameterType="com.ruoyi.system.domain.creative.CreativeDemand" resultMap="CreativeDemandResult">
+        <include refid="selectCreativeDemandVo"/>
+        <where>
+            <if test="demandTitle != null and demandTitle != ''">and demand_title like concat('%', #{demandTitle}, '%')</if>
+            <if test="demandStatus != null and demandStatus != ''">and demand_status = #{demandStatus}</if>
+            <if test="categoryId != null">and category_id = #{categoryId}</if>
+        </where>
+        order by demand_id desc
+    </select>
+
+    <insert id="insertCreativeDemand" parameterType="com.ruoyi.system.domain.creative.CreativeDemand" useGeneratedKeys="true" keyProperty="demandId">
+        insert into creative_demand (user_id, category_id, demand_title, budget_amount, demand_status, remark, create_by, create_time)
+        values (#{userId}, #{categoryId}, #{demandTitle}, #{budgetAmount}, #{demandStatus}, #{remark}, #{createBy}, sysdate())
+    </insert>
+
+    <update id="updateCreativeDemand" parameterType="com.ruoyi.system.domain.creative.CreativeDemand">
+        update creative_demand
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="demandTitle != null">demand_title = #{demandTitle},</if>
+            <if test="budgetAmount != null">budget_amount = #{budgetAmount},</if>
+            <if test="demandStatus != null">demand_status = #{demandStatus},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where demand_id = #{demandId}
+    </update>
+
+    <delete id="deleteCreativeDemandByDemandId" parameterType="Long">
+        delete from creative_demand where demand_id = #{demandId}
+    </delete>
+
+    <delete id="deleteCreativeDemandByDemandIds" parameterType="Long">
+        delete from creative_demand where demand_id in
+        <foreach collection="array" item="demandId" open="(" separator="," close=")">
+            #{demandId}
+        </foreach>
+    </delete>
+</mapper>

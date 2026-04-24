@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.creative.CreativeFavoriteMapper">
+
+    <resultMap id="CreativeFavoriteResult" type="com.ruoyi.system.domain.creative.CreativeFavorite">
+        <result property="favoriteId" column="favorite_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="targetType" column="target_type"/>
+        <result property="targetId" column="target_id"/>
+        <result property="status" column="status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectCreativeFavoriteVo">
+        select favorite_id, user_id, target_type, target_id, status, create_by, create_time, update_by, update_time, remark
+        from creative_favorite_follow
+    </sql>
+
+    <select id="selectCreativeFavoriteByFavoriteId" parameterType="Long" resultMap="CreativeFavoriteResult">
+        <include refid="selectCreativeFavoriteVo"/>
+        where favorite_id = #{favoriteId}
+    </select>
+
+    <select id="selectCreativeFavoriteList" parameterType="com.ruoyi.system.domain.creative.CreativeFavorite" resultMap="CreativeFavoriteResult">
+        <include refid="selectCreativeFavoriteVo"/>
+        <where>
+            <if test="userId != null">and user_id = #{userId}</if>
+            <if test="targetType != null and targetType != ''">and target_type = #{targetType}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by favorite_id desc
+    </select>
+
+    <insert id="insertCreativeFavorite" parameterType="com.ruoyi.system.domain.creative.CreativeFavorite" useGeneratedKeys="true" keyProperty="favoriteId">
+        insert into creative_favorite_follow (user_id, target_type, target_id, status, remark, create_by, create_time)
+        values (#{userId}, #{targetType}, #{targetId}, #{status}, #{remark}, #{createBy}, sysdate())
+    </insert>
+
+    <update id="updateCreativeFavorite" parameterType="com.ruoyi.system.domain.creative.CreativeFavorite">
+        update creative_favorite_follow
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="targetType != null">target_type = #{targetType},</if>
+            <if test="targetId != null">target_id = #{targetId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where favorite_id = #{favoriteId}
+    </update>
+
+    <delete id="deleteCreativeFavoriteByFavoriteId" parameterType="Long">
+        delete from creative_favorite_follow where favorite_id = #{favoriteId}
+    </delete>
+
+    <delete id="deleteCreativeFavoriteByFavoriteIds" parameterType="Long">
+        delete from creative_favorite_follow where favorite_id in
+        <foreach collection="array" item="favoriteId" open="(" separator="," close=")">
+            #{favoriteId}
+        </foreach>
+    </delete>
+</mapper>

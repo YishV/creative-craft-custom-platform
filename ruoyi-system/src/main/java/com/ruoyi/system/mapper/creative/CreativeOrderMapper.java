@@ -1,0 +1,19 @@
+package com.ruoyi.system.mapper.creative;
+
+import java.util.List;
+import com.ruoyi.system.domain.creative.CreativeOrder;
+
+public interface CreativeOrderMapper
+{
+    CreativeOrder selectCreativeOrderByOrderId(Long orderId);
+
+    List<CreativeOrder> selectCreativeOrderList(CreativeOrder creativeOrder);
+
+    int insertCreativeOrder(CreativeOrder creativeOrder);
+
+    int updateCreativeOrder(CreativeOrder creativeOrder);
+
+    int deleteCreativeOrderByOrderId(Long orderId);
+
+    int deleteCreativeOrderByOrderIds(Long[] orderIds);
+}

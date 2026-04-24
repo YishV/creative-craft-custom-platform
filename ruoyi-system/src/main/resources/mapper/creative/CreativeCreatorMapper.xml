@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.creative.CreativeCreatorMapper">
+
+    <resultMap id="CreativeCreatorResult" type="com.ruoyi.system.domain.creative.CreativeCreator">
+        <result property="creatorId" column="creator_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="creatorName" column="creator_name"/>
+        <result property="storeName" column="store_name"/>
+        <result property="creatorLevel" column="creator_level"/>
+        <result property="status" column="status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectCreativeCreatorVo">
+        select creator_id, user_id, creator_name, store_name, creator_level, status, create_by, create_time, update_by, update_time, remark
+        from creative_creator
+    </sql>
+
+    <select id="selectCreativeCreatorByCreatorId" parameterType="Long" resultMap="CreativeCreatorResult">
+        <include refid="selectCreativeCreatorVo"/>
+        where creator_id = #{creatorId}
+    </select>
+
+    <select id="selectCreativeCreatorList" parameterType="com.ruoyi.system.domain.creative.CreativeCreator" resultMap="CreativeCreatorResult">
+        <include refid="selectCreativeCreatorVo"/>
+        <where>
+            <if test="creatorName != null and creatorName != ''">and creator_name like concat('%', #{creatorName}, '%')</if>
+            <if test="storeName != null and storeName != ''">and store_name like concat('%', #{storeName}, '%')</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by creator_id desc
+    </select>
+
+    <insert id="insertCreativeCreator" parameterType="com.ruoyi.system.domain.creative.CreativeCreator" useGeneratedKeys="true" keyProperty="creatorId">
+        insert into creative_creator (user_id, creator_name, store_name, creator_level, status, remark, create_by, create_time)
+        values (#{userId}, #{creatorName}, #{storeName}, #{creatorLevel}, #{status}, #{remark}, #{createBy}, sysdate())
+    </insert>
+
+    <update id="updateCreativeCreator" parameterType="com.ruoyi.system.domain.creative.CreativeCreator">
+        update creative_creator
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="creatorName != null">creator_name = #{creatorName},</if>
+            <if test="storeName != null">store_name = #{storeName},</if>
+            <if test="creatorLevel != null">creator_level = #{creatorLevel},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where creator_id = #{creatorId}
+    </update>
+
+    <delete id="deleteCreativeCreatorByCreatorId" parameterType="Long">
+        delete from creative_creator where creator_id = #{creatorId}
+    </delete>
+
+    <delete id="deleteCreativeCreatorByCreatorIds" parameterType="Long">
+        delete from creative_creator where creator_id in
+        <foreach collection="array" item="creatorId" open="(" separator="," close=")">
+            #{creatorId}
+        </foreach>
+    </delete>
+</mapper>

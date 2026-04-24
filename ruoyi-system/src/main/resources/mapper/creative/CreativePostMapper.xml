@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.creative.CreativePostMapper">
+
+    <resultMap id="CreativePostResult" type="com.ruoyi.system.domain.creative.CreativePost">
+        <result property="postId" column="post_id"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="postTitle" column="post_title"/>
+        <result property="postType" column="post_type"/>
+        <result property="status" column="status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectCreativePostVo">
+        select post_id, creator_id, post_title, post_type, status, create_by, create_time, update_by, update_time, remark
+        from creative_post
+    </sql>
+
+    <select id="selectCreativePostByPostId" parameterType="Long" resultMap="CreativePostResult">
+        <include refid="selectCreativePostVo"/>
+        where post_id = #{postId}
+    </select>
+
+    <select id="selectCreativePostList" parameterType="com.ruoyi.system.domain.creative.CreativePost" resultMap="CreativePostResult">
+        <include refid="selectCreativePostVo"/>
+        <where>
+            <if test="postTitle != null and postTitle != ''">and post_title like concat('%', #{postTitle}, '%')</if>
+            <if test="postType != null and postType != ''">and post_type = #{postType}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by post_id desc
+    </select>
+
+    <insert id="insertCreativePost" parameterType="com.ruoyi.system.domain.creative.CreativePost" useGeneratedKeys="true" keyProperty="postId">
+        insert into creative_post (creator_id, post_title, post_type, status, remark, create_by, create_time)
+        values (#{creatorId}, #{postTitle}, #{postType}, #{status}, #{remark}, #{createBy}, sysdate())
+    </insert>
+
+    <update id="updateCreativePost" parameterType="com.ruoyi.system.domain.creative.CreativePost">
+        update creative_post
+        <set>
+            <if test="creatorId != null">creator_id = #{creatorId},</if>
+            <if test="postTitle != null">post_title = #{postTitle},</if>
+            <if test="postType != null">post_type = #{postType},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where post_id = #{postId}
+    </update>
+
+    <delete id="deleteCreativePostByPostId" parameterType="Long">
+        delete from creative_post where post_id = #{postId}
+    </delete>
+
+    <delete id="deleteCreativePostByPostIds" parameterType="Long">
+        delete from creative_post where post_id in
+        <foreach collection="array" item="postId" open="(" separator="," close=")">
+            #{postId}
+        </foreach>
+    </delete>
+</mapper>

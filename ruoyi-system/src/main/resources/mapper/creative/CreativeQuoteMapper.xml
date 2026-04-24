@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.creative.CreativeQuoteMapper">
+
+    <resultMap id="CreativeQuoteResult" type="com.ruoyi.system.domain.creative.CreativeQuote">
+        <result property="quoteId" column="quote_id"/>
+        <result property="demandId" column="demand_id"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="quoteAmount" column="quote_amount"/>
+        <result property="deliveryDays" column="delivery_days"/>
+        <result property="quoteStatus" column="quote_status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectCreativeQuoteVo">
+        select quote_id, demand_id, creator_id, quote_amount, delivery_days, quote_status, create_by, create_time, update_by, update_time, remark
+        from creative_quote
+    </sql>
+
+    <select id="selectCreativeQuoteByQuoteId" parameterType="Long" resultMap="CreativeQuoteResult">
+        <include refid="selectCreativeQuoteVo"/>
+        where quote_id = #{quoteId}
+    </select>
+
+    <select id="selectCreativeQuoteList" parameterType="com.ruoyi.system.domain.creative.CreativeQuote" resultMap="CreativeQuoteResult">
+        <include refid="selectCreativeQuoteVo"/>
+        <where>
+            <if test="demandId != null">and demand_id = #{demandId}</if>
+            <if test="creatorId != null">and creator_id = #{creatorId}</if>
+            <if test="quoteStatus != null and quoteStatus != ''">and quote_status = #{quoteStatus}</if>
+        </where>
+        order by quote_id desc
+    </select>
+
+    <insert id="insertCreativeQuote" parameterType="com.ruoyi.system.domain.creative.CreativeQuote" useGeneratedKeys="true" keyProperty="quoteId">
+        insert into creative_quote (demand_id, creator_id, quote_amount, delivery_days, quote_status, remark, create_by, create_time)
+        values (#{demandId}, #{creatorId}, #{quoteAmount}, #{deliveryDays}, #{quoteStatus}, #{remark}, #{createBy}, sysdate())
+    </insert>
+
+    <update id="updateCreativeQuote" parameterType="com.ruoyi.system.domain.creative.CreativeQuote">
+        update creative_quote
+        <set>
+            <if test="demandId != null">demand_id = #{demandId},</if>
+            <if test="creatorId != null">creator_id = #{creatorId},</if>
+            <if test="quoteAmount != null">quote_amount = #{quoteAmount},</if>
+            <if test="deliveryDays != null">delivery_days = #{deliveryDays},</if>
+            <if test="quoteStatus != null">quote_status = #{quoteStatus},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where quote_id = #{quoteId}
+    </update>
+
+    <delete id="deleteCreativeQuoteByQuoteId" parameterType="Long">
+        delete from creative_quote where quote_id = #{quoteId}
+    </delete>
+
+    <delete id="deleteCreativeQuoteByQuoteIds" parameterType="Long">
+        delete from creative_quote where quote_id in
+        <foreach collection="array" item="quoteId" open="(" separator="," close=")">
+            #{quoteId}
+        </foreach>
+    </delete>
+</mapper>

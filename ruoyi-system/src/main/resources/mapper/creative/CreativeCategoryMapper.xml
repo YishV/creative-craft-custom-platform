@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.creative.CreativeCategoryMapper">
+
+    <resultMap id="CreativeCategoryResult" type="com.ruoyi.system.domain.creative.CreativeCategory">
+        <result property="categoryId" column="category_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="categoryName" column="category_name"/>
+        <result property="categoryCode" column="category_code"/>
+        <result property="sortNum" column="sort_num"/>
+        <result property="status" column="status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectCreativeCategoryVo">
+        select category_id, parent_id, category_name, category_code, sort_num, status, create_by, create_time, update_by, update_time, remark
+        from creative_category
+    </sql>
+
+    <select id="selectCreativeCategoryByCategoryId" parameterType="Long" resultMap="CreativeCategoryResult">
+        <include refid="selectCreativeCategoryVo"/>
+        where category_id = #{categoryId}
+    </select>
+
+    <select id="selectCreativeCategoryList" parameterType="com.ruoyi.system.domain.creative.CreativeCategory" resultMap="CreativeCategoryResult">
+        <include refid="selectCreativeCategoryVo"/>
+        <where>
+            <if test="categoryName != null and categoryName != ''">and category_name like concat('%', #{categoryName}, '%')</if>
+            <if test="categoryCode != null and categoryCode != ''">and category_code = #{categoryCode}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by sort_num asc, category_id desc
+    </select>
+
+    <insert id="insertCreativeCategory" parameterType="com.ruoyi.system.domain.creative.CreativeCategory" useGeneratedKeys="true" keyProperty="categoryId">
+        insert into creative_category (parent_id, category_name, category_code, sort_num, status, remark, create_by, create_time)
+        values (#{parentId}, #{categoryName}, #{categoryCode}, #{sortNum}, #{status}, #{remark}, #{createBy}, sysdate())
+    </insert>
+
+    <update id="updateCreativeCategory" parameterType="com.ruoyi.system.domain.creative.CreativeCategory">
+        update creative_category
+        <set>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="categoryName != null">category_name = #{categoryName},</if>
+            <if test="categoryCode != null">category_code = #{categoryCode},</if>
+            <if test="sortNum != null">sort_num = #{sortNum},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where category_id = #{categoryId}
+    </update>
+
+    <delete id="deleteCreativeCategoryByCategoryId" parameterType="Long">
+        delete from creative_category where category_id = #{categoryId}
+    </delete>
+
+    <delete id="deleteCreativeCategoryByCategoryIds" parameterType="Long">
+        delete from creative_category where category_id in
+        <foreach collection="array" item="categoryId" open="(" separator="," close=")">
+            #{categoryId}
+        </foreach>
+    </delete>
+</mapper>

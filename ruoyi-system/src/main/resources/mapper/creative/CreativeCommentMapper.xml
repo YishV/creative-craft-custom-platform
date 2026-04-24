@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.creative.CreativeCommentMapper">
+
+    <resultMap id="CreativeCommentResult" type="com.ruoyi.system.domain.creative.CreativeComment">
+        <result property="commentId" column="comment_id"/>
+        <result property="postId" column="post_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="commentContent" column="comment_content"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectCreativeCommentVo">
+        select comment_id, post_id, user_id, comment_content, audit_status, create_by, create_time, update_by, update_time, remark
+        from creative_comment
+    </sql>
+
+    <select id="selectCreativeCommentByCommentId" parameterType="Long" resultMap="CreativeCommentResult">
+        <include refid="selectCreativeCommentVo"/>
+        where comment_id = #{commentId}
+    </select>
+
+    <select id="selectCreativeCommentList" parameterType="com.ruoyi.system.domain.creative.CreativeComment" resultMap="CreativeCommentResult">
+        <include refid="selectCreativeCommentVo"/>
+        <where>
+            <if test="postId != null">and post_id = #{postId}</if>
+            <if test="userId != null">and user_id = #{userId}</if>
+            <if test="auditStatus != null and auditStatus != ''">and audit_status = #{auditStatus}</if>
+        </where>
+        order by comment_id desc
+    </select>
+
+    <insert id="insertCreativeComment" parameterType="com.ruoyi.system.domain.creative.CreativeComment" useGeneratedKeys="true" keyProperty="commentId">
+        insert into creative_comment (post_id, user_id, comment_content, audit_status, remark, create_by, create_time)
+        values (#{postId}, #{userId}, #{commentContent}, #{auditStatus}, #{remark}, #{createBy}, sysdate())
+    </insert>
+
+    <update id="updateCreativeComment" parameterType="com.ruoyi.system.domain.creative.CreativeComment">
+        update creative_comment
+        <set>
+            <if test="postId != null">post_id = #{postId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="commentContent != null">comment_content = #{commentContent},</if>
+            <if test="auditStatus != null">audit_status = #{auditStatus},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where comment_id = #{commentId}
+    </update>
+
+    <delete id="deleteCreativeCommentByCommentId" parameterType="Long">
+        delete from creative_comment where comment_id = #{commentId}
+    </delete>
+
+    <delete id="deleteCreativeCommentByCommentIds" parameterType="Long">
+        delete from creative_comment where comment_id in
+        <foreach collection="array" item="commentId" open="(" separator="," close=")">
+            #{commentId}
+        </foreach>
+    </delete>
+</mapper>
