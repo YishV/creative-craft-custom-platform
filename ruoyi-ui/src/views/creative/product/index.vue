@@ -39,8 +39,12 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="商品ID" align="center" prop="productId" width="90" />
       <el-table-column label="商品名称" align="center" prop="productName" :show-overflow-tooltip="true" />
-      <el-table-column label="创作者ID" align="center" prop="creatorId" width="100" />
-      <el-table-column label="分类ID" align="center" prop="categoryId" width="90" />
+      <el-table-column label="创作者" align="center" prop="creatorId" width="140">
+        <template slot-scope="scope">{{ creatorName(scope.row.creatorId) }}</template>
+      </el-table-column>
+      <el-table-column label="分类" align="center" prop="categoryId" width="120">
+        <template slot-scope="scope">{{ categoryName(scope.row.categoryId) }}</template>
+      </el-table-column>
       <el-table-column label="商品类型" align="center" prop="productType" width="90">
         <template slot-scope="scope">{{ productTypeText(scope.row.productType) }}</template>
       </el-table-column>
@@ -55,8 +59,10 @@
           <span>{{ parseTime(scope.row.createTime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="150">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="220">
         <template slot-scope="scope">
+          <el-button size="mini" type="text" icon="el-icon-top" @click="handlePutOnShelf(scope.row)" v-if="scope.row.status === '1'" v-hasPermi="['creative:product:edit']">上架</el-button>
+          <el-button size="mini" type="text" icon="el-icon-bottom" @click="handleTakeOffShelf(scope.row)" v-if="scope.row.status === '0'" v-hasPermi="['creative:product:edit']">下架</el-button>
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['creative:product:edit']">修改</el-button>
           <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)" v-hasPermi="['creative:product:remove']">删除</el-button>
         </template>
@@ -70,8 +76,10 @@
         <el-form-item label="商品名称" prop="productName">
           <el-input v-model="form.productName" placeholder="请输入商品名称" />
         </el-form-item>
-        <el-form-item label="创作者ID" prop="creatorId">
-          <el-input-number v-model="form.creatorId" :min="1" controls-position="right" />
+        <el-form-item label="创作者" prop="creatorId">
+          <el-select v-model="form.creatorId" placeholder="请选择创作者" filterable clearable>
+            <el-option v-for="c in creatorOptions" :key="c.creatorId" :label="c.creatorName" :value="c.creatorId" />
+          </el-select>
         </el-form-item>
         <el-form-item label="分类" prop="categoryId">
           <el-select v-model="form.categoryId" placeholder="请选择分类" filterable clearable>
@@ -87,12 +95,6 @@
         <el-form-item label="价格" prop="price">
           <el-input-number v-model="form.price" :min="0" :precision="2" :step="10" controls-position="right" />
         </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="form.status">
-            <el-radio label="0">上架</el-radio>
-            <el-radio label="1">下架</el-radio>
-          </el-radio-group>
-        </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入商品说明" />
         </el-form-item>
@@ -106,8 +108,9 @@
 </template>
 
 <script>
-import { listProduct, getProduct, delProduct, addProduct, updateProduct } from '@/api/creative/product'
+import { listProduct, getProduct, delProduct, addProduct, updateProduct, putOnShelf, takeOffShelf } from '@/api/creative/product'
 import { listCategory } from '@/api/creative/category'
+import { listCreator } from '@/api/creative/creator'
 
 export default {
   name: 'CreativeProduct',
@@ -121,6 +124,7 @@ export default {
       total: 0,
       productList: [],
       categoryOptions: [],
+      creatorOptions: [],
       title: '',
       open: false,
       queryParams: {
@@ -142,6 +146,7 @@ export default {
   created() {
     this.getList()
     this.getCategoryOptions()
+    this.getCreatorOptions()
   },
   methods: {
     getList() {
@@ -156,6 +161,19 @@ export default {
       listCategory({ pageNum: 1, pageSize: 1000, status: '0' }).then(response => {
         this.categoryOptions = response.rows || []
       })
+    },
+    getCreatorOptions() {
+      listCreator({ pageNum: 1, pageSize: 1000, status: '0' }).then(response => {
+        this.creatorOptions = response.rows || []
+      })
+    },
+    creatorName(id) {
+      const c = this.creatorOptions.find(i => i.creatorId === id)
+      return c ? c.creatorName : id
+    },
+    categoryName(id) {
+      const c = this.categoryOptions.find(i => i.categoryId === id)
+      return c ? c.categoryName : id
     },
     productTypeText(type) {
       return type === 'custom' ? '定制' : '现货'
@@ -172,7 +190,7 @@ export default {
         productName: undefined,
         productType: 'spot',
         price: 0,
-        status: '0',
+        status: '1',
         remark: undefined
       }
       this.resetForm('form')
@@ -230,6 +248,22 @@ export default {
       }).then(() => {
         this.getList()
         this.$modal.msgSuccess('删除成功')
+      }).catch(() => {})
+    },
+    handlePutOnShelf(row) {
+      this.$modal.confirm('确认上架商品“' + row.productName + '”吗？').then(function() {
+        return putOnShelf(row.productId)
+      }).then(() => {
+        this.getList()
+        this.$modal.msgSuccess('上架成功')
+      }).catch(() => {})
+    },
+    handleTakeOffShelf(row) {
+      this.$modal.confirm('确认下架商品“' + row.productName + '”吗？').then(function() {
+        return takeOffShelf(row.productId)
+      }).then(() => {
+        this.getList()
+        this.$modal.msgSuccess('下架成功')
       }).catch(() => {})
     }
   }

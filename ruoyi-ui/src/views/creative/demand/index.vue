@@ -37,8 +37,12 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="需求ID" align="center" prop="demandId" width="90" />
       <el-table-column label="需求标题" align="center" prop="demandTitle" :show-overflow-tooltip="true" />
-      <el-table-column label="买家ID" align="center" prop="userId" width="90" />
-      <el-table-column label="分类ID" align="center" prop="categoryId" width="90" />
+      <el-table-column label="买家" align="center" prop="userId" width="100">
+        <template slot-scope="scope">{{ userName(scope.row.userId) }}</template>
+      </el-table-column>
+      <el-table-column label="分类" align="center" prop="categoryId" width="120">
+        <template slot-scope="scope">{{ categoryName(scope.row.categoryId) }}</template>
+      </el-table-column>
       <el-table-column label="预算" align="center" prop="budgetAmount" width="110" />
       <el-table-column label="状态" align="center" prop="demandStatus" width="110">
         <template slot-scope="scope">
@@ -65,8 +69,10 @@
         <el-form-item label="需求标题" prop="demandTitle">
           <el-input v-model="form.demandTitle" placeholder="如 定制手绘团扇" />
         </el-form-item>
-        <el-form-item label="买家ID" prop="userId">
-          <el-input-number v-model="form.userId" :min="1" controls-position="right" />
+        <el-form-item label="买家" prop="userId">
+          <el-select v-model="form.userId" placeholder="请选择买家" filterable clearable>
+            <el-option v-for="u in userOptions" :key="u.userId" :label="u.nickName || u.userName" :value="u.userId" />
+          </el-select>
         </el-form-item>
         <el-form-item label="分类" prop="categoryId">
           <el-select v-model="form.categoryId" placeholder="请选择分类" filterable clearable>
@@ -96,6 +102,7 @@
 <script>
 import { listDemand, getDemand, delDemand, addDemand, updateDemand } from '@/api/creative/demand'
 import { listCategory } from '@/api/creative/category'
+import { listUser } from '@/api/system/user'
 
 export default {
   name: 'CreativeDemand',
@@ -109,6 +116,7 @@ export default {
       total: 0,
       demandList: [],
       categoryOptions: [],
+      userOptions: [],
       statusOptions: [
         { label: '草稿', value: 'draft', tag: 'info' },
         { label: '待报价', value: 'published', tag: 'warning' },
@@ -136,6 +144,7 @@ export default {
   created() {
     this.getList()
     this.getCategoryOptions()
+    this.getUserOptions()
   },
   methods: {
     getList() {
@@ -150,6 +159,19 @@ export default {
       listCategory({ pageNum: 1, pageSize: 1000, status: '0' }).then(response => {
         this.categoryOptions = response.rows || []
       })
+    },
+    getUserOptions() {
+      listUser({ pageNum: 1, pageSize: 1000 }).then(response => {
+        this.userOptions = response.rows || []
+      })
+    },
+    userName(id) {
+      const u = this.userOptions.find(i => i.userId === id)
+      return u ? (u.nickName || u.userName) : id
+    },
+    categoryName(id) {
+      const c = this.categoryOptions.find(i => i.categoryId === id)
+      return c ? c.categoryName : id
     },
     statusText(value) {
       const item = this.statusOptions.find(option => option.value === value)

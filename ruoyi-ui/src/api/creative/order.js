@@ -37,3 +37,19 @@ export function delOrder(orderId) {
     method: 'delete'
   })
 }
+
+export function startOrder(orderId) {
+  return request({ url: '/creative/order/start/' + orderId, method: 'post' })
+}
+
+export function shipOrder(orderId) {
+  return request({ url: '/creative/order/ship/' + orderId, method: 'post' })
+}
+
+export function finishOrder(orderId) {
+  return request({ url: '/creative/order/finish/' + orderId, method: 'post' })
+}
+
+export function cancelOrder(orderId) {
+  return request({ url: '/creative/order/cancel/' + orderId, method: 'post' })
+}

@@ -17,6 +17,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.creative.CreativeOrder;
+import com.ruoyi.system.domain.creative.CreativeStatusFlow;
 import com.ruoyi.system.service.creative.ICreativeOrderService;
 
 @RestController
@@ -66,5 +67,41 @@ public class CreativeOrderController extends BaseController
     public AjaxResult remove(@PathVariable Long[] orderIds)
     {
         return toAjax(creativeOrderService.deleteCreativeOrderByOrderIds(orderIds));
+    }
+
+    /** 开始制作：created -> making */
+    @PreAuthorize("@ss.hasPermi('creative:order:edit')")
+    @Log(title = "订单-开始制作", businessType = BusinessType.UPDATE)
+    @PostMapping("/start/{orderId}")
+    public AjaxResult startMaking(@PathVariable Long orderId)
+    {
+        return toAjax(creativeOrderService.transitOrderStatus(orderId, CreativeStatusFlow.Order.MAKING, getUsername()));
+    }
+
+    /** 发货：making -> shipped */
+    @PreAuthorize("@ss.hasPermi('creative:order:edit')")
+    @Log(title = "订单-发货", businessType = BusinessType.UPDATE)
+    @PostMapping("/ship/{orderId}")
+    public AjaxResult ship(@PathVariable Long orderId)
+    {
+        return toAjax(creativeOrderService.transitOrderStatus(orderId, CreativeStatusFlow.Order.SHIPPED, getUsername()));
+    }
+
+    /** 完成：shipped -> finished */
+    @PreAuthorize("@ss.hasPermi('creative:order:edit')")
+    @Log(title = "订单-完成", businessType = BusinessType.UPDATE)
+    @PostMapping("/finish/{orderId}")
+    public AjaxResult finish(@PathVariable Long orderId)
+    {
+        return toAjax(creativeOrderService.transitOrderStatus(orderId, CreativeStatusFlow.Order.FINISHED, getUsername()));
+    }
+
+    /** 取消：created/making -> cancelled */
+    @PreAuthorize("@ss.hasPermi('creative:order:edit')")
+    @Log(title = "订单-取消", businessType = BusinessType.UPDATE)
+    @PostMapping("/cancel/{orderId}")
+    public AjaxResult cancel(@PathVariable Long orderId)
+    {
+        return toAjax(creativeOrderService.transitOrderStatus(orderId, CreativeStatusFlow.Order.CANCELLED, getUsername()));
     }
 }

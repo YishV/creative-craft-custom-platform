@@ -32,8 +32,12 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="订单ID" align="center" prop="orderId" width="90" />
       <el-table-column label="订单编号" align="center" prop="orderNo" :show-overflow-tooltip="true" />
-      <el-table-column label="买家ID" align="center" prop="buyerId" width="90" />
-      <el-table-column label="卖家ID" align="center" prop="sellerId" width="90" />
+      <el-table-column label="买家" align="center" prop="buyerId" width="120">
+        <template slot-scope="scope">{{ userName(scope.row.buyerId) }}</template>
+      </el-table-column>
+      <el-table-column label="卖家(创作者)" align="center" prop="sellerId" width="140">
+        <template slot-scope="scope">{{ creatorName(scope.row.sellerId) }}</template>
+      </el-table-column>
       <el-table-column label="金额" align="center" prop="orderAmount" width="110" />
       <el-table-column label="状态" align="center" prop="orderStatus" width="110">
         <template slot-scope="scope">
@@ -45,8 +49,12 @@
           <span>{{ parseTime(scope.row.createTime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="150">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="320">
         <template slot-scope="scope">
+          <el-button size="mini" type="text" v-if="scope.row.orderStatus === 'created'" @click="handleTransit(scope.row, 'start')" v-hasPermi="['creative:order:edit']">开始制作</el-button>
+          <el-button size="mini" type="text" v-if="scope.row.orderStatus === 'making'" @click="handleTransit(scope.row, 'ship')" v-hasPermi="['creative:order:edit']">发货</el-button>
+          <el-button size="mini" type="text" v-if="scope.row.orderStatus === 'shipped'" @click="handleTransit(scope.row, 'finish')" v-hasPermi="['creative:order:edit']">完成</el-button>
+          <el-button size="mini" type="text" v-if="scope.row.orderStatus === 'created' || scope.row.orderStatus === 'making'" @click="handleTransit(scope.row, 'cancel')" v-hasPermi="['creative:order:edit']">取消</el-button>
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['creative:order:edit']">修改</el-button>
           <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)" v-hasPermi="['creative:order:remove']">删除</el-button>
         </template>
@@ -60,11 +68,15 @@
         <el-form-item label="订单编号" prop="orderNo">
           <el-input v-model="form.orderNo" placeholder="为空时请手动填写，如 CRAFT20260424001" />
         </el-form-item>
-        <el-form-item label="买家ID" prop="buyerId">
-          <el-input-number v-model="form.buyerId" :min="1" controls-position="right" />
+        <el-form-item label="买家" prop="buyerId">
+          <el-select v-model="form.buyerId" placeholder="请选择买家" filterable>
+            <el-option v-for="u in userOptions" :key="u.userId" :label="u.nickName || u.userName" :value="u.userId" />
+          </el-select>
         </el-form-item>
-        <el-form-item label="卖家ID" prop="sellerId">
-          <el-input-number v-model="form.sellerId" :min="1" controls-position="right" />
+        <el-form-item label="卖家(创作者)" prop="sellerId">
+          <el-select v-model="form.sellerId" placeholder="请选择创作者" filterable>
+            <el-option v-for="c in creatorOptions" :key="c.creatorId" :label="c.creatorName" :value="c.creatorId" />
+          </el-select>
         </el-form-item>
         <el-form-item label="订单金额" prop="orderAmount">
           <el-input-number v-model="form.orderAmount" :min="0" :precision="2" :step="50" controls-position="right" />
@@ -87,7 +99,9 @@
 </template>
 
 <script>
-import { listOrder, getOrder, delOrder, addOrder, updateOrder } from '@/api/creative/order'
+import { listOrder, getOrder, delOrder, addOrder, updateOrder, startOrder, shipOrder, finishOrder, cancelOrder } from '@/api/creative/order'
+import { listUser } from '@/api/system/user'
+import { listCreator } from '@/api/creative/creator'
 
 export default {
   name: 'CreativeOrder',
@@ -100,6 +114,8 @@ export default {
       showSearch: true,
       total: 0,
       orderList: [],
+      userOptions: [],
+      creatorOptions: [],
       statusOptions: [
         { label: '已创建', value: 'created', tag: 'info' },
         { label: '制作中', value: 'making', tag: 'warning' },
@@ -126,6 +142,7 @@ export default {
   },
   created() {
     this.getList()
+    this.loadOptions()
   },
   methods: {
     getList() {
@@ -135,6 +152,18 @@ export default {
         this.total = response.total
         this.loading = false
       })
+    },
+    loadOptions() {
+      listUser({ pageNum: 1, pageSize: 1000 }).then(r => { this.userOptions = r.rows || [] })
+      listCreator({ pageNum: 1, pageSize: 1000, status: '0' }).then(r => { this.creatorOptions = r.rows || [] })
+    },
+    userName(id) {
+      const u = this.userOptions.find(i => i.userId === id)
+      return u ? (u.nickName || u.userName) : id
+    },
+    creatorName(id) {
+      const c = this.creatorOptions.find(i => i.creatorId === id)
+      return c ? c.creatorName : id
     },
     statusText(value) {
       const item = this.statusOptions.find(option => option.value === value)
@@ -213,6 +242,16 @@ export default {
       }).then(() => {
         this.getList()
         this.$modal.msgSuccess('删除成功')
+      }).catch(() => {})
+    },
+    handleTransit(row, action) {
+      const labelMap = { start: '开始制作', ship: '发货', finish: '完成', cancel: '取消' }
+      const fnMap = { start: startOrder, ship: shipOrder, finish: finishOrder, cancel: cancelOrder }
+      this.$modal.confirm('确认对订单 ' + row.orderNo + ' 执行 [' + labelMap[action] + ']？').then(() => {
+        return fnMap[action](row.orderId)
+      }).then(() => {
+        this.$modal.msgSuccess(labelMap[action] + '成功')
+        this.getList()
       }).catch(() => {})
     }
   }

@@ -9,9 +9,15 @@ public interface ICreativeCreatorService
 
     List<CreativeCreator> selectCreativeCreatorList(CreativeCreator creativeCreator);
 
+    int applyCreator(CreativeCreator creativeCreator);
+
     int insertCreativeCreator(CreativeCreator creativeCreator);
 
     int updateCreativeCreator(CreativeCreator creativeCreator);
+
+    int approveCreator(Long creatorId, String operator);
+
+    int rejectCreator(Long creatorId, String auditRemark, String operator);
 
     int deleteCreativeCreatorByCreatorId(Long creatorId);
 

@@ -16,4 +16,9 @@ public interface ICreativeOrderService
     int deleteCreativeOrderByOrderId(Long orderId);
 
     int deleteCreativeOrderByOrderIds(Long[] orderIds);
+
+    /**
+     * 推进订单状态，校验状态机合法性。
+     */
+    int transitOrderStatus(Long orderId, String targetStatus, String operator);
 }

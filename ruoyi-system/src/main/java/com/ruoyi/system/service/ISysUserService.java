@@ -122,6 +122,14 @@ public interface ISysUserService
     public boolean registerUser(SysUser user);
 
     /**
+     * 按角色标识为用户追加角色，已存在时跳过
+     *
+     * @param userId 用户ID
+     * @param roleKey 角色标识
+     */
+    public void appendRoleByKeyIfAbsent(Long userId, String roleKey);
+
+    /**
      * 修改用户信息
      * 
      * @param user 用户信息

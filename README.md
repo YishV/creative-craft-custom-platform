@@ -1,115 +1,292 @@
-<p align="center">
-	<img alt="logo" src="https://oscimg.oschina.net/oscnet/up-d3d0a9303e11d522a06cd263f3079027715.png">
-</p>
-<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">RuoYi v3.9.2</h1>
-<h4 align="center">基于SpringBoot+Vue前后端分离的Java快速开发框架</h4>
-<p align="center">
-	<a href="https://gitee.com/y_project/RuoYi-Vue/stargazers"><img src="https://gitee.com/y_project/RuoYi-Vue/badge/star.svg?theme=dark"></a>
-	<a href="https://gitee.com/y_project/RuoYi-Vue"><img src="https://img.shields.io/badge/RuoYi-v3.9.2-brightgreen.svg"></a>
-	<a href="https://gitee.com/y_project/RuoYi-Vue/blob/master/LICENSE"><img src="https://img.shields.io/github/license/mashape/apistatus.svg"></a>
-</p>
+# 文创手作定制交易平台
 
-## 平台简介
+> 毕业设计题目：**基于 SpringBoot 的文创手作定制交易平台设计与实现**
+> 学生：徐浩（软件 225，学号 2200770527）｜指导老师：游静（副教授）｜2026 届
+> 框架基础：[RuoYi-Vue v3.9.2](https://gitee.com/y_project/RuoYi-Vue)（Spring Boot + Vue 前后端分离）
 
-若依是一套全部开源的快速开发平台，毫无保留给个人及企业免费使用。
+本项目由 **Claude / Codex / Gemini** 三方 AI 协作开发，完整协作过程与每日进度见 [`docs/collaboration.md`](docs/collaboration.md)。
 
-* 前端采用Vue、Element UI。
-* 后端采用Spring Boot、Spring Security、Redis & Jwt。
-* 权限认证使用Jwt，支持多终端认证系统。
-* 支持加载动态权限菜单，多方式轻松权限控制。
-* 高效率开发，使用代码生成器可以一键生成前后端代码。
-* 阿里云折扣场：[点我进入](http://aly.ruoyi.vip)，腾讯云秒杀场：[点我进入](http://txy.ruoyi.vip)&nbsp;&nbsp;
+---
 
-# 版本分支
+## 一、课题背景与意义
 
-RuoYi-Vue 后端项目提供 Spring Boot 2.x / 3.x / 4.x 多版本分支的并行维护。
+随着文化创意产业的蓬勃发展和消费升级，**个性化、定制化的文创手作产品**日益受到年轻消费者青睐。然而：
 
-| 名称              | 说明                      | 地址                                                    |
-| :---------------- | :------------------------ | :------------------------------------------------------ |
-| master 默认分支   | Spring Boot 4.x (JDK 17+) | https://gitee.com/y_project/RuoYi-Vue                   |
-| springboot3 分支  | Spring Boot 3.x (JDK 17+) | https://gitee.com/y_project/RuoYi-Vue/tree/springboot3  |
-| springboot2 分支  | Spring Boot 2.x (JDK 8+)  | https://gitee.com/y_project/RuoYi-Vue/tree/springboot2  |  
+- 传统电商平台以标准化商品为主，缺乏对**定制化交易流程**的有效支持；
+- 手工艺人与消费者之间**沟通成本高**、**信任机制不健全**、**交易过程不透明**；
+- 现有定制类平台普遍**缺少社区氛围**与个性化推荐能力。
 
-RuoYi-Vue 前端项目提供 Vue 2.x / 3.x / JavaScript TypeScript 版本均可混用搭配
+本平台面向上述痛点，构建一个集 **作品展示、定制需求发布、报价沟通、订单跟踪、社区互动、个性化推荐** 于一体的文创手作交易平台，促进文创产业数字化转型。
 
-| 项目名称      | **RuoYi-Vue** | **RuoYi-Vue3** | **RuoYi-Vue3-TypeScript**   |
-| :---          | :---          | :---           | :---                        |
-| **前端框架**  | Vue 2        | Vue 3          | Vue 3                       |
-| **脚本语言**  | JavaScript   | JavaScript     | TypeScript                  |
-| **构建工具**  | Vue CLI      | Vite           | Vite                        |
-| **UI 组件库** | Element UI   | Element Plus   | Element Plus                |
-| **状态管理**  | Vuex         | Pinia          | Pinia                       |
-| **路由管理**  | Vue Router 3 | Vue Router 4   | Vue Router 4                |
-| **核心特点**  | 1. 技术栈经典稳定<br>2. 社区资料丰富<br>3. 当前维护重心已转移 | 1. 现代前端技术栈<br>2. 开发体验与性能更优<br>3. 官方主推的活跃版本 | 1. 类型加持，减少沟通成本<br>2. 开发时有提示，效率更高<br>3. 多人协作企业级开发项目 |
-| **仓库地址**  | [RuoYi-Vue](https://gitee.com/y_project/RuoYi-Vue) | [RuoYi-Vue3](https://gitcode.com/yangzongzhuan/RuoYi-Vue3) | [RuoYi-Vue3-TypeScript](https://gitcode.com/yangzongzhuan/RuoYi-Vue3/tree/typescript) |
+---
 
-## 内置功能
+## 二、研究目标与功能范围
 
-1.  用户管理：用户是系统操作者，该功能主要完成系统用户配置。
-2.  部门管理：配置系统组织机构（公司、部门、小组），树结构展现支持数据权限。
-3.  岗位管理：配置系统用户所属担任职务。
-4.  菜单管理：配置系统菜单，操作权限，按钮权限标识等。
-5.  角色管理：角色菜单权限分配、设置角色按机构进行数据范围权限划分。
-6.  字典管理：对系统中经常使用的一些较为固定的数据进行维护。
-7.  参数管理：对系统动态配置常用参数。
-8.  通知公告：系统通知公告信息发布维护。
-9.  操作日志：系统正常操作日志记录和查询；系统异常信息日志记录和查询。
-10. 登录日志：系统登录日志记录查询包含登录异常。
-11. 在线用户：当前系统中活跃用户状态监控。
-12. 定时任务：在线（添加、修改、删除)任务调度包含执行结果日志。
-13. 代码生成：前后端代码的生成（java、html、xml、sql）支持CRUD下载 。
-14. 系统接口：根据业务代码自动生成相关的api接口文档。
-15. 服务监控：监视当前系统CPU、内存、磁盘、堆栈等相关信息。
-16. 缓存监控：对系统的缓存信息查询，命令统计等。
-17. 在线构建器：拖动表单元素生成相应的HTML代码。
-18. 连接池监视：监视当前系统数据库连接池状态，可进行分析SQL找出系统性能瓶颈。
+### 2.1 总体目标
 
-## 在线体验
+设计并实现一个支持 **用户注册登录、商品浏览、定制需求发布、在线沟通、订单管理、支付集成、社区互动** 的 Web 应用：
 
-- admin/admin123  
-- 陆陆续续收到一些打赏，为了更好的体验已用于演示服务器升级。谢谢各位小伙伴。
+- 实现 **手工艺人（创作者/商家）** 与 **普通用户（买家）** 端的功能分离与差异化界面；
+- 引入 **协同过滤推荐算法**（基于用户的协同过滤 + 皮尔逊相关系数），按浏览/收藏/下单行为推荐相关手作商品或创作者；
+- 设计合理的 **定制交易流程状态机**，保障买卖双方权益、降低交易纠纷；
+- 提供完善的 **后台管理模块**，支持平台运营方对用户、商品、订单、评论进行有效管理。
 
-演示地址：http://vue.ruoyi.vip  
-文档地址：http://doc.ruoyi.vip
+### 2.2 功能模块
 
-## 演示图
+| 模块 | 主要功能 |
+|---|---|
+| **用户模块** | 注册、登录、身份选择（买家/创作者）、个人信息、收货地址 |
+| **商品模块** | 商品分类、商品发布（创作者）、搜索浏览、商品详情 |
+| **定制模块** | 定制需求发布（买家）、需求广场与匹配、报价与沟通、定制进度跟踪 |
+| **交易模块** | 购物车、订单生成、模拟在线支付、订单状态流转 |
+| **社区模块** | 用户评价、作品分享、点赞评论、关注创作者 |
+| **后台管理** | 用户管理、商品审核、订单监控、评论审核、数据统计大屏 |
+| **算法模块** | 基于用户的协同过滤推荐、动态敏感词过滤 |
 
-<table>
-    <tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/cd1f90be5f2684f4560c9519c0f2a232ee8.jpg"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/1cbcf0e6f257c7d3a063c0e3f2ff989e4b3.jpg"/></td>
-    </tr>
-    <tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-8074972883b5ba0622e13246738ebba237a.png"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-9f88719cdfca9af2e58b352a20e23d43b12.png"/></td>
-    </tr>
-    <tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-39bf2584ec3a529b0d5a3b70d15c9b37646.png"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-936ec82d1f4872e1bc980927654b6007307.png"/></td>
-    </tr>
-	<tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-b2d62ceb95d2dd9b3fbe157bb70d26001e9.png"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-d67451d308b7a79ad6819723396f7c3d77a.png"/></td>
-    </tr>	 
-    <tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/5e8c387724954459291aafd5eb52b456f53.jpg"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/644e78da53c2e92a95dfda4f76e6d117c4b.jpg"/></td>
-    </tr>
-	<tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-8370a0d02977eebf6dbf854c8450293c937.png"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-49003ed83f60f633e7153609a53a2b644f7.png"/></td>
-    </tr>
-	<tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-d4fe726319ece268d4746602c39cffc0621.png"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-c195234bbcd30be6927f037a6755e6ab69c.png"/></td>
-    </tr>
-    <tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/b6115bc8c31de52951982e509930b20684a.jpg"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-5e4daac0bb59612c5038448acbcef235e3a.png"/></td>
-    </tr>
-</table>
+### 2.3 待解决的关键问题
 
+1. **定制流程的标准化与灵活性**：把非标的定制需求转化为可跟踪的订单状态机，同时保留沟通灵活性。
+2. **系统的高并发与安全性**：促销/高峰期稳定性，防止 SQL 注入、XSS 等常见 Web 漏洞。
+3. **前后端分离架构**下的接口设计与性能优化。
 
-## 若依前后端分离交流群
+---
 
-QQ群： [![加入QQ群](https://img.shields.io/badge/已满-937441-blue.svg)](https://jq.qq.com/?_wv=1027&k=5bVB1og) [![加入QQ群](https://img.shields.io/badge/已满-887144332-blue.svg)](https://jq.qq.com/?_wv=1027&k=5eiA4DH) [![加入QQ群](https://img.shields.io/badge/已满-180251782-blue.svg)](https://jq.qq.com/?_wv=1027&k=5AxMKlC) [![加入QQ群](https://img.shields.io/badge/已满-104180207-blue.svg)](https://jq.qq.com/?_wv=1027&k=51G72yr) [![加入QQ群](https://img.shields.io/badge/已满-186866453-blue.svg)](https://jq.qq.com/?_wv=1027&k=VvjN2nvu) [![加入QQ群](https://img.shields.io/badge/已满-201396349-blue.svg)](https://jq.qq.com/?_wv=1027&k=5vYAqA05) [![加入QQ群](https://img.shields.io/badge/已满-101456076-blue.svg)](https://jq.qq.com/?_wv=1027&k=kOIINEb5) [![加入QQ群](https://img.shields.io/badge/已满-101539465-blue.svg)](https://jq.qq.com/?_wv=1027&k=UKtX5jhs) [![加入QQ群](https://img.shields.io/badge/已满-264312783-blue.svg)](https://jq.qq.com/?_wv=1027&k=EI9an8lJ) [![加入QQ群](https://img.shields.io/badge/已满-167385320-blue.svg)](https://jq.qq.com/?_wv=1027&k=SWCtLnMz) [![加入QQ群](https://img.shields.io/badge/已满-104748341-blue.svg)](https://jq.qq.com/?_wv=1027&k=96Dkdq0k) [![加入QQ群](https://img.shields.io/badge/已满-160110482-blue.svg)](https://jq.qq.com/?_wv=1027&k=0fsNiYZt) [![加入QQ群](https://img.shields.io/badge/已满-170801498-blue.svg)](https://jq.qq.com/?_wv=1027&k=7xw4xUG1) [![加入QQ群](https://img.shields.io/badge/已满-108482800-blue.svg)](https://jq.qq.com/?_wv=1027&k=eCx8eyoJ) [![加入QQ群](https://img.shields.io/badge/已满-101046199-blue.svg)](https://jq.qq.com/?_wv=1027&k=SpyH2875) [![加入QQ群](https://img.shields.io/badge/已满-136919097-blue.svg)](https://jq.qq.com/?_wv=1027&k=tKEt51dz) [![加入QQ群](https://img.shields.io/badge/已满-143961921-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=0vBbSb0ztbBgVtn3kJS-Q4HUNYwip89G&authKey=8irq5PhutrZmWIvsUsklBxhj57l%2F1nOZqjzigkXZVoZE451GG4JHPOqW7AW6cf0T&noverify=0&group_code=143961921) [![加入QQ群](https://img.shields.io/badge/已满-174951577-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=ZFAPAbp09S2ltvwrJzp7wGlbopsc0rwi&authKey=HB2cxpxP2yspk%2Bo3WKTBfktRCccVkU26cgi5B16u0KcAYrVu7sBaE7XSEqmMdFQp&noverify=0&group_code=174951577) [![加入QQ群](https://img.shields.io/badge/已满-161281055-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=Fn2aF5IHpwsy8j6VlalNJK6qbwFLFHat&authKey=uyIT%2B97x2AXj3odyXpsSpVaPMC%2Bidw0LxG5MAtEqlrcBcWJUA%2FeS43rsF1Tg7IRJ&noverify=0&group_code=161281055) [![加入QQ群](https://img.shields.io/badge/已满-138988063-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=XIzkm_mV2xTsUtFxo63bmicYoDBA6Ifm&authKey=dDW%2F4qsmw3x9govoZY9w%2FoWAoC4wbHqGal%2BbqLzoS6VBarU8EBptIgPKN%2FviyC8j&noverify=0&group_code=138988063) [![加入QQ群](https://img.shields.io/badge/已满-151450850-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=DkugnCg68PevlycJSKSwjhFqfIgrWWwR&authKey=pR1Pa5lPIeGF%2FFtIk6d%2FGB5qFi0EdvyErtpQXULzo03zbhopBHLWcuqdpwY241R%2F&noverify=0&group_code=151450850) [![加入QQ群](https://img.shields.io/badge/已满-224622315-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=F58bgRa-Dp-rsQJThiJqIYv8t4-lWfXh&authKey=UmUs4CVG5OPA1whvsa4uSespOvyd8%2FAr9olEGaWAfdLmfKQk%2FVBp2YU3u2xXXt76&noverify=0&group_code=224622315) [![加入QQ群](https://img.shields.io/badge/已满-287842588-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=Nxb2EQ5qozWa218Wbs7zgBnjLSNk_tVT&authKey=obBKXj6SBKgrFTJZx0AqQnIYbNOvBB2kmgwWvGhzxR67RoRr84%2Bus5OadzMcdJl5&noverify=0&group_code=287842588) [![加入QQ群](https://img.shields.io/badge/已满-187944233-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=numtK1M_I4eVd2Gvg8qtbuL8JgX42qNh&authKey=giV9XWMaFZTY%2FqPlmWbkB9g3fi0Ev5CwEtT9Tgei0oUlFFCQLDp4ozWRiVIzubIm&noverify=0&group_code=187944233) [![加入QQ群](https://img.shields.io/badge/已满-228578329-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=G6r5KGCaa3pqdbUSXNIgYloyb8e0_L0D&authKey=4w8tF1eGW7%2FedWn%2FHAypQksdrML%2BDHolQSx7094Agm7Luakj9EbfPnSTxSi2T1LQ&noverify=0&group_code=228578329) [![加入QQ群](https://img.shields.io/badge/已满-191164766-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=GsOo-OLz53J8y_9TPoO6XXSGNRTgbFxA&authKey=R7Uy%2Feq%2BZsoKNqHvRKhiXpypW7DAogoWapOawUGHokJSBIBIre2%2FoiAZeZBSLuBc&noverify=0&group_code=191164766) [![加入QQ群](https://img.shields.io/badge/已满-174569686-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=PmYavuzsOthVqfdAPbo4uAeIbu7Ttjgc&authKey=p52l8%2FXa4PS1JcEmS3VccKSwOPJUZ1ZfQ69MEKzbrooNUljRtlKjvsXf04bxNp3G&noverify=0&group_code=174569686) [![加入QQ群](https://img.shields.io/badge/127358632-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=M9y5NjAl44lAL_Vh2crmEehZU_PMU6KS&authKey=ZSDz8hEREWSaPuxQV3gEwqGIaGjfRNnkB4rJjf0IvXhrSUGSGwQFmBA%2Boe8HFxyl&noverify=0&group_code=127358632) 点击按钮入群。
+## 三、技术选型
+
+| 层 | 技术栈 |
+|---|---|
+| **后端框架** | Spring Boot 4.x、Spring MVC、Spring Security、JWT |
+| **持久层** | MyBatis、MySQL 8.0 |
+| **缓存** | Redis（本地未启动时使用内存兜底，已在 `RedisCache` 中实现） |
+| **前端框架** | Vue 2、Vue Router 3、Vuex、Axios |
+| **UI 组件库** | Element UI |
+| **构建工具** | Maven（多模块）、Vue CLI |
+| **服务器** | Tomcat（内置） |
+| **测试与压测** | JUnit、JMeter、Postman |
+| **版本管理** | Git |
+
+### 系统架构（四层）
+
+```
+┌─────────────────────────────────────────┐
+│  前端 (Vue + Element UI)                 │
+└─────────────────┬───────────────────────┘
+                  │ HTTP / Axios
+┌─────────────────▼───────────────────────┐
+│  过滤器/拦截器层 (JWT、权限、敏感词过滤)   │
+├─────────────────────────────────────────┤
+│  Controller 层 (REST API、参数校验)      │
+├─────────────────────────────────────────┤
+│  Service 层 (业务逻辑、状态机、推荐算法)  │
+├─────────────────────────────────────────┤
+│  数据访问层 (MyBatis Mapper)             │
+└─────────────────┬───────────────────────┘
+                  │ JDBC
+              ┌───▼───┐
+              │ MySQL │
+              └───────┘
+```
+
+---
+
+## 四、模块结构
+
+```
+creative-craft-custom-platform/
+├── ruoyi-admin/        # 启动模块 + 业务 Controller
+│   └── src/main/java/com/ruoyi/web/controller/creative/
+│       ├── CreativeCategoryController.java   # 文创分类
+│       ├── CreativeCreatorController.java    # 创作者档案
+│       ├── CreativeProductController.java    # 手作商品
+│       ├── CreativeDemandController.java     # 定制需求
+│       ├── CreativeQuoteController.java      # 定制报价
+│       ├── CreativeOrderController.java      # 定制订单
+│       ├── CreativePostController.java       # 社区作品
+│       ├── CreativeCommentController.java    # 评论
+│       └── CreativeFavoriteController.java   # 收藏
+├── ruoyi-system/       # 业务 Domain / Mapper / Service
+│   └── src/main/java/com/ruoyi/system/
+│       ├── domain/creative/
+│       ├── mapper/creative/
+│       └── service/creative/
+├── ruoyi-framework/    # 框架配置（拦截器、AOP）
+├── ruoyi-common/       # 通用工具（含本地 RedisCache 兜底）
+├── ruoyi-quartz/       # 定时任务
+├── ruoyi-generator/    # 代码生成
+├── ruoyi-ui/           # 前端工程
+│   └── src/
+│       ├── api/creative/        # 9 个业务 API 封装
+│       └── views/creative/      # 9 个业务页面
+├── sql/
+│   ├── ry_20260417.sql              # 若依基础 SQL
+│   ├── creative_platform_tables.sql # 文创业务表
+│   ├── creative_platform_menu.sql   # 业务菜单 + 按钮权限
+│   └── quartz.sql
+├── doc/
+│   ├── 软件225 徐浩 前期材料.docx     # 任务书 / 开题报告 / 外文翻译
+│   └── 若依环境使用手册.docx
+├── docs/
+│   └── collaboration.md             # 三方 AI 协作文档（路线、进度、约定）
+├── bin/
+│   └── run-admin-jdk17.bat          # JDK 17 启动脚本
+└── pom.xml
+```
+
+---
+
+## 五、业务实体与定制流程
+
+### 5.1 核心实体
+
+| 实体 | 作用 |
+|---|---|
+| `creative_category` | 文创分类（如手工皮具、刺绣、陶艺） |
+| `creative_creator` | 创作者档案（绑定系统用户、店铺名、等级） |
+| `creative_product` | 现货/定制商品 |
+| `creative_demand` | 买家发布的定制需求 |
+| `creative_quote` | 创作者对需求的报价 |
+| `creative_order` | 订单（来源：直接购买商品 / 选中报价生成） |
+| `creative_post` | 社区作品分享 |
+| `creative_comment` | 评论（含审核状态） |
+| `creative_favorite` | 收藏（支持商品/创作者/作品三种 targetType） |
+
+### 5.2 定制交易状态机
+
+```
+[需求 demand]
+  草稿 ──发布──▶ 待报价 ──收到报价──▶ 报价中 ──选中报价──▶ 已选中
+                                                              │
+                                                              ▼
+                                                         [自动生成订单]
+                                                              │
+[订单 order]                                                   │
+  已创建 ──开始制作──▶ 制作中 ──发货──▶ 已发货 ──确认收货──▶ 已完成
+                                                    │
+                                                    └──取消──▶ 已取消
+
+[报价 quote]
+  待确认 ──被买家选中──▶ 已选中
+        └──其他报价自动──▶ 已拒绝
+```
+
+### 5.3 算法亮点（论文）
+
+1. **基于用户的协同过滤推荐**：使用皮尔逊相关系数计算用户相似度，找到目标用户的"最近邻"，按其偏好预测推荐商品 / 创作者（与外文翻译《Online Shopping Mall Based on Collaborative Filtering》对齐）。
+2. **动态敏感词过滤机制**：评论提交前与内存中的敏感词库进行字符串匹配，命中后替换为 `****`，配置文件支持热更新（同样对齐外文翻译第二个亮点）。
+
+---
+
+## 六、环境要求
+
+| 项 | 版本 |
+|---|---|
+| 操作系统 | Windows 10 / 11 |
+| JDK | **17+** |
+| Maven | 3.6+ |
+| Node.js | 16+（推荐 18 LTS） |
+| MySQL | 8.0 |
+| Redis | 可选（不安装时自动走内存兜底） |
+| 浏览器 | Chrome / Edge |
+
+---
+
+## 七、本地启动
+
+### 7.1 数据库初始化
+
+```sql
+-- MySQL 中按顺序导入
+source sql/ry_20260417.sql;
+source sql/quartz.sql;
+source sql/creative_platform_tables.sql;
+source sql/creative_platform_menu.sql;
+```
+
+### 7.2 启动后端（JDK 17）
+
+```powershell
+# 方式 1：使用启动脚本（自动选 JDK 17）
+.\bin\run-admin-jdk17.bat
+
+# 方式 2：手动 mvn 打包后运行
+mvn -pl ruoyi-admin -am -DskipTests package
+java -jar ruoyi-admin/target/ruoyi-admin.jar
+```
+
+后端地址：`http://localhost:8080`
+
+### 7.3 启动前端
+
+```powershell
+cd ruoyi-ui
+npm.cmd install      # 首次
+npm.cmd run dev
+```
+
+前端地址：`http://localhost/`
+（PowerShell 必须用 `npm.cmd`，不要用 `npm`，否则会报 `npm.ps1 cannot be loaded`）
+
+### 7.4 默认账号
+
+```
+admin / admin123
+```
+
+---
+
+## 八、构建与验证
+
+```powershell
+# 后端打包验证
+mvn -pl ruoyi-admin -am -DskipTests package
+
+# 前端生产构建验证
+cd ruoyi-ui
+npm.cmd run build:prod
+```
+
+---
+
+## 九、当前进度
+
+详见 [`docs/collaboration.md`](docs/collaboration.md)。
+
+| 阶段 | 状态 |
+|---|---|
+| 阶段 1：后台 9 模块 CRUD + 关联名称展示 | ✅ 已完成 |
+| 阶段 2：业务闭环（状态机、报价选中生成订单） | ⏳ 进行中 |
+| 阶段 3：角色权限细化（管理员/买家/创作者） | ⬜ 待开始 |
+| 阶段 4：前台用户端（首页/商品详情/需求广场/订单中心/购物车/社区） | ⬜ 待开始 |
+| 阶段 5：协同过滤推荐 + 敏感词过滤（论文亮点） | ⬜ 待开始 |
+| 阶段 6：管理后台增强（数据统计大屏、审核流） | ⬜ 待开始 |
+| 阶段 7：文档与测试（E-R 图、Swagger、JUnit、JMeter、答辩 PPT） | ⬜ 待开始 |
+
+---
+
+## 十、协作说明
+
+本项目由 **Claude / Codex / Gemini** 三方 AI 协作完成，无人类编码参与。所有任务的认领、改动、验证、完成人都记录在 [`docs/collaboration.md`](docs/collaboration.md) 中。
+
+**核心约定**：
+- 每完成一个任务（哪怕很小），立即在协作文档 §5 追加记录并标注完成人
+- 开始任务前在协作文档 §4 对应行末打 `(@Claude WIP)` / `(@Codex WIP)` / `(@Gemini WIP)` 避免撞车
+- commit message 末尾追加完成人标记，如 `feat(creative): xxx [Claude]`
+- 不主动启动前后端服务，需要启动时只给命令
+
+---
+
+## 十一、参考文献
+
+- 耿庆阳. 基于 Spring Boot 和 Vue 的电子商务商城的设计与实现 [D]. 西安石油大学, 2020.
+- 孙宏攀. 基于 SpringBoot 和 Vue 的有为通信社区的设计与实现 [D]. 重庆大学, 2022.
+- 付鹤岗, 王祝伟. 基于项目的协同过滤推荐系统的改进 [J]. 重庆理工大学学报(自然科学版), 2010, 24(09): 69-74.
+- 李晨. 基于 Spring Boot 的电子商务商城的设计与实现 [D]. 哈尔滨工业大学, 2020.
+- Suryotrisongko H, Jayanto D P, Tjahyanto A. Design and Development of Backend Application for Public Complaint Systems Using Microservice Spring Boot [J]. Procedia Computer Science, 2017, 124: 736-743.
+- 王福强. Spring Boot 揭秘：快速构建微服务体系 [M]. 北京: 机械工业出版社, 2016.
+- 完整文献列表见 `doc/软件225 徐浩 前期材料.docx`。
+
+---
+
+## License
+
+本项目基于 [RuoYi-Vue](https://gitee.com/y_project/RuoYi-Vue) (MIT License) 二次开发，毕业设计用途。

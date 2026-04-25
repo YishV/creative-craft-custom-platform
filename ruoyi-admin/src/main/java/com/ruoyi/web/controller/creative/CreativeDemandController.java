@@ -16,6 +16,7 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.system.domain.creative.CreativeDemand;
 import com.ruoyi.system.service.creative.ICreativeDemandService;
 
@@ -47,6 +48,10 @@ public class CreativeDemandController extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody CreativeDemand creativeDemand)
     {
+        if (!SecurityUtils.isAdmin())
+        {
+            creativeDemand.setUserId(getUserId());
+        }
         creativeDemand.setCreateBy(getUsername());
         return toAjax(creativeDemandService.insertCreativeDemand(creativeDemand));
     }

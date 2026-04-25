@@ -125,6 +125,7 @@ create table sys_role (
 -- ----------------------------
 insert into sys_role values('1', '超级管理员',  'admin',  1, 1, 1, 1, '0', '0', 'admin', sysdate(), '', null, '超级管理员');
 insert into sys_role values('2', '普通角色',    'common', 2, 2, 1, 1, '0', '0', 'admin', sysdate(), '', null, '普通角色');
+insert into sys_role values('4', '买家角色',    'buyer',  3, 2, 1, 1, '0', '0', 'admin', sysdate(), '', null, '买家角色');
 
 
 -- ----------------------------
@@ -276,6 +277,7 @@ create table sys_user_role (
 -- ----------------------------
 insert into sys_user_role values ('1', '1');
 insert into sys_user_role values ('2', '2');
+insert into sys_user_role values ('2', '4');
 
 
 -- ----------------------------
@@ -376,6 +378,7 @@ insert into sys_role_menu values ('2', '1057');
 insert into sys_role_menu values ('2', '1058');
 insert into sys_role_menu values ('2', '1059');
 insert into sys_role_menu values ('2', '1060');
+insert into sys_role_menu select '4', menu_id from sys_role_menu where role_id = '2';
 
 -- ----------------------------
 -- 8、角色和部门关联表  角色1-N部门
@@ -393,6 +396,7 @@ create table sys_role_dept (
 insert into sys_role_dept values ('2', '100');
 insert into sys_role_dept values ('2', '101');
 insert into sys_role_dept values ('2', '105');
+insert into sys_role_dept select '4', dept_id from sys_role_dept where role_id = '2';
 
 
 -- ----------------------------

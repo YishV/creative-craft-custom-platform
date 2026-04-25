@@ -41,6 +41,7 @@ import com.ruoyi.system.service.ISysUserService;
 public class SysUserServiceImpl implements ISysUserService
 {
     private static final Logger log = LoggerFactory.getLogger(SysUserServiceImpl.class);
+    private static final String BUYER_ROLE_KEY = "buyer";
 
     @Autowired
     private SysUserMapper userMapper;
@@ -277,9 +278,39 @@ public class SysUserServiceImpl implements ISysUserService
      * @return 结果
      */
     @Override
+    @Transactional
     public boolean registerUser(SysUser user)
     {
-        return userMapper.insertUser(user) > 0;
+        boolean registered = userMapper.insertUser(user) > 0;
+        if (!registered)
+        {
+            return false;
+        }
+        appendRoleByKeyIfAbsent(user.getUserId(), BUYER_ROLE_KEY);
+        return true;
+    }
+
+    @Override
+    public void appendRoleByKeyIfAbsent(Long userId, String roleKey)
+    {
+        SysRole role = roleMapper.checkRoleKeyUnique(roleKey);
+        if (role == null)
+        {
+            throw new ServiceException("未找到角色[" + roleKey + "]，请先执行初始化 SQL");
+        }
+
+        List<Long> assignedRoleIds = roleMapper.selectRoleListByUserId(userId);
+        if (assignedRoleIds != null && assignedRoleIds.contains(role.getRoleId()))
+        {
+            return;
+        }
+
+        List<SysUserRole> list = new ArrayList<SysUserRole>(1);
+        SysUserRole userRole = new SysUserRole();
+        userRole.setUserId(userId);
+        userRole.setRoleId(role.getRoleId());
+        list.add(userRole);
+        userRoleMapper.batchUserRole(list);
     }
 
     /**

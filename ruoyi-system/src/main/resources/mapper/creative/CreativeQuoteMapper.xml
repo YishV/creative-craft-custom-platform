@@ -68,4 +68,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{quoteId}
         </foreach>
     </delete>
+
+    <update id="rejectOtherQuotesByDemand">
+        update creative_quote
+        set quote_status = #{targetStatus},
+            update_by = #{updateBy},
+            update_time = sysdate()
+        where demand_id = #{demandId}
+          and quote_id != #{keepQuoteId}
+    </update>
 </mapper>

@@ -1,11 +1,15 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="需求ID" prop="demandId">
-        <el-input-number v-model="queryParams.demandId" :min="1" controls-position="right" />
+      <el-form-item label="需求" prop="demandId">
+        <el-select v-model="queryParams.demandId" placeholder="请选择需求" filterable clearable>
+          <el-option v-for="d in demandOptions" :key="d.demandId" :label="d.demandTitle" :value="d.demandId" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="创作者ID" prop="creatorId">
-        <el-input-number v-model="queryParams.creatorId" :min="1" controls-position="right" />
+      <el-form-item label="创作者" prop="creatorId">
+        <el-select v-model="queryParams.creatorId" placeholder="请选择创作者" filterable clearable>
+          <el-option v-for="c in creatorOptions" :key="c.creatorId" :label="c.creatorName" :value="c.creatorId" />
+        </el-select>
       </el-form-item>
       <el-form-item label="状态" prop="quoteStatus">
         <el-select v-model="queryParams.quoteStatus" placeholder="请选择状态" clearable>
@@ -34,8 +38,12 @@
     <el-table v-loading="loading" :data="quoteList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="报价ID" align="center" prop="quoteId" width="90" />
-      <el-table-column label="需求ID" align="center" prop="demandId" width="90" />
-      <el-table-column label="创作者ID" align="center" prop="creatorId" width="100" />
+      <el-table-column label="需求" align="center" prop="demandId" width="180">
+        <template slot-scope="scope">{{ demandTitle(scope.row.demandId) }}</template>
+      </el-table-column>
+      <el-table-column label="创作者" align="center" prop="creatorId" width="140">
+        <template slot-scope="scope">{{ creatorName(scope.row.creatorId) }}</template>
+      </el-table-column>
       <el-table-column label="报价金额" align="center" prop="quoteAmount" width="110" />
       <el-table-column label="交付天数" align="center" prop="deliveryDays" width="100" />
       <el-table-column label="状态" align="center" prop="quoteStatus" width="110">
@@ -48,8 +56,9 @@
           <span>{{ parseTime(scope.row.createTime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="150">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="220">
         <template slot-scope="scope">
+          <el-button size="mini" type="text" icon="el-icon-check" @click="handleSelect(scope.row)" v-hasPermi="['creative:quote:edit']" :disabled="scope.row.quoteStatus !== 'pending'">选中</el-button>
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['creative:quote:edit']">修改</el-button>
           <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)" v-hasPermi="['creative:quote:remove']">删除</el-button>
         </template>
@@ -60,11 +69,15 @@
 
     <el-dialog :title="title" :visible.sync="open" width="520px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="90px">
-        <el-form-item label="需求ID" prop="demandId">
-          <el-input-number v-model="form.demandId" :min="1" controls-position="right" />
+        <el-form-item label="需求" prop="demandId">
+          <el-select v-model="form.demandId" placeholder="请选择需求" filterable>
+            <el-option v-for="d in demandOptions" :key="d.demandId" :label="d.demandTitle" :value="d.demandId" />
+          </el-select>
         </el-form-item>
-        <el-form-item label="创作者ID" prop="creatorId">
-          <el-input-number v-model="form.creatorId" :min="1" controls-position="right" />
+        <el-form-item label="创作者" prop="creatorId">
+          <el-select v-model="form.creatorId" placeholder="请选择创作者" filterable>
+            <el-option v-for="c in creatorOptions" :key="c.creatorId" :label="c.creatorName" :value="c.creatorId" />
+          </el-select>
         </el-form-item>
         <el-form-item label="报价金额" prop="quoteAmount">
           <el-input-number v-model="form.quoteAmount" :min="0" :precision="2" :step="50" controls-position="right" />
@@ -90,7 +103,9 @@
 </template>
 
 <script>
-import { listQuote, getQuote, delQuote, addQuote, updateQuote } from '@/api/creative/quote'
+import { listQuote, getQuote, delQuote, addQuote, updateQuote, selectQuote } from '@/api/creative/quote'
+import { listDemand } from '@/api/creative/demand'
+import { listCreator } from '@/api/creative/creator'
 
 export default {
   name: 'CreativeQuote',
@@ -103,6 +118,8 @@ export default {
       showSearch: true,
       total: 0,
       quoteList: [],
+      demandOptions: [],
+      creatorOptions: [],
       statusOptions: [
         { label: '待确认', value: 'pending', tag: 'warning' },
         { label: '已选中', value: 'selected', tag: 'success' },
@@ -128,6 +145,7 @@ export default {
   },
   created() {
     this.getList()
+    this.loadOptions()
   },
   methods: {
     getList() {
@@ -137,6 +155,18 @@ export default {
         this.total = response.total
         this.loading = false
       })
+    },
+    loadOptions() {
+      listDemand({ pageNum: 1, pageSize: 1000 }).then(r => { this.demandOptions = r.rows || [] })
+      listCreator({ pageNum: 1, pageSize: 1000, status: '0' }).then(r => { this.creatorOptions = r.rows || [] })
+    },
+    demandTitle(id) {
+      const d = this.demandOptions.find(i => i.demandId === id)
+      return d ? d.demandTitle : id
+    },
+    creatorName(id) {
+      const c = this.creatorOptions.find(i => i.creatorId === id)
+      return c ? c.creatorName : id
     },
     statusText(value) {
       const item = this.statusOptions.find(option => option.value === value)
@@ -215,6 +245,14 @@ export default {
       }).then(() => {
         this.getList()
         this.$modal.msgSuccess('删除成功')
+      }).catch(() => {})
+    },
+    handleSelect(row) {
+      this.$modal.confirm('确认选中报价 #' + row.quoteId + '？同需求其他报价将自动落败，并生成订单。').then(() => {
+        return selectQuote(row.quoteId)
+      }).then(res => {
+        this.$modal.msgSuccess('选中成功，订单已生成：' + (res.data && res.data.orderNo))
+        this.getList()
       }).catch(() => {})
     }
   }

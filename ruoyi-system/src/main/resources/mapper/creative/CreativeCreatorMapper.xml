@@ -11,6 +11,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="storeName" column="store_name"/>
         <result property="creatorLevel" column="creator_level"/>
         <result property="status" column="status"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="auditBy" column="audit_by"/>
+        <result property="auditTime" column="audit_time"/>
         <result property="createBy" column="create_by"/>
         <result property="createTime" column="create_time"/>
         <result property="updateBy" column="update_by"/>
@@ -19,7 +23,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectCreativeCreatorVo">
-        select creator_id, user_id, creator_name, store_name, creator_level, status, create_by, create_time, update_by, update_time, remark
+        select creator_id, user_id, creator_name, store_name, creator_level, status, audit_status, audit_remark, audit_by, audit_time,
+               create_by, create_time, update_by, update_time, remark
         from creative_creator
     </sql>
 
@@ -31,16 +36,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectCreativeCreatorList" parameterType="com.ruoyi.system.domain.creative.CreativeCreator" resultMap="CreativeCreatorResult">
         <include refid="selectCreativeCreatorVo"/>
         <where>
+            <if test="userId != null">and user_id = #{userId}</if>
             <if test="creatorName != null and creatorName != ''">and creator_name like concat('%', #{creatorName}, '%')</if>
             <if test="storeName != null and storeName != ''">and store_name like concat('%', #{storeName}, '%')</if>
             <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="auditStatus != null and auditStatus != ''">and audit_status = #{auditStatus}</if>
         </where>
         order by creator_id desc
     </select>
 
     <insert id="insertCreativeCreator" parameterType="com.ruoyi.system.domain.creative.CreativeCreator" useGeneratedKeys="true" keyProperty="creatorId">
-        insert into creative_creator (user_id, creator_name, store_name, creator_level, status, remark, create_by, create_time)
-        values (#{userId}, #{creatorName}, #{storeName}, #{creatorLevel}, #{status}, #{remark}, #{createBy}, sysdate())
+        insert into creative_creator (user_id, creator_name, store_name, creator_level, status, audit_status, audit_remark, audit_by, audit_time, remark, create_by, create_time)
+        values (#{userId}, #{creatorName}, #{storeName}, #{creatorLevel}, #{status}, #{auditStatus}, #{auditRemark}, #{auditBy}, #{auditTime}, #{remark}, #{createBy}, sysdate())
     </insert>
 
     <update id="updateCreativeCreator" parameterType="com.ruoyi.system.domain.creative.CreativeCreator">
@@ -51,6 +58,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="storeName != null">store_name = #{storeName},</if>
             <if test="creatorLevel != null">creator_level = #{creatorLevel},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="auditStatus != null">audit_status = #{auditStatus},</if>
+            <if test="auditRemark != null">audit_remark = #{auditRemark},</if>
+            <if test="auditBy != null">audit_by = #{auditBy},</if>
+            <if test="auditTime != null">audit_time = #{auditTime},</if>
             <if test="remark != null">remark = #{remark},</if>
             update_by = #{updateBy},
             update_time = sysdate()

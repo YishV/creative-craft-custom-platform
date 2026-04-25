@@ -37,3 +37,10 @@ export function delQuote(quoteId) {
     method: 'delete'
   })
 }
+
+export function selectQuote(quoteId) {
+  return request({
+    url: '/creative/quote/select/' + quoteId,
+    method: 'post'
+  })
+}

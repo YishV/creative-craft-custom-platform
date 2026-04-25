@@ -1,5 +1,12 @@
 package com.ruoyi.web.controller.creative;
 
+import com.ruoyi.common.annotation.Log;
+import com.ruoyi.common.core.controller.BaseController;
+import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.system.domain.creative.CreativeCreator;
+import com.ruoyi.system.service.creative.ICreativeCreatorService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,13 +18,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.ruoyi.common.annotation.Log;
-import com.ruoyi.common.core.controller.BaseController;
-import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.system.domain.creative.CreativeCreator;
-import com.ruoyi.system.service.creative.ICreativeCreatorService;
 
 @RestController
 @RequestMapping("/creative/creator")
@@ -43,6 +43,15 @@ public class CreativeCreatorController extends BaseController
     }
 
     @PreAuthorize("@ss.hasPermi('creative:creator:add')")
+    @Log(title = "创作者申请", businessType = BusinessType.INSERT)
+    @PostMapping("/apply")
+    public AjaxResult apply(@RequestBody CreativeCreator creativeCreator)
+    {
+        creativeCreator.setCreateBy(getUsername());
+        return toAjax(creativeCreatorService.applyCreator(creativeCreator));
+    }
+
+    @PreAuthorize("@ss.hasPermi('creative:creator:add')")
     @Log(title = "创作者管理", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody CreativeCreator creativeCreator)
@@ -58,6 +67,22 @@ public class CreativeCreatorController extends BaseController
     {
         creativeCreator.setUpdateBy(getUsername());
         return toAjax(creativeCreatorService.updateCreativeCreator(creativeCreator));
+    }
+
+    @PreAuthorize("@ss.hasPermi('creative:creator:edit')")
+    @Log(title = "创作者审核", businessType = BusinessType.UPDATE)
+    @PostMapping("/{creatorId}/approve")
+    public AjaxResult approve(@PathVariable Long creatorId)
+    {
+        return toAjax(creativeCreatorService.approveCreator(creatorId, getUsername()));
+    }
+
+    @PreAuthorize("@ss.hasPermi('creative:creator:edit')")
+    @Log(title = "创作者审核", businessType = BusinessType.UPDATE)
+    @PostMapping("/{creatorId}/reject")
+    public AjaxResult reject(@PathVariable Long creatorId, @RequestBody CreativeCreator creativeCreator)
+    {
+        return toAjax(creativeCreatorService.rejectCreator(creatorId, creativeCreator.getAuditRemark(), getUsername()));
     }
 
     @PreAuthorize("@ss.hasPermi('creative:creator:remove')")

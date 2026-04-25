@@ -16,4 +16,9 @@ public interface ICreativeDemandService
     int deleteCreativeDemandByDemandId(Long demandId);
 
     int deleteCreativeDemandByDemandIds(Long[] demandIds);
+
+    /**
+     * 推进需求状态，校验状态机合法性。
+     */
+    int transitDemandStatus(Long demandId, String targetStatus, String operator);
 }

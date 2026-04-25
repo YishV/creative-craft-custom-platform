@@ -13,6 +13,10 @@ public interface ICreativeProductService
 
     int updateCreativeProduct(CreativeProduct creativeProduct);
 
+    int putOnShelf(Long productId, String operator);
+
+    int takeOffShelf(Long productId, String operator);
+
     int deleteCreativeProductByProductId(Long productId);
 
     int deleteCreativeProductByProductIds(Long[] productIds);

@@ -16,6 +16,8 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.system.domain.creative.CreativeOrder;
 import com.ruoyi.system.domain.creative.CreativeQuote;
 import com.ruoyi.system.service.creative.ICreativeQuoteService;
 
@@ -47,6 +49,10 @@ public class CreativeQuoteController extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody CreativeQuote creativeQuote)
     {
+        if (!SecurityUtils.isAdmin())
+        {
+            creativeQuote.setCreatorId(null);
+        }
         creativeQuote.setCreateBy(getUsername());
         return toAjax(creativeQuoteService.insertCreativeQuote(creativeQuote));
     }
@@ -66,5 +72,17 @@ public class CreativeQuoteController extends BaseController
     public AjaxResult remove(@PathVariable Long[] quoteIds)
     {
         return toAjax(creativeQuoteService.deleteCreativeQuoteByQuoteIds(quoteIds));
+    }
+
+    /**
+     * 买家选中报价 -> 自动生成订单 + 落败其他报价 + 推进需求状态。
+     */
+    @PreAuthorize("@ss.hasPermi('creative:quote:edit')")
+    @Log(title = "定制报价-选中", businessType = BusinessType.UPDATE)
+    @PostMapping("/select/{quoteId}")
+    public AjaxResult selectQuote(@PathVariable Long quoteId)
+    {
+        CreativeOrder order = creativeQuoteService.selectQuoteAndGenerateOrder(quoteId, getUsername());
+        return success(order);
     }
 }

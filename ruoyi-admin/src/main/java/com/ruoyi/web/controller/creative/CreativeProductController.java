@@ -16,6 +16,7 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.system.domain.creative.CreativeProduct;
 import com.ruoyi.system.service.creative.ICreativeProductService;
 
@@ -47,6 +48,10 @@ public class CreativeProductController extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody CreativeProduct creativeProduct)
     {
+        if (!SecurityUtils.isAdmin())
+        {
+            creativeProduct.setCreatorId(null);
+        }
         creativeProduct.setCreateBy(getUsername());
         return toAjax(creativeProductService.insertCreativeProduct(creativeProduct));
     }
@@ -58,6 +63,22 @@ public class CreativeProductController extends BaseController
     {
         creativeProduct.setUpdateBy(getUsername());
         return toAjax(creativeProductService.updateCreativeProduct(creativeProduct));
+    }
+
+    @PreAuthorize("@ss.hasPermi('creative:product:edit')")
+    @Log(title = "手作商品", businessType = BusinessType.UPDATE)
+    @PostMapping("/{productId}/putOnShelf")
+    public AjaxResult putOnShelf(@PathVariable Long productId)
+    {
+        return toAjax(creativeProductService.putOnShelf(productId, getUsername()));
+    }
+
+    @PreAuthorize("@ss.hasPermi('creative:product:edit')")
+    @Log(title = "手作商品", businessType = BusinessType.UPDATE)
+    @PostMapping("/{productId}/takeOffShelf")
+    public AjaxResult takeOffShelf(@PathVariable Long productId)
+    {
+        return toAjax(creativeProductService.takeOffShelf(productId, getUsername()));
     }
 
     @PreAuthorize("@ss.hasPermi('creative:product:remove')")

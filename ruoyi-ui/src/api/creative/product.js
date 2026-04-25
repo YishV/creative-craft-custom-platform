@@ -31,6 +31,20 @@ export function updateProduct(data) {
   })
 }
 
+export function putOnShelf(productId) {
+  return request({
+    url: '/creative/product/' + productId + '/putOnShelf',
+    method: 'post'
+  })
+}
+
+export function takeOffShelf(productId) {
+  return request({
+    url: '/creative/product/' + productId + '/takeOffShelf',
+    method: 'post'
+  })
+}
+
 export function delProduct(productId) {
   return request({
     url: '/creative/product/' + productId,
