@@ -26,7 +26,7 @@ public class CreativeOrderServiceImpl implements ICreativeOrderService
     public CreativeOrder selectCreativeOrderByOrderId(Long orderId)
     {
         CreativeOrder order = requireOrder(orderId);
-        ensureOrderAccessible(order);
+        permissionService.ensureOrderOwned(order.getBuyerId(), order.getSellerId());
         return order;
     }
 
@@ -71,7 +71,7 @@ public class CreativeOrderServiceImpl implements ICreativeOrderService
     public int updateCreativeOrder(CreativeOrder creativeOrder)
     {
         CreativeOrder existing = requireOrder(creativeOrder.getOrderId());
-        ensureOrderAccessible(existing);
+        permissionService.ensureOrderOwned(existing.getBuyerId(), existing.getSellerId());
         creativeOrder.setBuyerId(existing.getBuyerId());
         creativeOrder.setSellerId(existing.getSellerId());
         return creativeOrderMapper.updateCreativeOrder(creativeOrder);
@@ -80,7 +80,8 @@ public class CreativeOrderServiceImpl implements ICreativeOrderService
     @Override
     public int deleteCreativeOrderByOrderId(Long orderId)
     {
-        ensureOrderAccessible(requireOrder(orderId));
+        CreativeOrder existing = requireOrder(orderId);
+        permissionService.ensureOrderOwned(existing.getBuyerId(), existing.getSellerId());
         return creativeOrderMapper.deleteCreativeOrderByOrderId(orderId);
     }
 
@@ -91,7 +92,8 @@ public class CreativeOrderServiceImpl implements ICreativeOrderService
         {
             for (Long orderId : orderIds)
             {
-                ensureOrderAccessible(requireOrder(orderId));
+                CreativeOrder existing = requireOrder(orderId);
+                permissionService.ensureOrderOwned(existing.getBuyerId(), existing.getSellerId());
             }
         }
         return creativeOrderMapper.deleteCreativeOrderByOrderIds(orderIds);
@@ -101,7 +103,7 @@ public class CreativeOrderServiceImpl implements ICreativeOrderService
     public int transitOrderStatus(Long orderId, String targetStatus, String operator)
     {
         CreativeOrder order = requireOrder(orderId);
-        ensureOrderAccessible(order);
+        permissionService.ensureOrderOwned(order.getBuyerId(), order.getSellerId());
         try
         {
             CreativeStatusFlow.ensureOrderTransition(order.getOrderStatus(), targetStatus);
@@ -123,25 +125,6 @@ public class CreativeOrderServiceImpl implements ICreativeOrderService
             throw new ServiceException("订单不存在: " + orderId);
         }
         return order;
-    }
-
-    private void ensureOrderAccessible(CreativeOrder order)
-    {
-        if (order == null || permissionService.isAdmin())
-        {
-            return;
-        }
-        Long currentUserId = permissionService.getCurrentUserId();
-        Long currentCreatorId = permissionService.getCurrentCreatorIdOrNull();
-        if (currentUserId.equals(order.getBuyerId()))
-        {
-            return;
-        }
-        if (currentCreatorId != null && currentCreatorId.equals(order.getSellerId()))
-        {
-            return;
-        }
-        throw new ServiceException("无权操作该数据");
     }
 
     private CreativeOrder copyOrderQuery(CreativeOrder source)

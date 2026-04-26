@@ -4,11 +4,23 @@ import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.creative.CreativeCreator;
+import com.ruoyi.system.domain.creative.CreativeCreatorProfile;
+import com.ruoyi.system.domain.creative.CreativeOrder;
+import com.ruoyi.system.domain.creative.CreativeProduct;
+import com.ruoyi.system.domain.creative.CreativeQuote;
+import com.ruoyi.system.domain.creative.CreativeStatusFlow;
 import com.ruoyi.system.mapper.creative.CreativeCreatorMapper;
+import com.ruoyi.system.mapper.creative.CreativeOrderMapper;
+import com.ruoyi.system.mapper.creative.CreativeProductMapper;
+import com.ruoyi.system.mapper.creative.CreativeQuoteMapper;
 import com.ruoyi.system.service.ISysUserService;
 import com.ruoyi.system.service.creative.ICreativeCreatorService;
+import com.ruoyi.system.service.creative.support.CreativeDataPermissionService;
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +39,19 @@ public class CreativeCreatorServiceImpl implements ICreativeCreatorService
     private CreativeCreatorMapper creativeCreatorMapper;
 
     @Autowired
+    private CreativeProductMapper creativeProductMapper;
+
+    @Autowired
+    private CreativeQuoteMapper creativeQuoteMapper;
+
+    @Autowired
+    private CreativeOrderMapper creativeOrderMapper;
+
+    @Autowired
     private ISysUserService sysUserService;
+
+    @Autowired
+    private CreativeDataPermissionService permissionService;
 
     @Override
     public CreativeCreator selectCreativeCreatorByCreatorId(Long creatorId)
@@ -39,6 +63,98 @@ public class CreativeCreatorServiceImpl implements ICreativeCreatorService
     public List<CreativeCreator> selectCreativeCreatorList(CreativeCreator creativeCreator)
     {
         return creativeCreatorMapper.selectCreativeCreatorList(creativeCreator);
+    }
+
+    @Override
+    public CreativeCreatorProfile selectMyCreatorProfile()
+    {
+        Long userId = permissionService.getCurrentUserId();
+        CreativeCreatorProfile profile = new CreativeCreatorProfile();
+
+        CreativeCreator query = new CreativeCreator();
+        query.setUserId(userId);
+        List<CreativeCreator> creators = creativeCreatorMapper.selectCreativeCreatorList(query);
+        CreativeCreator chosen = pickPrimaryCreator(creators);
+        profile.setCreator(chosen);
+
+        if (chosen == null
+            || !STATUS_NORMAL.equals(chosen.getStatus())
+            || !AUDIT_APPROVED.equals(chosen.getAuditStatus()))
+        {
+            return profile;
+        }
+
+        Long creatorId = chosen.getCreatorId();
+        fillCreatorStatistics(profile, creatorId);
+        return profile;
+    }
+
+    private CreativeCreator pickPrimaryCreator(List<CreativeCreator> creators)
+    {
+        if (creators == null || creators.isEmpty())
+        {
+            return null;
+        }
+        Comparator<String> auditPriority = Comparator.comparingInt(this::auditWeight);
+        Optional<CreativeCreator> approved = creators.stream()
+            .filter(c -> AUDIT_APPROVED.equals(c.getAuditStatus())).findFirst();
+        if (approved.isPresent())
+        {
+            return approved.get();
+        }
+        return creators.stream()
+            .min((a, b) -> auditPriority.compare(a.getAuditStatus(), b.getAuditStatus()))
+            .orElse(creators.get(0));
+    }
+
+    private int auditWeight(String auditStatus)
+    {
+        if (AUDIT_PENDING.equals(auditStatus)) return 0;
+        if (AUDIT_REJECTED.equals(auditStatus)) return 1;
+        return 2;
+    }
+
+    private void fillCreatorStatistics(CreativeCreatorProfile profile, Long creatorId)
+    {
+        CreativeProduct productQuery = new CreativeProduct();
+        productQuery.setCreatorId(creatorId);
+        List<CreativeProduct> products = creativeProductMapper.selectCreativeProductList(productQuery);
+        profile.setProductCount(products.size());
+        profile.setOnShelfProductCount(products.stream()
+            .filter(p -> "0".equals(p.getStatus())).count());
+
+        CreativeQuote quoteQuery = new CreativeQuote();
+        quoteQuery.setCreatorId(creatorId);
+        quoteQuery.setQuoteStatus(CreativeStatusFlow.Quote.PENDING);
+        profile.setPendingQuoteCount(creativeQuoteMapper.selectCreativeQuoteList(quoteQuery).size());
+
+        CreativeOrder orderQuery = new CreativeOrder();
+        orderQuery.setSellerId(creatorId);
+        List<CreativeOrder> orders = creativeOrderMapper.selectCreativeOrderList(orderQuery);
+        long active = 0;
+        long completed = 0;
+        BigDecimal revenue = BigDecimal.ZERO;
+        for (CreativeOrder order : orders)
+        {
+            String status = order.getOrderStatus();
+            if (CreativeStatusFlow.Order.CREATED.equals(status)
+                || CreativeStatusFlow.Order.MAKING.equals(status)
+                || CreativeStatusFlow.Order.SHIPPED.equals(status))
+            {
+                active++;
+            }
+            else if (CreativeStatusFlow.Order.FINISHED.equals(status))
+            {
+                completed++;
+                if (order.getOrderAmount() != null)
+                {
+                    revenue = revenue.add(order.getOrderAmount());
+                }
+            }
+        }
+        profile.setActiveOrderCount(active);
+        profile.setCompletedOrderCount(completed);
+        profile.setCompletedRevenue(revenue);
     }
 
     @Override

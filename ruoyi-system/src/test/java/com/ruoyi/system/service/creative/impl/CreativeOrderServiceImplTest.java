@@ -3,6 +3,8 @@ package com.ruoyi.system.service.creative.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,10 +60,10 @@ class CreativeOrderServiceImplTest
     @Test
     void selectCreativeOrderByOrderIdShouldFailWhenOrderNotAccessible()
     {
-        when(permissionService.isAdmin()).thenReturn(false);
-        when(permissionService.getCurrentUserId()).thenReturn(3L);
-        when(permissionService.getCurrentCreatorIdOrNull()).thenReturn(9L);
-        when(creativeOrderMapper.selectCreativeOrderByOrderId(1L)).thenReturn(buildOrder(1L, 4L, 10L, CreativeStatusFlow.Order.CREATED));
+        CreativeOrder order = buildOrder(1L, 4L, 10L, CreativeStatusFlow.Order.CREATED);
+        when(creativeOrderMapper.selectCreativeOrderByOrderId(1L)).thenReturn(order);
+        doThrow(new ServiceException("无权操作该数据"))
+            .when(permissionService).ensureOrderOwned(eq(4L), eq(10L));
 
         assertThrows(ServiceException.class, () -> creativeOrderService.selectCreativeOrderByOrderId(1L));
     }
@@ -69,10 +71,10 @@ class CreativeOrderServiceImplTest
     @Test
     void transitOrderStatusShouldFailWhenOrderNotAccessible()
     {
-        when(permissionService.isAdmin()).thenReturn(false);
-        when(permissionService.getCurrentUserId()).thenReturn(3L);
-        when(permissionService.getCurrentCreatorIdOrNull()).thenReturn(9L);
-        when(creativeOrderMapper.selectCreativeOrderByOrderId(1L)).thenReturn(buildOrder(1L, 4L, 10L, CreativeStatusFlow.Order.CREATED));
+        CreativeOrder order = buildOrder(1L, 4L, 10L, CreativeStatusFlow.Order.CREATED);
+        when(creativeOrderMapper.selectCreativeOrderByOrderId(1L)).thenReturn(order);
+        doThrow(new ServiceException("无权操作该数据"))
+            .when(permissionService).ensureOrderOwned(eq(4L), eq(10L));
 
         assertThrows(ServiceException.class,
             () -> creativeOrderService.transitOrderStatus(1L, CreativeStatusFlow.Order.MAKING, "codex"));
@@ -81,15 +83,15 @@ class CreativeOrderServiceImplTest
     }
 
     @Test
-    void selectCreativeOrderByOrderIdShouldAllowAdmin()
+    void selectCreativeOrderByOrderIdShouldAllowOwner()
     {
         CreativeOrder order = buildOrder(1L, 4L, 10L, CreativeStatusFlow.Order.CREATED);
-        when(permissionService.isAdmin()).thenReturn(true);
         when(creativeOrderMapper.selectCreativeOrderByOrderId(1L)).thenReturn(order);
 
         CreativeOrder result = creativeOrderService.selectCreativeOrderByOrderId(1L);
 
         assertEquals(1L, result.getOrderId());
+        verify(permissionService).ensureOrderOwned(eq(4L), eq(10L));
     }
 
     private CreativeOrder buildOrder(Long orderId, Long buyerId, Long sellerId, String status)

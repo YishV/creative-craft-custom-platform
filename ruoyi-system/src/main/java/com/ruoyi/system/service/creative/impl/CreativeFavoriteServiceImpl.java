@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.creative.impl;
 
+import com.ruoyi.common.annotation.CreativeDataScope;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.system.domain.creative.CreativeFavorite;
 import com.ruoyi.system.mapper.creative.CreativeFavoriteMapper;
@@ -22,17 +23,14 @@ public class CreativeFavoriteServiceImpl implements ICreativeFavoriteService
     public CreativeFavorite selectCreativeFavoriteByFavoriteId(Long favoriteId)
     {
         CreativeFavorite favorite = requireFavorite(favoriteId);
-        ensureBuyerOwned(favorite);
+        permissionService.ensureBuyerOwned(favorite.getUserId());
         return favorite;
     }
 
     @Override
+    @CreativeDataScope(owner = CreativeDataScope.Owner.BUYER, field = "userId")
     public List<CreativeFavorite> selectCreativeFavoriteList(CreativeFavorite creativeFavorite)
     {
-        if (!permissionService.isAdmin())
-        {
-            creativeFavorite.setUserId(permissionService.getCurrentUserId());
-        }
         return creativeFavoriteMapper.selectCreativeFavoriteList(creativeFavorite);
     }
 
@@ -46,7 +44,7 @@ public class CreativeFavoriteServiceImpl implements ICreativeFavoriteService
     public int updateCreativeFavorite(CreativeFavorite creativeFavorite)
     {
         CreativeFavorite existing = requireFavorite(creativeFavorite.getFavoriteId());
-        ensureBuyerOwned(existing);
+        permissionService.ensureBuyerOwned(existing.getUserId());
         creativeFavorite.setUserId(existing.getUserId());
         return creativeFavoriteMapper.updateCreativeFavorite(creativeFavorite);
     }
@@ -54,7 +52,7 @@ public class CreativeFavoriteServiceImpl implements ICreativeFavoriteService
     @Override
     public int deleteCreativeFavoriteByFavoriteId(Long favoriteId)
     {
-        ensureBuyerOwned(requireFavorite(favoriteId));
+        permissionService.ensureBuyerOwned(requireFavorite(favoriteId).getUserId());
         return creativeFavoriteMapper.deleteCreativeFavoriteByFavoriteId(favoriteId);
     }
 
@@ -65,7 +63,7 @@ public class CreativeFavoriteServiceImpl implements ICreativeFavoriteService
         {
             for (Long favoriteId : favoriteIds)
             {
-                ensureBuyerOwned(requireFavorite(favoriteId));
+                permissionService.ensureBuyerOwned(requireFavorite(favoriteId).getUserId());
             }
         }
         return creativeFavoriteMapper.deleteCreativeFavoriteByFavoriteIds(favoriteIds);
@@ -79,17 +77,5 @@ public class CreativeFavoriteServiceImpl implements ICreativeFavoriteService
             throw new ServiceException("收藏不存在: " + favoriteId);
         }
         return favorite;
-    }
-
-    private void ensureBuyerOwned(CreativeFavorite favorite)
-    {
-        if (favorite == null || permissionService.isAdmin())
-        {
-            return;
-        }
-        if (!permissionService.getCurrentUserId().equals(favorite.getUserId()))
-        {
-            throw new ServiceException("无权操作该数据");
-        }
     }
 }

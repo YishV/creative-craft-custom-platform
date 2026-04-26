@@ -3,6 +3,8 @@ package com.ruoyi.system.service.creative.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,7 +17,6 @@ import com.ruoyi.system.mapper.creative.CreativeCategoryMapper;
 import com.ruoyi.system.mapper.creative.CreativeCreatorMapper;
 import com.ruoyi.system.mapper.creative.CreativeProductMapper;
 import com.ruoyi.system.service.creative.support.CreativeDataPermissionService;
-import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -42,26 +43,9 @@ class CreativeProductServiceImplTest
     private CreativeProductServiceImpl creativeProductService;
 
     @Test
-    void selectCreativeProductListShouldScopeToCurrentCreator()
-    {
-        CreativeProduct query = new CreativeProduct();
-        when(permissionService.isAdmin()).thenReturn(false);
-        when(permissionService.getCurrentCreatorIdOrNull()).thenReturn(11L);
-        when(creativeProductMapper.selectCreativeProductList(any(CreativeProduct.class))).thenReturn(Collections.emptyList());
-
-        creativeProductService.selectCreativeProductList(query);
-
-        ArgumentCaptor<CreativeProduct> captor = ArgumentCaptor.forClass(CreativeProduct.class);
-        verify(creativeProductMapper).selectCreativeProductList(captor.capture());
-        assertEquals(11L, captor.getValue().getCreatorId());
-    }
-
-    @Test
     void putOnShelfShouldUpdateStatusWhenProductIsValid()
     {
         CreativeProduct product = buildProduct(1L, "1", 11L);
-        when(permissionService.isAdmin()).thenReturn(false);
-        when(permissionService.requireCurrentCreatorId()).thenReturn(11L);
         when(creativeProductMapper.selectCreativeProductByProductId(1L)).thenReturn(product);
         when(creativeCreatorMapper.selectCreativeCreatorByCreatorId(11L)).thenReturn(buildCreator("0"));
         when(creativeCategoryMapper.selectCreativeCategoryByCategoryId(21L)).thenReturn(buildCategory("0"));
@@ -70,6 +54,7 @@ class CreativeProductServiceImplTest
         int rows = creativeProductService.putOnShelf(1L, "codex");
 
         assertEquals(1, rows);
+        verify(permissionService).ensureCreatorOwned(eq(11L));
         ArgumentCaptor<CreativeProduct> captor = ArgumentCaptor.forClass(CreativeProduct.class);
         verify(creativeProductMapper).updateCreativeProduct(captor.capture());
         assertEquals(1L, captor.getValue().getProductId());
@@ -80,8 +65,6 @@ class CreativeProductServiceImplTest
     @Test
     void putOnShelfShouldFailWhenProductAlreadyOnShelf()
     {
-        when(permissionService.isAdmin()).thenReturn(false);
-        when(permissionService.requireCurrentCreatorId()).thenReturn(11L);
         when(creativeProductMapper.selectCreativeProductByProductId(1L)).thenReturn(buildProduct(1L, "0", 11L));
 
         assertThrows(ServiceException.class, () -> creativeProductService.putOnShelf(1L, "codex"));
@@ -93,8 +76,6 @@ class CreativeProductServiceImplTest
     void putOnShelfShouldFailWhenCreatorIsDisabled()
     {
         CreativeProduct product = buildProduct(1L, "1", 11L);
-        when(permissionService.isAdmin()).thenReturn(false);
-        when(permissionService.requireCurrentCreatorId()).thenReturn(11L);
         when(creativeProductMapper.selectCreativeProductByProductId(1L)).thenReturn(product);
         when(creativeCreatorMapper.selectCreativeCreatorByCreatorId(11L)).thenReturn(buildCreator("1"));
 
@@ -107,8 +88,6 @@ class CreativeProductServiceImplTest
     void putOnShelfShouldFailWhenCategoryIsDisabled()
     {
         CreativeProduct product = buildProduct(1L, "1", 11L);
-        when(permissionService.isAdmin()).thenReturn(false);
-        when(permissionService.requireCurrentCreatorId()).thenReturn(11L);
         when(creativeProductMapper.selectCreativeProductByProductId(1L)).thenReturn(product);
         when(creativeCreatorMapper.selectCreativeCreatorByCreatorId(11L)).thenReturn(buildCreator("0"));
         when(creativeCategoryMapper.selectCreativeCategoryByCategoryId(21L)).thenReturn(buildCategory("1"));
@@ -121,9 +100,9 @@ class CreativeProductServiceImplTest
     @Test
     void putOnShelfShouldFailWhenProductDoesNotBelongToCurrentCreator()
     {
-        when(permissionService.isAdmin()).thenReturn(false);
-        when(permissionService.requireCurrentCreatorId()).thenReturn(77L);
         when(creativeProductMapper.selectCreativeProductByProductId(1L)).thenReturn(buildProduct(1L, "1", 66L));
+        doThrow(new ServiceException("无权操作该数据"))
+            .when(permissionService).ensureCreatorOwned(eq(66L));
 
         assertThrows(ServiceException.class, () -> creativeProductService.putOnShelf(1L, "codex"));
 
@@ -133,14 +112,13 @@ class CreativeProductServiceImplTest
     @Test
     void takeOffShelfShouldUpdateStatusWhenProductIsOnShelf()
     {
-        when(permissionService.isAdmin()).thenReturn(false);
-        when(permissionService.requireCurrentCreatorId()).thenReturn(11L);
         when(creativeProductMapper.selectCreativeProductByProductId(1L)).thenReturn(buildProduct(1L, "0", 11L));
         when(creativeProductMapper.updateCreativeProduct(any(CreativeProduct.class))).thenReturn(1);
 
         int rows = creativeProductService.takeOffShelf(1L, "codex");
 
         assertEquals(1, rows);
+        verify(permissionService).ensureCreatorOwned(eq(11L));
         ArgumentCaptor<CreativeProduct> captor = ArgumentCaptor.forClass(CreativeProduct.class);
         verify(creativeProductMapper).updateCreativeProduct(captor.capture());
         assertEquals(1L, captor.getValue().getProductId());
@@ -151,8 +129,6 @@ class CreativeProductServiceImplTest
     @Test
     void takeOffShelfShouldFailWhenProductAlreadyOffShelf()
     {
-        when(permissionService.isAdmin()).thenReturn(false);
-        when(permissionService.requireCurrentCreatorId()).thenReturn(11L);
         when(creativeProductMapper.selectCreativeProductByProductId(1L)).thenReturn(buildProduct(1L, "1", 11L));
 
         assertThrows(ServiceException.class, () -> creativeProductService.takeOffShelf(1L, "codex"));

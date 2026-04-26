@@ -1,8 +1,9 @@
 package com.ruoyi.system.service.creative.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,10 +13,8 @@ import com.ruoyi.system.domain.creative.CreativeDemand;
 import com.ruoyi.system.mapper.creative.CreativeDemandMapper;
 import com.ruoyi.system.service.creative.support.CreativeDataPermissionService;
 import java.math.BigDecimal;
-import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,27 +32,12 @@ class CreativeDemandServiceImplTest
     private CreativeDemandServiceImpl creativeDemandService;
 
     @Test
-    void selectCreativeDemandListShouldScopeToCurrentBuyer()
-    {
-        CreativeDemand query = new CreativeDemand();
-        when(permissionService.isAdmin()).thenReturn(false);
-        when(permissionService.getCurrentUserId()).thenReturn(7L);
-        when(creativeDemandMapper.selectCreativeDemandList(any(CreativeDemand.class))).thenReturn(Collections.emptyList());
-
-        creativeDemandService.selectCreativeDemandList(query);
-
-        ArgumentCaptor<CreativeDemand> captor = ArgumentCaptor.forClass(CreativeDemand.class);
-        verify(creativeDemandMapper).selectCreativeDemandList(captor.capture());
-        assertEquals(7L, captor.getValue().getUserId());
-    }
-
-    @Test
     void updateCreativeDemandShouldFailWhenDemandNotOwnedByCurrentBuyer()
     {
         CreativeDemand existing = buildDemand(1L, 8L);
         when(creativeDemandMapper.selectCreativeDemandByDemandId(1L)).thenReturn(existing);
-        when(permissionService.isAdmin()).thenReturn(false);
-        when(permissionService.getCurrentUserId()).thenReturn(7L);
+        doThrow(new ServiceException("无权操作该数据"))
+            .when(permissionService).ensureBuyerOwned(eq(8L));
 
         CreativeDemand update = new CreativeDemand();
         update.setDemandId(1L);
@@ -62,6 +46,25 @@ class CreativeDemandServiceImplTest
         assertThrows(ServiceException.class, () -> creativeDemandService.updateCreativeDemand(update));
 
         verify(creativeDemandMapper, never()).updateCreativeDemand(any(CreativeDemand.class));
+    }
+
+    @Test
+    void updateCreativeDemandShouldPreserveOriginalUserIdAfterOwnershipPasses()
+    {
+        CreativeDemand existing = buildDemand(1L, 8L);
+        when(creativeDemandMapper.selectCreativeDemandByDemandId(1L)).thenReturn(existing);
+        when(creativeDemandMapper.updateCreativeDemand(any(CreativeDemand.class))).thenReturn(1);
+
+        CreativeDemand update = new CreativeDemand();
+        update.setDemandId(1L);
+        update.setUserId(999L);
+        update.setDemandTitle("修改标题");
+
+        creativeDemandService.updateCreativeDemand(update);
+
+        verify(permissionService).ensureBuyerOwned(eq(8L));
+        // userId 被强制回填为 existing.userId(8L)
+        assert update.getUserId().equals(8L);
     }
 
     private CreativeDemand buildDemand(Long demandId, Long userId)

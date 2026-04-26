@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.creative.impl;
 
+import com.ruoyi.common.annotation.CreativeDataScope;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.system.domain.creative.CreativeDemand;
 import com.ruoyi.system.domain.creative.CreativeStatusFlow;
@@ -23,17 +24,14 @@ public class CreativeDemandServiceImpl implements ICreativeDemandService
     public CreativeDemand selectCreativeDemandByDemandId(Long demandId)
     {
         CreativeDemand demand = requireDemand(demandId);
-        ensureBuyerOwned(demand);
+        permissionService.ensureBuyerOwned(demand.getUserId());
         return demand;
     }
 
     @Override
+    @CreativeDataScope(owner = CreativeDataScope.Owner.BUYER, field = "userId")
     public List<CreativeDemand> selectCreativeDemandList(CreativeDemand creativeDemand)
     {
-        if (!permissionService.isAdmin())
-        {
-            creativeDemand.setUserId(permissionService.getCurrentUserId());
-        }
         return creativeDemandMapper.selectCreativeDemandList(creativeDemand);
     }
 
@@ -47,7 +45,7 @@ public class CreativeDemandServiceImpl implements ICreativeDemandService
     public int updateCreativeDemand(CreativeDemand creativeDemand)
     {
         CreativeDemand existing = requireDemand(creativeDemand.getDemandId());
-        ensureBuyerOwned(existing);
+        permissionService.ensureBuyerOwned(existing.getUserId());
         creativeDemand.setUserId(existing.getUserId());
         return creativeDemandMapper.updateCreativeDemand(creativeDemand);
     }
@@ -55,7 +53,7 @@ public class CreativeDemandServiceImpl implements ICreativeDemandService
     @Override
     public int deleteCreativeDemandByDemandId(Long demandId)
     {
-        ensureBuyerOwned(requireDemand(demandId));
+        permissionService.ensureBuyerOwned(requireDemand(demandId).getUserId());
         return creativeDemandMapper.deleteCreativeDemandByDemandId(demandId);
     }
 
@@ -66,7 +64,7 @@ public class CreativeDemandServiceImpl implements ICreativeDemandService
         {
             for (Long demandId : demandIds)
             {
-                ensureBuyerOwned(requireDemand(demandId));
+                permissionService.ensureBuyerOwned(requireDemand(demandId).getUserId());
             }
         }
         return creativeDemandMapper.deleteCreativeDemandByDemandIds(demandIds);
@@ -76,7 +74,7 @@ public class CreativeDemandServiceImpl implements ICreativeDemandService
     public int transitDemandStatus(Long demandId, String targetStatus, String operator)
     {
         CreativeDemand demand = requireDemand(demandId);
-        ensureBuyerOwned(demand);
+        permissionService.ensureBuyerOwned(demand.getUserId());
         try
         {
             CreativeStatusFlow.ensureDemandTransition(demand.getDemandStatus(), targetStatus);
@@ -98,17 +96,5 @@ public class CreativeDemandServiceImpl implements ICreativeDemandService
             throw new ServiceException("需求不存在: " + demandId);
         }
         return demand;
-    }
-
-    private void ensureBuyerOwned(CreativeDemand demand)
-    {
-        if (demand == null || permissionService.isAdmin())
-        {
-            return;
-        }
-        if (!permissionService.getCurrentUserId().equals(demand.getUserId()))
-        {
-            throw new ServiceException("无权操作该数据");
-        }
     }
 }

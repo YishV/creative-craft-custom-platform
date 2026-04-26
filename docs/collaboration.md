@@ -28,14 +28,14 @@
 
 ## 二、当前阶段进度
 
-**当前阶段**：阶段 3 · 用户角色与权限细化（阶段 2 已于 2026-04-25 收尾）
+**当前阶段**：阶段 4 · 前台用户端（阶段 3 已于 2026-04-26 收尾）
 
 | 阶段 | 主题 | 状态 |
 |---|---|---|
 | 阶段 1 | 后台 CRUD 全量补齐 + 关联名称展示 | ✅ 已完成（2026-04-25） |
 | 阶段 2 | 业务闭环（状态机、报价选中、订单生成） | ✅ 已完成（2026-04-25） |
-| 阶段 3 | 用户角色与权限细化（管理员/买家/创作者） | ⏳ 进行中 |
-| 阶段 4 | 前台用户端（首页/商品详情/需求广场/订单中心） | ⬜ 待开始 |
+| 阶段 3 | 用户角色与权限细化（管理员/买家/创作者） | ✅ 已完成（2026-04-26） |
+| 阶段 4 | 前台用户端（首页/商品详情/需求广场/订单中心） | ⏳ 待开始 |
 | 阶段 5 | 推荐算法（基于用户的协同过滤，对齐外文翻译） | ⬜ 待开始 |
 | 阶段 6 | 管理后台增强（数据统计大屏、审核流） | ⬜ 待开始 |
 | 阶段 7 | 文档与测试（E-R 图、接口文档、JMeter、答辩 PPT） | ⬜ 待开始 |
@@ -80,8 +80,8 @@
 ### 阶段 3 · 角色与权限
 - [x] 业务角色语义化：`admin` 视为平台管理员，注册默认 `buyer`，审核追加 `creator`
 - [x] 数据权限：买家只看自己需求/订单/收藏；创作者只看自己商品/报价/订单
-- [ ] 后端注解过滤，不依赖前端隐藏
-- [ ] 创作者主页（个人中心）
+- [x] 后端注解过滤，不依赖前端隐藏（`@CreativeDataScope` + AOP + `ensureXxxOwned`）
+- [x] 创作者主页（个人中心）：`GET /creative/creator/me` + 主页统计 + `views/creative/me/index.vue`
 
 ### 阶段 4 · 前台用户端
 - [ ] 前台路由组（`/portal/*`）或独立模块
@@ -143,6 +143,8 @@
 | 2026-04-25 | 创作者认证审核流程 | `docs/collaboration.md`、`docs/superpowers/plans/2026-04-25-creator-certification-audit.md`、`sql/{creative_platform_tables.sql,creative_creator_audit_upgrade_20260425.sql}`、`ruoyi-system/src/test/java/com/ruoyi/system/service/creative/impl/CreativeCreatorServiceImplTest.java`、`ruoyi-system/src/main/java/com/ruoyi/system/domain/creative/CreativeCreator.java`、`ruoyi-system/src/main/java/com/ruoyi/system/service/creative/{ICreativeCreatorService.java,impl/CreativeCreatorServiceImpl.java}`、`ruoyi-system/src/main/resources/mapper/creative/CreativeCreatorMapper.xml`、`ruoyi-admin/src/main/java/com/ruoyi/web/controller/creative/CreativeCreatorController.java`、`ruoyi-ui/src/api/creative/creator.js`、`ruoyi-ui/src/views/creative/creator/index.vue` | `mvn --% -Dmaven.repo.local=.m2repo -DfailIfNoTests=false -pl ruoyi-system -am -Dtest=CreativeCreatorServiceImplTest test`；`mvn --% -Dmaven.repo.local=.m2repo -DskipTests -pl ruoyi-admin -am package`；`npm.cmd run build:prod` | Codex | 新增申请/通过/驳回审核闭环，审核通过时追加 `creator` 角色；后台创作者页展示审核状态并提供通过/驳回动作 |
 | 2026-04-25 | 买家角色自动绑定 | `docs/collaboration.md`、`docs/superpowers/specs/2026-04-25-buyer-role-auto-binding-design.md`、`docs/superpowers/plans/2026-04-25-buyer-role-auto-binding.md`、`sql/{ry_20260417.sql,buyer_role_upgrade_20260425.sql}`、`ruoyi-system/src/test/java/com/ruoyi/system/service/{impl/SysUserServiceImplTest.java,creative/impl/CreativeCreatorServiceImplTest.java}`、`ruoyi-system/src/main/java/com/ruoyi/system/service/{ISysUserService.java,impl/SysUserServiceImpl.java,creative/impl/CreativeCreatorServiceImpl.java}` | `mvn --% -Dmaven.repo.local=.m2repo -DfailIfNoTests=false -pl ruoyi-system -am -Dtest=SysUserServiceImplTest,CreativeCreatorServiceImplTest test`；`mvn --% -Dmaven.repo.local=.m2repo -DskipTests -pl ruoyi-admin -am package`；`npm.cmd run build:prod` | Codex | 新增按 `roleKey` 追加角色的通用能力；注册成功后自动绑定 `buyer`，创作者审核改为复用同一角色追加逻辑；补 `buyer` 角色初始化和历史 `common` 用户回填脚本 |
 | 2026-04-25 | 后端数据权限 | `docs/collaboration.md`、`docs/superpowers/specs/2026-04-25-backend-data-permissions-design.md`、`docs/superpowers/plans/2026-04-25-backend-data-permissions.md`、`ruoyi-system/src/main/java/com/ruoyi/system/service/creative/support/CreativeDataPermissionService.java`、`ruoyi-system/src/main/java/com/ruoyi/system/service/creative/impl/{CreativeDemandServiceImpl.java,CreativeFavoriteServiceImpl.java,CreativeOrderServiceImpl.java,CreativeProductServiceImpl.java,CreativeQuoteServiceImpl.java}`、`ruoyi-admin/src/main/java/com/ruoyi/web/controller/creative/{CreativeDemandController.java,CreativeFavoriteController.java,CreativeProductController.java,CreativeQuoteController.java}`、`ruoyi-system/src/test/java/com/ruoyi/system/service/creative/{support/CreativeDataPermissionServiceTest.java,impl/CreativeDemandServiceImplTest.java,impl/CreativeFavoriteServiceImplTest.java,impl/CreativeOrderServiceImplTest.java,impl/CreativeProductServiceImplTest.java,impl/CreativeQuoteServiceImplTest.java}` | `mvn --% -Dmaven.repo.local=.m2repo -DfailIfNoTests=false -pl ruoyi-system -am -Dtest=CreativeDataPermissionServiceTest,CreativeDemandServiceImplTest,CreativeFavoriteServiceImplTest,CreativeProductServiceImplTest,CreativeQuoteServiceImplTest,CreativeOrderServiceImplTest,CreativeCreatorServiceImplTest test`；`mvn --% -Dmaven.repo.local=.m2repo -DskipTests -pl ruoyi-admin -am package`；`npm.cmd run build:prod` | Codex | 新增统一业务权限组件；买家仅可访问本人需求/收藏/买家订单，创作者仅可访问本人商品/报价/卖家订单；订单列表按买家和卖家双视角合并去重 |
+| 2026-04-26 | 创作者主页（个人中心） | `ruoyi-system/src/main/java/com/ruoyi/system/domain/creative/CreativeCreatorProfile.java`、`ruoyi-system/src/main/java/com/ruoyi/system/service/creative/{ICreativeCreatorService.java,impl/CreativeCreatorServiceImpl.java}`、`ruoyi-admin/src/main/java/com/ruoyi/web/controller/creative/CreativeCreatorController.java`、`ruoyi-ui/src/api/creative/creator.js`、`ruoyi-ui/src/views/creative/me/index.vue`、`sql/creator_me_menu_20260426.sql`、`ruoyi-system/src/test/java/com/ruoyi/system/service/creative/impl/CreativeCreatorServiceImplTest.java` | `mvn -Dmaven.repo.local=.m2repo -DfailIfNoTests=false -pl ruoyi-system -am -Dtest=CreativeCreatorServiceImplTest,...其他 7 项 test`（43/43 通过）；`mvn -Dmaven.repo.local=.m2repo -DskipTests -pl ruoyi-admin -am package`；`npm.cmd run build:prod` 全部通过 | Claude | 新增 `CreativeCreatorProfile` VO（档案 + 商品/上架/待报价/进行中订单/完成订单/累计成交额）；`GET /creative/creator/me` 复用 mapper 直接聚合；前端 `creative/me/index.vue` 卡片+统计；菜单 SQL `creator_me_menu_20260426.sql` 注册菜单 2150 + 自动给 creator 角色绑定可见。pending/rejected/disabled 状态返回档案但统计为 0，由前端引导 |
+| 2026-04-26 | 后端注解化数据权限（@CreativeDataScope + AOP） | `ruoyi-common/src/main/java/com/ruoyi/common/annotation/CreativeDataScope.java`、`ruoyi-framework/src/main/java/com/ruoyi/framework/aspectj/CreativeDataScopeAspect.java`、`ruoyi-system/src/main/java/com/ruoyi/system/service/creative/support/CreativeDataPermissionService.java`、`ruoyi-system/src/main/java/com/ruoyi/system/service/creative/impl/{CreativeDemandServiceImpl.java,CreativeFavoriteServiceImpl.java,CreativeOrderServiceImpl.java,CreativeProductServiceImpl.java,CreativeQuoteServiceImpl.java}`、`ruoyi-system/src/test/java/com/ruoyi/system/service/creative/{support/CreativeDataPermissionServiceTest.java,impl/CreativeDemandServiceImplTest.java,impl/CreativeFavoriteServiceImplTest.java,impl/CreativeOrderServiceImplTest.java,impl/CreativeProductServiceImplTest.java,impl/CreativeQuoteServiceImplTest.java}` | `mvn -Dmaven.repo.local=.m2repo -DfailIfNoTests=false -pl ruoyi-system -am -Dtest=CreativeDataPermissionServiceTest,CreativeDemandServiceImplTest,CreativeFavoriteServiceImplTest,CreativeProductServiceImplTest,CreativeQuoteServiceImplTest,CreativeOrderServiceImplTest,CreativeCreatorServiceImplTest,SysUserServiceImplTest test`（40/40 通过）；`mvn -Dmaven.repo.local=.m2repo -DskipTests -pl ruoyi-admin -am package` 通过 | Claude | 新增 `@CreativeDataScope(owner, field)` 注解 + `CreativeDataScopeAspect`：list 注入买家/创作者归属字段，创作者无生效身份时短路返回空列表；`ensureBuyerOwned/ensureCreatorOwned/ensureOrderOwned` 下沉到 `CreativeDataPermissionService`，5 个 Service 删除内联 ensureXxxOwned 私有方法；行为不变，重复模板退化为声明式注解 |
 
 ---
 

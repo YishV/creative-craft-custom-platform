@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.creative.impl;
 
+import com.ruoyi.common.annotation.CreativeDataScope;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.system.domain.creative.CreativeDemand;
 import com.ruoyi.system.domain.creative.CreativeOrder;
@@ -10,7 +11,6 @@ import com.ruoyi.system.mapper.creative.CreativeOrderMapper;
 import com.ruoyi.system.mapper.creative.CreativeQuoteMapper;
 import com.ruoyi.system.service.creative.ICreativeQuoteService;
 import com.ruoyi.system.service.creative.support.CreativeDataPermissionService;
-import java.util.Collections;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,22 +35,14 @@ public class CreativeQuoteServiceImpl implements ICreativeQuoteService
     public CreativeQuote selectCreativeQuoteByQuoteId(Long quoteId)
     {
         CreativeQuote quote = requireQuote(quoteId);
-        ensureQuoteOwned(quote);
+        permissionService.ensureCreatorOwned(quote.getCreatorId());
         return quote;
     }
 
     @Override
+    @CreativeDataScope(owner = CreativeDataScope.Owner.CREATOR, field = "creatorId")
     public List<CreativeQuote> selectCreativeQuoteList(CreativeQuote creativeQuote)
     {
-        if (!permissionService.isAdmin())
-        {
-            Long creatorId = permissionService.getCurrentCreatorIdOrNull();
-            if (creatorId == null)
-            {
-                return Collections.emptyList();
-            }
-            creativeQuote.setCreatorId(creatorId);
-        }
         return creativeQuoteMapper.selectCreativeQuoteList(creativeQuote);
     }
 
@@ -82,7 +74,7 @@ public class CreativeQuoteServiceImpl implements ICreativeQuoteService
     public int updateCreativeQuote(CreativeQuote creativeQuote)
     {
         CreativeQuote existing = requireQuote(creativeQuote.getQuoteId());
-        ensureQuoteOwned(existing);
+        permissionService.ensureCreatorOwned(existing.getCreatorId());
         creativeQuote.setCreatorId(existing.getCreatorId());
         return creativeQuoteMapper.updateCreativeQuote(creativeQuote);
     }
@@ -90,7 +82,7 @@ public class CreativeQuoteServiceImpl implements ICreativeQuoteService
     @Override
     public int deleteCreativeQuoteByQuoteId(Long quoteId)
     {
-        ensureQuoteOwned(requireQuote(quoteId));
+        permissionService.ensureCreatorOwned(requireQuote(quoteId).getCreatorId());
         return creativeQuoteMapper.deleteCreativeQuoteByQuoteId(quoteId);
     }
 
@@ -101,7 +93,7 @@ public class CreativeQuoteServiceImpl implements ICreativeQuoteService
         {
             for (Long quoteId : quoteIds)
             {
-                ensureQuoteOwned(requireQuote(quoteId));
+                permissionService.ensureCreatorOwned(requireQuote(quoteId).getCreatorId());
             }
         }
         return creativeQuoteMapper.deleteCreativeQuoteByQuoteIds(quoteIds);
@@ -122,10 +114,7 @@ public class CreativeQuoteServiceImpl implements ICreativeQuoteService
         {
             throw new ServiceException("报价对应的需求不存在: " + quote.getDemandId());
         }
-        if (!permissionService.isAdmin() && !permissionService.getCurrentUserId().equals(demand.getUserId()))
-        {
-            throw new ServiceException("无权操作该数据");
-        }
+        permissionService.ensureBuyerOwned(demand.getUserId());
         try
         {
             CreativeStatusFlow.ensureDemandTransition(demand.getDemandStatus(), CreativeStatusFlow.Demand.SELECTED);
@@ -167,18 +156,5 @@ public class CreativeQuoteServiceImpl implements ICreativeQuoteService
             throw new ServiceException("报价不存在: " + quoteId);
         }
         return quote;
-    }
-
-    private void ensureQuoteOwned(CreativeQuote quote)
-    {
-        if (quote == null || permissionService.isAdmin())
-        {
-            return;
-        }
-        Long creatorId = permissionService.requireCurrentCreatorId();
-        if (!creatorId.equals(quote.getCreatorId()))
-        {
-            throw new ServiceException("无权操作该数据");
-        }
     }
 }

@@ -35,6 +35,12 @@ public class CreativeCreatorController extends BaseController
         return getDataTable(list);
     }
 
+    @GetMapping("/me")
+    public AjaxResult getMyProfile()
+    {
+        return success(creativeCreatorService.selectMyCreatorProfile());
+    }
+
     @PreAuthorize("@ss.hasPermi('creative:creator:query')")
     @GetMapping("/{creatorId}")
     public AjaxResult getInfo(@PathVariable Long creatorId)

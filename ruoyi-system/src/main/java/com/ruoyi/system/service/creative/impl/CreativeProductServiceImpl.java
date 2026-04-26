@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.creative.impl;
 
+import com.ruoyi.common.annotation.CreativeDataScope;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.creative.CreativeCategory;
@@ -11,7 +12,6 @@ import com.ruoyi.system.mapper.creative.CreativeProductMapper;
 import com.ruoyi.system.service.creative.ICreativeProductService;
 import com.ruoyi.system.service.creative.support.CreativeDataPermissionService;
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,22 +38,14 @@ public class CreativeProductServiceImpl implements ICreativeProductService
     public CreativeProduct selectCreativeProductByProductId(Long productId)
     {
         CreativeProduct product = requireProduct(productId);
-        ensureCreatorOwned(product);
+        permissionService.ensureCreatorOwned(product.getCreatorId());
         return product;
     }
 
     @Override
+    @CreativeDataScope(owner = CreativeDataScope.Owner.CREATOR, field = "creatorId")
     public List<CreativeProduct> selectCreativeProductList(CreativeProduct creativeProduct)
     {
-        if (!permissionService.isAdmin())
-        {
-            Long creatorId = permissionService.getCurrentCreatorIdOrNull();
-            if (creatorId == null)
-            {
-                return Collections.emptyList();
-            }
-            creativeProduct.setCreatorId(creatorId);
-        }
         return creativeProductMapper.selectCreativeProductList(creativeProduct);
     }
 
@@ -71,7 +63,7 @@ public class CreativeProductServiceImpl implements ICreativeProductService
     public int updateCreativeProduct(CreativeProduct creativeProduct)
     {
         CreativeProduct existing = requireProduct(creativeProduct.getProductId());
-        ensureCreatorOwned(existing);
+        permissionService.ensureCreatorOwned(existing.getCreatorId());
         creativeProduct.setCreatorId(existing.getCreatorId());
         return creativeProductMapper.updateCreativeProduct(creativeProduct);
     }
@@ -80,7 +72,7 @@ public class CreativeProductServiceImpl implements ICreativeProductService
     public int putOnShelf(Long productId, String operator)
     {
         CreativeProduct product = requireProduct(productId);
-        ensureCreatorOwned(product);
+        permissionService.ensureCreatorOwned(product.getCreatorId());
         if (STATUS_ON_SHELF.equals(product.getStatus()))
         {
             throw new ServiceException("商品已处于上架状态");
@@ -98,7 +90,7 @@ public class CreativeProductServiceImpl implements ICreativeProductService
     public int takeOffShelf(Long productId, String operator)
     {
         CreativeProduct product = requireProduct(productId);
-        ensureCreatorOwned(product);
+        permissionService.ensureCreatorOwned(product.getCreatorId());
         if (STATUS_OFF_SHELF.equals(product.getStatus()))
         {
             throw new ServiceException("商品已处于下架状态");
@@ -114,7 +106,7 @@ public class CreativeProductServiceImpl implements ICreativeProductService
     @Override
     public int deleteCreativeProductByProductId(Long productId)
     {
-        ensureCreatorOwned(requireProduct(productId));
+        permissionService.ensureCreatorOwned(requireProduct(productId).getCreatorId());
         return creativeProductMapper.deleteCreativeProductByProductId(productId);
     }
 
@@ -125,7 +117,7 @@ public class CreativeProductServiceImpl implements ICreativeProductService
         {
             for (Long productId : productIds)
             {
-                ensureCreatorOwned(requireProduct(productId));
+                permissionService.ensureCreatorOwned(requireProduct(productId).getCreatorId());
             }
         }
         return creativeProductMapper.deleteCreativeProductByProductIds(productIds);
@@ -139,19 +131,6 @@ public class CreativeProductServiceImpl implements ICreativeProductService
             throw new ServiceException("商品不存在: " + productId);
         }
         return product;
-    }
-
-    private void ensureCreatorOwned(CreativeProduct product)
-    {
-        if (product == null || permissionService.isAdmin())
-        {
-            return;
-        }
-        Long creatorId = permissionService.requireCurrentCreatorId();
-        if (!creatorId.equals(product.getCreatorId()))
-        {
-            throw new ServiceException("无权操作该数据");
-        }
     }
 
     private void validateProductForShelf(CreativeProduct product)

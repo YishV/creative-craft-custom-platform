@@ -10,8 +10,18 @@ import static org.mockito.Mockito.when;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.system.domain.creative.CreativeCreator;
+import com.ruoyi.system.domain.creative.CreativeCreatorProfile;
+import com.ruoyi.system.domain.creative.CreativeOrder;
+import com.ruoyi.system.domain.creative.CreativeProduct;
+import com.ruoyi.system.domain.creative.CreativeQuote;
+import com.ruoyi.system.domain.creative.CreativeStatusFlow;
 import com.ruoyi.system.mapper.creative.CreativeCreatorMapper;
+import com.ruoyi.system.mapper.creative.CreativeOrderMapper;
+import com.ruoyi.system.mapper.creative.CreativeProductMapper;
+import com.ruoyi.system.mapper.creative.CreativeQuoteMapper;
 import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.system.service.creative.support.CreativeDataPermissionService;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -28,7 +38,19 @@ class CreativeCreatorServiceImplTest
     private CreativeCreatorMapper creativeCreatorMapper;
 
     @Mock
+    private CreativeProductMapper creativeProductMapper;
+
+    @Mock
+    private CreativeQuoteMapper creativeQuoteMapper;
+
+    @Mock
+    private CreativeOrderMapper creativeOrderMapper;
+
+    @Mock
     private ISysUserService sysUserService;
+
+    @Mock
+    private CreativeDataPermissionService permissionService;
 
     @InjectMocks
     private CreativeCreatorServiceImpl creativeCreatorService;
@@ -118,6 +140,78 @@ class CreativeCreatorServiceImplTest
         assertThrows(ServiceException.class, () -> creativeCreatorService.rejectCreator(1L, "  ", "admin"));
 
         verify(creativeCreatorMapper, never()).updateCreativeCreator(any(CreativeCreator.class));
+    }
+
+    @Test
+    void selectMyCreatorProfileShouldReturnEmptyWhenUserHasNoApplication()
+    {
+        when(permissionService.getCurrentUserId()).thenReturn(100L);
+        when(creativeCreatorMapper.selectCreativeCreatorList(any(CreativeCreator.class))).thenReturn(Collections.emptyList());
+
+        CreativeCreatorProfile profile = creativeCreatorService.selectMyCreatorProfile();
+
+        org.junit.jupiter.api.Assertions.assertNull(profile.getCreator());
+        assertEquals(0L, profile.getProductCount());
+        assertEquals(BigDecimal.ZERO, profile.getCompletedRevenue());
+    }
+
+    @Test
+    void selectMyCreatorProfileShouldReturnPendingProfileWithoutStatistics()
+    {
+        when(permissionService.getCurrentUserId()).thenReturn(100L);
+        CreativeCreator pending = existingCreator("pending");
+        when(creativeCreatorMapper.selectCreativeCreatorList(any(CreativeCreator.class))).thenReturn(List.of(pending));
+
+        CreativeCreatorProfile profile = creativeCreatorService.selectMyCreatorProfile();
+
+        assertEquals("pending", profile.getCreator().getAuditStatus());
+        assertEquals(0L, profile.getProductCount());
+        assertEquals(0L, profile.getActiveOrderCount());
+        verify(creativeProductMapper, never()).selectCreativeProductList(any(CreativeProduct.class));
+    }
+
+    @Test
+    void selectMyCreatorProfileShouldFillStatisticsForApprovedCreator()
+    {
+        when(permissionService.getCurrentUserId()).thenReturn(100L);
+        CreativeCreator approved = existingCreator("approved");
+        approved.setStatus("0");
+        when(creativeCreatorMapper.selectCreativeCreatorList(any(CreativeCreator.class))).thenReturn(List.of(approved));
+
+        CreativeProduct onShelf = new CreativeProduct();
+        onShelf.setStatus("0");
+        CreativeProduct offShelf = new CreativeProduct();
+        offShelf.setStatus("1");
+        when(creativeProductMapper.selectCreativeProductList(any(CreativeProduct.class)))
+            .thenReturn(List.of(onShelf, onShelf, offShelf));
+
+        when(creativeQuoteMapper.selectCreativeQuoteList(any(CreativeQuote.class)))
+            .thenReturn(List.of(new CreativeQuote(), new CreativeQuote()));
+
+        CreativeOrder created = orderWithStatus(CreativeStatusFlow.Order.CREATED, BigDecimal.valueOf(100));
+        CreativeOrder making = orderWithStatus(CreativeStatusFlow.Order.MAKING, BigDecimal.valueOf(200));
+        CreativeOrder finished1 = orderWithStatus(CreativeStatusFlow.Order.FINISHED, BigDecimal.valueOf(300));
+        CreativeOrder finished2 = orderWithStatus(CreativeStatusFlow.Order.FINISHED, BigDecimal.valueOf(150));
+        CreativeOrder cancelled = orderWithStatus(CreativeStatusFlow.Order.CANCELLED, BigDecimal.valueOf(50));
+        when(creativeOrderMapper.selectCreativeOrderList(any(CreativeOrder.class)))
+            .thenReturn(List.of(created, making, finished1, finished2, cancelled));
+
+        CreativeCreatorProfile profile = creativeCreatorService.selectMyCreatorProfile();
+
+        assertEquals(3L, profile.getProductCount());
+        assertEquals(2L, profile.getOnShelfProductCount());
+        assertEquals(2L, profile.getPendingQuoteCount());
+        assertEquals(2L, profile.getActiveOrderCount());
+        assertEquals(2L, profile.getCompletedOrderCount());
+        assertEquals(BigDecimal.valueOf(450), profile.getCompletedRevenue());
+    }
+
+    private CreativeOrder orderWithStatus(String status, BigDecimal amount)
+    {
+        CreativeOrder order = new CreativeOrder();
+        order.setOrderStatus(status);
+        order.setOrderAmount(amount);
+        return order;
     }
 
     private CreativeCreator buildCreator()

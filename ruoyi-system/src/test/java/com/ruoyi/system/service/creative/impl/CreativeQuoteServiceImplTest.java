@@ -3,6 +3,8 @@ package com.ruoyi.system.service.creative.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,7 +18,6 @@ import com.ruoyi.system.mapper.creative.CreativeOrderMapper;
 import com.ruoyi.system.mapper.creative.CreativeQuoteMapper;
 import com.ruoyi.system.service.creative.support.CreativeDataPermissionService;
 import java.math.BigDecimal;
-import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -43,21 +44,6 @@ class CreativeQuoteServiceImplTest
     private CreativeQuoteServiceImpl creativeQuoteService;
 
     @Test
-    void selectCreativeQuoteListShouldScopeToCurrentCreator()
-    {
-        CreativeQuote query = new CreativeQuote();
-        when(permissionService.isAdmin()).thenReturn(false);
-        when(permissionService.getCurrentCreatorIdOrNull()).thenReturn(11L);
-        when(creativeQuoteMapper.selectCreativeQuoteList(any(CreativeQuote.class))).thenReturn(Collections.emptyList());
-
-        creativeQuoteService.selectCreativeQuoteList(query);
-
-        ArgumentCaptor<CreativeQuote> captor = ArgumentCaptor.forClass(CreativeQuote.class);
-        verify(creativeQuoteMapper).selectCreativeQuoteList(captor.capture());
-        assertEquals(11L, captor.getValue().getCreatorId());
-    }
-
-    @Test
     void insertCreativeQuoteShouldAssignCurrentCreatorIdForNonAdmin()
     {
         CreativeQuote quote = buildQuote(1L, 9L, 66L);
@@ -78,9 +64,9 @@ class CreativeQuoteServiceImplTest
     @Test
     void updateCreativeQuoteShouldFailWhenQuoteNotOwnedByCurrentCreator()
     {
-        when(permissionService.isAdmin()).thenReturn(false);
-        when(permissionService.requireCurrentCreatorId()).thenReturn(11L);
         when(creativeQuoteMapper.selectCreativeQuoteByQuoteId(1L)).thenReturn(buildQuote(1L, 9L, 66L));
+        doThrow(new ServiceException("无权操作该数据"))
+            .when(permissionService).ensureCreatorOwned(eq(66L));
 
         CreativeQuote update = new CreativeQuote();
         update.setQuoteId(1L);
@@ -94,10 +80,11 @@ class CreativeQuoteServiceImplTest
     @Test
     void selectQuoteAndGenerateOrderShouldFailWhenDemandNotOwnedByCurrentBuyer()
     {
-        when(permissionService.getCurrentUserId()).thenReturn(8L);
         when(creativeQuoteMapper.selectCreativeQuoteByQuoteId(1L)).thenReturn(buildQuote(1L, 9L, 11L));
         when(creativeDemandMapper.selectCreativeDemandByDemandId(9L))
             .thenReturn(buildDemand(5L, CreativeStatusFlow.Demand.QUOTING));
+        doThrow(new ServiceException("无权操作该数据"))
+            .when(permissionService).ensureBuyerOwned(eq(5L));
 
         assertThrows(ServiceException.class, () -> creativeQuoteService.selectQuoteAndGenerateOrder(1L, "buyer"));
 

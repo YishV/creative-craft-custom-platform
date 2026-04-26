@@ -60,3 +60,10 @@ export function delCreator(creatorId) {
     method: 'delete'
   })
 }
+
+export function getMyCreatorProfile() {
+  return request({
+    url: '/creative/creator/me',
+    method: 'get'
+  })
+}
