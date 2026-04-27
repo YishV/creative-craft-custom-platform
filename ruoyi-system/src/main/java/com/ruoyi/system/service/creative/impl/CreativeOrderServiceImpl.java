@@ -104,6 +104,7 @@ public class CreativeOrderServiceImpl implements ICreativeOrderService
     {
         CreativeOrder order = requireOrder(orderId);
         permissionService.ensureOrderOwned(order.getBuyerId(), order.getSellerId());
+        ensureActorCanTransit(order, targetStatus);
         try
         {
             CreativeStatusFlow.ensureOrderTransition(order.getOrderStatus(), targetStatus);
@@ -115,6 +116,31 @@ public class CreativeOrderServiceImpl implements ICreativeOrderService
         order.setOrderStatus(targetStatus);
         order.setUpdateBy(operator);
         return creativeOrderMapper.updateCreativeOrder(order);
+    }
+
+    private void ensureActorCanTransit(CreativeOrder order, String targetStatus)
+    {
+        if (permissionService.isAdmin())
+        {
+            return;
+        }
+        if (CreativeStatusFlow.Order.MAKING.equals(targetStatus)
+            || CreativeStatusFlow.Order.SHIPPED.equals(targetStatus))
+        {
+            Long creatorId = permissionService.getCurrentCreatorIdOrNull();
+            if (creatorId == null || !creatorId.equals(order.getSellerId()))
+            {
+                throw new ServiceException("只有创作者可以执行该订单操作");
+            }
+        }
+        if (CreativeStatusFlow.Order.FINISHED.equals(targetStatus))
+        {
+            Long userId = permissionService.getCurrentUserId();
+            if (userId == null || !userId.equals(order.getBuyerId()))
+            {
+                throw new ServiceException("只有买家可以执行该订单操作");
+            }
+        }
     }
 
     private CreativeOrder requireOrder(Long orderId)

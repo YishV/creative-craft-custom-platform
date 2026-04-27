@@ -42,7 +42,11 @@
     <el-table v-loading="loading" :data="creatorList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="创作者ID" align="center" prop="creatorId" width="90" />
-      <el-table-column label="用户ID" align="center" prop="userId" width="90" />
+      <el-table-column label="绑定账号" align="center" prop="userId" width="100">
+        <template slot-scope="scope">
+          <span>{{ scope.row.userId ? `账号#${scope.row.userId}` : '-' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="创作者名" align="center" prop="creatorName" :show-overflow-tooltip="true" />
       <el-table-column label="店铺名称" align="center" prop="storeName" :show-overflow-tooltip="true" />
       <el-table-column label="等级" align="center" prop="creatorLevel" width="100">
@@ -104,8 +108,11 @@
 
     <el-dialog :title="title" :visible.sync="open" width="560px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="90px">
-        <el-form-item label="用户ID" prop="userId">
-          <el-input-number v-model="form.userId" :min="1" controls-position="right" />
+        <el-form-item v-if="form.creatorId === undefined" label="申请账号">
+          <el-input :value="currentUserLabel" disabled />
+        </el-form-item>
+        <el-form-item v-else label="绑定账号">
+          <el-input :value="boundUserLabel" disabled />
         </el-form-item>
         <el-form-item label="创作者名" prop="creatorName">
           <el-input v-model="form.creatorName" placeholder="请输入创作者名" />
@@ -183,10 +190,18 @@ export default {
       },
       form: {},
       rules: {
-        userId: [{ required: true, message: '用户ID不能为空', trigger: 'blur' }],
         creatorName: [{ required: true, message: '创作者名不能为空', trigger: 'blur' }],
         storeName: [{ required: true, message: '店铺名称不能为空', trigger: 'blur' }]
       }
+    }
+  },
+  computed: {
+    currentUserLabel() {
+      const nickName = this.$store.getters.nickName || this.$store.getters.name || '当前登录账号'
+      return `${nickName}（当前登录账号）`
+    },
+    boundUserLabel() {
+      return this.form.userId ? `账号#${this.form.userId}` : '-'
     }
   },
   created() {
@@ -217,7 +232,7 @@ export default {
     reset() {
       this.form = {
         creatorId: undefined,
-        userId: undefined,
+        userId: this.$store.getters.id,
         creatorName: undefined,
         storeName: undefined,
         creatorLevel: 'newbie',
@@ -263,7 +278,11 @@ export default {
         if (!valid) {
           return
         }
-        const request = this.form.creatorId !== undefined ? updateCreator(this.form) : applyCreator(this.form)
+        const payload = { ...this.form }
+        if (payload.creatorId === undefined) {
+          delete payload.userId
+        }
+        const request = payload.creatorId !== undefined ? updateCreator(payload) : applyCreator(payload)
         request.then(() => {
           this.$modal.msgSuccess(this.form.creatorId !== undefined ? '修改成功' : '申请提交成功')
           this.open = false

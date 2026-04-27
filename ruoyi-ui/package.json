@@ -1,8 +1,8 @@
 {
-  "name": "ruoyi",
+  "name": "creative-craft-platform-ui",
   "version": "3.9.2",
-  "description": "若依管理系统",
-  "author": "若依",
+  "description": "文创手作定制交易平台前端",
+  "author": "Creative Craft Team",
   "license": "MIT",
   "scripts": {
     "dev": "vue-cli-service serve",
@@ -15,14 +15,10 @@
     "admin",
     "dashboard",
     "element-ui",
-    "boilerplate",
-    "admin-template",
+    "creative",
+    "craft",
     "management-system"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://gitee.com/y_project/RuoYi-Vue.git"
-  },
   "dependencies": {
     "@riophae/vue-treeselect": "0.4.0",
     "axios": "0.30.3",

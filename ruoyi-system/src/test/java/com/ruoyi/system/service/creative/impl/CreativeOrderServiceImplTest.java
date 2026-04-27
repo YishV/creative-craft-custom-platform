@@ -83,6 +83,36 @@ class CreativeOrderServiceImplTest
     }
 
     @Test
+    void transitOrderStatusShouldRejectBuyerStartingProduction()
+    {
+        CreativeOrder order = buildOrder(1L, 4L, 10L, CreativeStatusFlow.Order.CREATED);
+        when(creativeOrderMapper.selectCreativeOrderByOrderId(1L)).thenReturn(order);
+        when(permissionService.isAdmin()).thenReturn(false);
+        when(permissionService.getCurrentCreatorIdOrNull()).thenReturn(null);
+
+        ServiceException exception = assertThrows(ServiceException.class,
+            () -> creativeOrderService.transitOrderStatus(1L, CreativeStatusFlow.Order.MAKING, "buyer"));
+
+        assertEquals("只有创作者可以执行该订单操作", exception.getMessage());
+        verify(creativeOrderMapper, never()).updateCreativeOrder(any(CreativeOrder.class));
+    }
+
+    @Test
+    void transitOrderStatusShouldRejectCreatorFinishingOrder()
+    {
+        CreativeOrder order = buildOrder(1L, 4L, 10L, CreativeStatusFlow.Order.SHIPPED);
+        when(creativeOrderMapper.selectCreativeOrderByOrderId(1L)).thenReturn(order);
+        when(permissionService.isAdmin()).thenReturn(false);
+        when(permissionService.getCurrentUserId()).thenReturn(8L);
+
+        ServiceException exception = assertThrows(ServiceException.class,
+            () -> creativeOrderService.transitOrderStatus(1L, CreativeStatusFlow.Order.FINISHED, "creator"));
+
+        assertEquals("只有买家可以执行该订单操作", exception.getMessage());
+        verify(creativeOrderMapper, never()).updateCreativeOrder(any(CreativeOrder.class));
+    }
+
+    @Test
     void selectCreativeOrderByOrderIdShouldAllowOwner()
     {
         CreativeOrder order = buildOrder(1L, 4L, 10L, CreativeStatusFlow.Order.CREATED);

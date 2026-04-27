@@ -93,6 +93,37 @@ export const constantRoutes = [
         meta: { title: '个人中心', icon: 'user' }
       }
     ]
+  },
+  {
+    path: '/portal',
+    component: Layout,
+    redirect: '/portal/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/portal/index'),
+        name: 'PortalIndex',
+        meta: { title: '文创前台', icon: 'guide', affix: true }
+      },
+      {
+        path: 'products',
+        component: () => import('@/views/portal/products'),
+        name: 'PortalProducts',
+        meta: { title: '商品浏览', icon: 'shopping' }
+      },
+      {
+        path: 'demands',
+        component: () => import('@/views/portal/demands'),
+        name: 'PortalDemands',
+        meta: { title: '需求广场', icon: 'form' }
+      },
+      {
+        path: 'orders',
+        component: () => import('@/views/portal/orders'),
+        name: 'PortalOrders',
+        meta: { title: '订单中心', icon: 'list' }
+      }
+    ]
   }
 ]
 

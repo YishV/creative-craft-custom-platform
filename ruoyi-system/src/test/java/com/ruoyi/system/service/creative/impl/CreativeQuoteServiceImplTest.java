@@ -78,6 +78,37 @@ class CreativeQuoteServiceImplTest
     }
 
     @Test
+    void insertCreativeQuoteShouldFailWhenDemandDoesNotExist()
+    {
+        CreativeQuote quote = buildQuote(null, 9L, 66L);
+        when(permissionService.isAdmin()).thenReturn(false);
+        when(permissionService.requireCurrentCreatorId()).thenReturn(66L);
+        when(creativeDemandMapper.selectCreativeDemandByDemandId(9L)).thenReturn(null);
+
+        ServiceException exception = assertThrows(ServiceException.class,
+            () -> creativeQuoteService.insertCreativeQuote(quote));
+
+        assertEquals("报价对应的需求不存在: 9", exception.getMessage());
+        verify(creativeQuoteMapper, never()).insertCreativeQuote(any(CreativeQuote.class));
+    }
+
+    @Test
+    void insertCreativeQuoteShouldFailWhenDemandIsNotOpenForQuote()
+    {
+        CreativeQuote quote = buildQuote(null, 9L, 66L);
+        when(permissionService.isAdmin()).thenReturn(false);
+        when(permissionService.requireCurrentCreatorId()).thenReturn(66L);
+        when(creativeDemandMapper.selectCreativeDemandByDemandId(9L))
+            .thenReturn(buildDemand(7L, CreativeStatusFlow.Demand.SELECTED));
+
+        ServiceException exception = assertThrows(ServiceException.class,
+            () -> creativeQuoteService.insertCreativeQuote(quote));
+
+        assertEquals("当前需求状态不允许报价: selected", exception.getMessage());
+        verify(creativeQuoteMapper, never()).insertCreativeQuote(any(CreativeQuote.class));
+    }
+
+    @Test
     void selectQuoteAndGenerateOrderShouldFailWhenDemandNotOwnedByCurrentBuyer()
     {
         when(creativeQuoteMapper.selectCreativeQuoteByQuoteId(1L)).thenReturn(buildQuote(1L, 9L, 11L));

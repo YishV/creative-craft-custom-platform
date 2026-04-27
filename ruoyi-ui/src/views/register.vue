@@ -29,6 +29,15 @@
           <svg-icon slot="prefix" icon-class="password" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
+      <el-form-item prop="identityType">
+        <el-radio-group v-model="registerForm.identityType" class="identity-group">
+          <el-radio-button label="buyer">我是买家</el-radio-button>
+          <el-radio-button label="creator">我是创作者</el-radio-button>
+        </el-radio-group>
+        <div class="identity-tip">
+          {{ identityTip }}
+        </div>
+      </el-form-item>
       <el-form-item prop="code" v-if="captchaEnabled">
         <el-input
           v-model="registerForm.code"
@@ -82,6 +91,7 @@ export default {
         username: "",
         password: "",
         confirmPassword: "",
+        identityType: "buyer",
         code: "",
         uuid: ""
       },
@@ -90,11 +100,19 @@ export default {
     }
   },
   computed: {
+    identityTip() {
+      return this.registerForm.identityType === 'creator'
+        ? '注册后先以买家身份进入系统，再提交创作者认证申请。'
+        : '买家可浏览商品、发布定制需求、管理订单。'
+    },
     registerRules() {
       return {
         username: [
           { required: true, trigger: "blur", message: "请输入您的账号" },
           { min: 2, max: 20, message: '用户账号长度必须介于 2 和 20 之间', trigger: 'blur' }
+        ],
+        identityType: [
+          { required: true, trigger: "change", message: "请选择注册身份" }
         ],
         confirmPassword: [
           { required: true, message: "请再次输入您的密码", trigger: "blur" },
@@ -129,9 +147,13 @@ export default {
       this.$refs.registerForm.validate(valid => {
         if (valid) {
           this.loading = true
-          register(this.registerForm).then(() => {
+          const payload = { ...this.registerForm }
+          register(payload).then(() => {
             const username = this.registerForm.username
-            this.$alert("<font color='red'>恭喜你，您的账号 " + username + " 注册成功！</font>", '系统提示', {
+            const nextTip = this.registerForm.identityType === 'creator'
+              ? "登录后请进入“文创平台 / 创作者管理”提交创作者申请。"
+              : "登录后可进入“文创前台”浏览商品并发布定制需求。"
+            this.$alert("<font color='red'>恭喜你，账号 " + username + " 注册成功！</font><br/>" + nextTip, '系统提示', {
               dangerouslyUseHTMLString: true,
               type: 'success'
             }).then(() => {
@@ -181,6 +203,22 @@ export default {
     width: 14px;
     margin-left: 2px;
   }
+}
+.identity-group {
+  width: 100%;
+  display: flex;
+  ::v-deep .el-radio-button {
+    flex: 1;
+  }
+  ::v-deep .el-radio-button__inner {
+    width: 100%;
+  }
+}
+.identity-tip {
+  margin-top: 8px;
+  color: #909399;
+  font-size: 12px;
+  line-height: 1.5;
 }
 .register-tip {
   font-size: 13px;

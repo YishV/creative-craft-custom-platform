@@ -60,12 +60,17 @@ public class CreativeQuoteServiceImpl implements ICreativeQuoteService
         if (creativeQuote.getDemandId() != null)
         {
             CreativeDemand demand = creativeDemandMapper.selectCreativeDemandByDemandId(creativeQuote.getDemandId());
-            if (demand != null && CreativeStatusFlow.Demand.PUBLISHED.equals(demand.getDemandStatus()))
+            ensureDemandOpenForQuote(creativeQuote.getDemandId(), demand);
+            if (CreativeStatusFlow.Demand.PUBLISHED.equals(demand.getDemandStatus()))
             {
                 demand.setDemandStatus(CreativeStatusFlow.Demand.QUOTING);
                 demand.setUpdateBy(creativeQuote.getCreateBy());
                 creativeDemandMapper.updateCreativeDemand(demand);
             }
+        }
+        else
+        {
+            throw new ServiceException("报价对应的需求不能为空");
         }
         return creativeQuoteMapper.insertCreativeQuote(creativeQuote);
     }
@@ -146,6 +151,20 @@ public class CreativeQuoteServiceImpl implements ICreativeQuoteService
         creativeOrderMapper.insertCreativeOrder(order);
 
         return order;
+    }
+
+    private void ensureDemandOpenForQuote(Long demandId, CreativeDemand demand)
+    {
+        if (demand == null)
+        {
+            throw new ServiceException("报价对应的需求不存在: " + demandId);
+        }
+        String status = demand.getDemandStatus();
+        if (!CreativeStatusFlow.Demand.PUBLISHED.equals(status)
+            && !CreativeStatusFlow.Demand.QUOTING.equals(status))
+        {
+            throw new ServiceException("当前需求状态不允许报价: " + status);
+        }
     }
 
     private CreativeQuote requireQuote(Long quoteId)

@@ -1,194 +1,263 @@
-# 文创手作定制交易平台 · 协作文档
+# 文创手作定制交易平台 · AI 协作指南
 
-> 本文档由 **Claude Code / Codex / Gemini** 三个 AI 协作维护，无人类参与日常开发。
-> **每完成一个任务，必须立即在本文档"五、任务进展记录"中追加一条记录（含完成人）并更新"二、当前阶段进度"。**
-
----
-
-## 一、协作约定
-
-1. **每完成一个任务（哪怕很小），立即更新本文档**：
-   - 在 §5 追加一条任务记录：**日期 / 任务名 / 改动文件 / 验证方式 / 完成人 / 备注**。
-   - **完成人字段必填**，取值之一：`Claude` / `Codex` / `Gemini`。
-   - 同步把 §4 对应任务勾选 `[x]`，并修改 §2 "当前阶段"指针。
-2. **认领任务规则**：
-   - 开始任务前，在 §4 对应行末尾用 `(@Claude WIP)` / `(@Codex WIP)` / `(@Gemini WIP)` 标记，避免三方撞车。
-   - 完成后把 `(WIP)` 删掉、勾选 `[x]`，并在 §5 追加完整记录。
-   - 如果发现别人挂着 `WIP` 但很久没动（看 §5 上次更新时间），可在 §6 留言询问后再接手。
-3. **不主动启动前后端服务**，需要启动时只在回复里给命令；只有"帮我启动 / start the server"这类原话才执行启动。
-4. **打包/构建命令**（验证改动用）：
-   - 后端：`mvn -pl ruoyi-admin -am -DskipTests package`
-   - 前端：`cd ruoyi-ui && npm.cmd run build:prod`（PowerShell 用 `npm.cmd`，不要用 `npm`）
-5. **改动较大或跨阶段时**，先在 §6 写一段简短设计说明（含取舍）再动手，其他 AI 可在那里追加意见。
-6. 所有时间使用绝对日期（如 `2026-04-25`），不写"昨天/今天"。
-7. 论文/答辩相关需求优先：凡能体现"协同过滤推荐"、"状态流转"、"敏感词过滤"等论文亮点的任务，优先安排。
-8. **commit 规范**：commit message 末尾追加完成人标记，例如 `feat(creative): 创作者认证审核流程 [Claude]`，便于事后 `git log` 复盘各方贡献。
+> 本项目由 Claude / Codex / Gemini 协作开发。本文档给后续接手的 AI 或同学看的：先知道项目做到哪，再知道怎么接着做，最后再查历史记录。
 
 ---
 
-## 二、当前阶段进度
+## 1. 先看结论
 
-**当前阶段**：阶段 4 · 前台用户端（阶段 3 已于 2026-04-26 收尾）
+**当前阶段**：阶段 4 · 前台用户端。
 
-| 阶段 | 主题 | 状态 |
-|---|---|---|
-| 阶段 1 | 后台 CRUD 全量补齐 + 关联名称展示 | ✅ 已完成（2026-04-25） |
-| 阶段 2 | 业务闭环（状态机、报价选中、订单生成） | ✅ 已完成（2026-04-25） |
-| 阶段 3 | 用户角色与权限细化（管理员/买家/创作者） | ✅ 已完成（2026-04-26） |
-| 阶段 4 | 前台用户端（首页/商品详情/需求广场/订单中心） | ⏳ 待开始 |
-| 阶段 5 | 推荐算法（基于用户的协同过滤，对齐外文翻译） | ⬜ 待开始 |
-| 阶段 6 | 管理后台增强（数据统计大屏、审核流） | ⬜ 待开始 |
-| 阶段 7 | 文档与测试（E-R 图、接口文档、JMeter、答辩 PPT） | ⬜ 待开始 |
+阶段 1 到阶段 3 已完成，后台 CRUD、定制业务闭环、买家/创作者角色、后端数据权限、创作者个人中心都已经落地。
 
----
+下一步优先做：
 
-## 三、整体路线（开题报告对齐）
-
-毕业设计题目：**基于 SpringBoot 的文创手作定制交易平台设计与实现**
-开题报告关键功能模块对照：
-
-- 用户：注册/登录、买家/商家身份分离、个人信息、收货地址
-- 商品：分类、商家发布、搜索浏览、详情
-- 定制：需求发布、需求列表与匹配、报价与沟通、进度跟踪
-- 交易：购物车、订单生成、在线支付（模拟）、订单状态
-- 社区：评价、作品分享、点赞评论、关注创作者
-- 后台：用户管理、商品审核、订单监控、数据统计
-- **算法亮点**：基于用户的协同过滤推荐（与外文翻译《Online Shopping Mall Based on Collaborative Filtering》对齐）
-- **关键问题**：定制流程标准化+灵活性、高并发与安全性、前后端分离接口设计
+1. 交易闭环补齐：购物车、收货地址、模拟支付页。
+2. 前台体验补齐：创作者主页、收藏中心、社区帖子列表与详情。
+3. 推荐算法：用户行为表、基于用户的协同过滤、首页“猜你喜欢”。
+4. 管理增强：统计大屏、商品审核、评论审核。
+5. 文档测试：E-R 图、接口文档、JUnit、JMeter、答辩 PPT。
 
 ---
 
-## 四、分阶段任务清单
+## 2. 接手任务怎么做
 
-### 阶段 1 · 后台 CRUD 全量补齐（已完成）
+每次接手一个任务，按下面 5 步走。少一步都容易把项目搞乱，嗯，别逞强。
+
+1. **先看状态**
+   - 执行 `git status --short`，确认当前有没有别人留下的改动。
+   - 阅读本文件第 4 节任务清单，找到要做的阶段。
+   - 如果任务已有 `(@Claude WIP)` / `(@Codex WIP)` / `(@Gemini WIP)`，先不要抢。
+
+2. **认领任务**
+   - 在第 4 节对应任务后面标记：`(@Claude WIP)`、`(@Codex WIP)` 或 `(@Gemini WIP)`。
+   - 如果是跨模块任务，先在第 6 节写一句设计说明。
+
+3. **开发与验证**
+   - 后端改动至少跑：
+     ```powershell
+     mvn -pl ruoyi-admin -am -DskipTests package
+     ```
+   - 前端改动至少跑：
+     ```powershell
+     cd ruoyi-ui
+     npm.cmd run build:prod
+     ```
+   - 有单测就优先跑相关单测，不要上来就全量轰炸。
+
+4. **更新协作文档**
+   - 完成后把任务勾选为 `[x]`。
+   - 删除任务后面的 WIP 标记。
+   - 在第 5 节追加记录：日期、任务、主要改动、验证方式、完成人、备注。
+
+5. **提交规范**
+   - commit message 末尾带完成人，例如：
+     ```text
+     feat(creative): 创作者认证审核流程 [Codex]
+     ```
+
+---
+
+## 3. 项目路线
+
+毕业设计题目：**基于 SpringBoot 的文创手作定制交易平台设计与实现**。
+
+开题报告对应功能：
+
+| 模块 | 开题要求 | 当前状态 | 下一步 |
+|---|---|---|---|
+| 用户 | 注册登录、身份选择、个人信息、收货地址 | 注册登录、买家/创作者选择已完成；个人中心复用系统页 | 补收货地址 |
+| 商品 | 分类、创作者发布、搜索浏览、详情 | 分类、发布、上下架、前台商品列表/详情已完成 | 商品详情可补加入购物车 |
+| 定制 | 需求发布、列表匹配、报价沟通、进度跟踪 | 需求广场、报价、选中报价、订单状态机已完成；沟通为备注说明版 | 后续可加站内消息 |
+| 交易 | 购物车、订单生成、模拟支付、订单状态 | 报价生成订单、订单状态流转已完成 | 优先补购物车和模拟支付 |
+| 社区 | 评价、作品分享、点赞评论、关注创作者 | 后台表和管理页已完成，前台展示未完整 | 补社区前台和创作者主页 |
+| 后台 | 用户、商品、订单、评论、数据统计 | 基础管理已完成 | 补统计大屏、审核演示 |
+| 算法 | 基于内容或行为的推荐 | 尚未实现 | 建议做用户行为 + 协同过滤 |
+
+说明：本项目是毕设演示系统，安全能力不作为当前优先开发项。后续只保留必要的权限边界和演示稳定性，别又把精力全砸到安全配置里，没必要。
+
+核心业务状态：
+
+```text
+需求：draft -> published -> quoting -> selected -> closed
+报价：pending -> selected / rejected
+订单：created -> making -> shipped -> finished
+订单也可以：created/making -> cancelled
+```
+
+---
+
+## 4. 分阶段任务清单
+
+### 阶段 1 · 后台 CRUD 全量补齐
+
 - [x] creator 页面 CRUD
 - [x] post 页面 CRUD
 - [x] comment 页面 CRUD
-- [x] favorite 页面 CRUD（按 targetType 动态目标下拉）
+- [x] favorite 页面 CRUD，按 targetType 动态目标下拉
 - [x] product / demand / quote / order 关联字段改名称展示
 - [x] 前端 `build:prod` 验证通过
 
 ### 阶段 2 · 业务闭环
-- [x] 定制需求状态机（草稿 → 待报价 → 报价中 → 已选中 → 已关闭）
-- [x] 报价状态机（待确认 → 已选中 → 已拒绝），同需求其他报价自动落败
-- [x] "选中报价"接口：自动生成订单、回填买家/卖家/金额、需求状态推进
-- [x] 订单状态推进接口：开始制作 / 发货 / 完成 / 取消，校验非法流转
-- [x] 前端接入选中按钮 + 订单状态推进按钮组
- - [x] 商品上下架业务校验
-- [x] 创作者认证审核流程（普通用户申请 → 管理员审核通过 → 角色升级）
+
+- [x] 定制需求状态机
+- [x] 报价状态机
+- [x] 选中报价后自动生成订单
+- [x] 订单开始制作、发货、完成、取消
+- [x] 前端接入业务按钮
+- [x] 商品上下架业务校验
+- [x] 创作者认证审核流程
 
 ### 阶段 3 · 角色与权限
-- [x] 业务角色语义化：`admin` 视为平台管理员，注册默认 `buyer`，审核追加 `creator`
-- [x] 数据权限：买家只看自己需求/订单/收藏；创作者只看自己商品/报价/订单
-- [x] 后端注解过滤，不依赖前端隐藏（`@CreativeDataScope` + AOP + `ensureXxxOwned`）
-- [x] 创作者主页（个人中心）：`GET /creative/creator/me` + 主页统计 + `views/creative/me/index.vue`
+
+- [x] 注册默认 `buyer`，审核通过追加 `creator`
+- [x] 管理员、买家、创作者三类角色语义明确
+- [x] 买家只看自己的需求、订单、收藏
+- [x] 创作者只看自己的商品、报价、订单
+- [x] `@CreativeDataScope` + AOP 注解化数据权限
+- [x] 创作者主页：`GET /creative/creator/me` + 前端页面
 
 ### 阶段 4 · 前台用户端
-- [ ] 前台路由组（`/portal/*`）或独立模块
-- [ ] 首页（推荐位 + 热门分类 + 最新作品）
-- [ ] 商品列表 / 详情
-- [ ] 需求广场（创作者视角看需求 + 报价入口）
-- [ ] 创作者主页（作品列表 + 关注按钮）
-- [ ] 购物车（开题报告必做）
-- [ ] 订单中心（买家/创作者两个视角）
+
+- [x] 注册登录入口 + 身份选择（买家/创作者）
+- [x] 前台路由组：建议使用 `/portal/*`
+- [x] 首页：推荐位、热门分类、最新作品
+- [x] 商品列表 / 商品详情
+- [x] 需求广场：买家发布需求，创作者看需求并报价
+- [ ] 创作者主页：作品列表、关注按钮
+- [ ] 收货地址管理
+- [ ] 购物车
+- [x] 订单中心：买家/创作者两个视角
 - [ ] 收藏中心
 - [ ] 社区帖子列表与详情
 - [ ] 模拟支付页
 
-### 阶段 5 · 推荐算法（论文亮点）
-- [ ] 用户行为收集表（浏览/收藏/下单）
-- [ ] 基于用户的协同过滤实现（皮尔逊相关系数）
-- [ ] 推荐结果接口 + 前台首页"猜你喜欢"展示
-- [ ] 离线/在线推荐效果对比数据（写论文用）
+### 阶段 4.5 · 交易演示闭环
+
+> 这是从开题报告截图倒推出来的最高优先级。答辩时老师最容易问“用户怎么下单、怎么支付、怎么收货”，所以先补这里。
+
+- [ ] 商品详情加入购物车
+- [ ] 购物车数量修改、删除、结算
+- [ ] 结算页选择收货地址
+- [ ] 模拟支付页：余额/二维码/支付成功三种演示状态任选一种即可
+- [ ] 支付成功后订单进入 `created` 或 `paid` 状态
+- [ ] 订单中心展示支付状态与物流/制作状态
+
+### 阶段 5 · 推荐算法
+
+- [ ] 用户行为收集表：浏览、收藏、下单
+- [ ] 基于用户的协同过滤实现
+- [ ] 皮尔逊相关系数计算用户相似度
+- [ ] 推荐接口
+- [ ] 首页“猜你喜欢”
+- [ ] 推荐效果样例数据，论文用
 
 ### 阶段 6 · 管理后台增强
-- [ ] 数据统计大屏（ECharts：商品数/订单数/销售额/活跃创作者/热门分类）
+
+- [ ] 数据统计大屏：商品数、订单数、销售额、活跃创作者、热门分类
 - [ ] 商品审核流
-- [ ] 评论审核流（已有 auditStatus，补审核动作）
-- [ ] 敏感词过滤模块（与外文翻译第二个亮点对齐）
+- [ ] 评论审核流
+- [ ] 敏感词过滤模块
 
 ### 阶段 7 · 文档与测试
-- [ ] E-R 图（draw.io / PlantUML）
+
+- [ ] E-R 图
 - [ ] 系统架构图、用例图
-- [ ] 各模块流程图（注册、定制、报价选中、订单流转）
-- [ ] Swagger 接口文档输出
-- [ ] JUnit 单元测试（核心 Service）
+- [ ] 注册、定制、报价选中、订单流转流程图
+- [ ] Swagger / Springdoc 接口文档
+- [ ] 核心 Service 单元测试
 - [ ] JMeter 压测报告
-- [ ] 演示数据（创作者、商品、需求、报价、订单各 ≥10 条）
+- [ ] 演示数据：创作者、商品、需求、报价、订单各不少于 10 条
 - [ ] 答辩 PPT 大纲
 
 ---
 
-## 五、任务进展记录
+## 5. 已完成记录
 
-| 日期 | 任务 | 改动文件 | 验证 | 完成人 | 备注 |
+| 日期 | 任务 | 主要改动 | 验证 | 完成人 | 备注 |
 |---|---|---|---|---|---|
-| 2026-04-25 | 项目了解 + 路线对齐 | — | 阅读 README、`docs/creative-platform-progress.md`、`doc/软件225 徐浩 前期材料.docx` | Claude | 输出阶段路线图 |
-| 2026-04-25 | creator 前端 CRUD | `ruoyi-ui/src/views/creative/creator/index.vue` | 前端 build 通过 | Claude | 含等级下拉、状态标签 |
-| 2026-04-25 | post 前端 CRUD | `ruoyi-ui/src/views/creative/post/index.vue` | 前端 build 通过 | Claude | 创作者下拉联动 |
-| 2026-04-25 | comment 前端 CRUD | `ruoyi-ui/src/views/creative/comment/index.vue` | 前端 build 通过 | Claude | 含审核状态（待审核/通过/驳回） |
-| 2026-04-25 | favorite 前端 CRUD | `ruoyi-ui/src/views/creative/favorite/index.vue` | 前端 build 通过 | Claude | 按 targetType 动态切换目标下拉 |
-| 2026-04-25 | product 关联名称展示 | `ruoyi-ui/src/views/creative/product/index.vue` | 前端 build 通过 | Claude | creatorId/categoryId → 名称 |
-| 2026-04-25 | demand 关联名称展示 | `ruoyi-ui/src/views/creative/demand/index.vue` | 前端 build 通过 | Claude | userId/categoryId → 名称（接 sys user） |
-| 2026-04-25 | quote 关联名称展示 | `ruoyi-ui/src/views/creative/quote/index.vue` | 前端 build 通过 | Claude | demandId/creatorId → 名称 |
-| 2026-04-25 | order 关联名称展示 | `ruoyi-ui/src/views/creative/order/index.vue` | 前端 build 通过 | Claude | buyerId/sellerId → 名称 |
-| 2026-04-25 | 协作文档建立 | `docs/collaboration.md` | — | Claude | 约定每完成一个任务即更新本文档 |
-| 2026-04-25 | 协作模式调整为三方 AI 协作 | `docs/collaboration.md` | — | Claude | 引入 Codex / Gemini，新增完成人字段、WIP 认领规则、commit 标记规范 |
-| 2026-04-25 | 重写 README 项目说明 | `README.md` | — | Claude | 基于《前期材料.docx》开题报告改写：背景/目标/功能/技术栈/状态机/启动/进度/协作约定 |
-| 2026-04-25 | 状态机常量类 + Demand/Order/Quote 状态流转 Service | `ruoyi-system/.../domain/creative/CreativeStatusFlow.java`、`ICreativeDemandService` & impl、`ICreativeOrderService` & impl、`ICreativeQuoteService` & impl、`CreativeQuoteMapper.java` & xml | mvn 后端打包通过 (89.7MB jar) | Claude | 集中维护合法状态及流转规则，非法流转抛 ServiceException |
-| 2026-04-25 | 选中报价生成订单（事务） | `CreativeQuoteServiceImpl.selectQuoteAndGenerateOrder` | mvn 后端打包通过 | Claude | @Transactional 包裹：选中目标报价→其他报价批量落败→需求推进 selected→自动生成订单（orderNo=CRAFT+timestamp+quoteId） |
-| 2026-04-25 | Quote/Order Controller 加业务接口 | `CreativeQuoteController.selectQuote`、`CreativeOrderController.{startMaking,ship,finish,cancel}` | mvn 后端打包通过 | Claude | 5 个 POST 接口，复用 `creative:quote:edit`/`creative:order:edit` 权限 |
-| 2026-04-25 | 前端接入业务闭环按钮 | `ruoyi-ui/src/api/creative/{quote,order}.js`、`views/creative/quote/index.vue`、`views/creative/order/index.vue` | 前端 build 通过 | Claude | quote 表加“选中”按钮（仅 pending 可点）；order 表按当前状态动态显示开始制作/发货/完成/取消 |
-| 2026-04-25 | 商品上下架业务校验 | `docs/collaboration.md`、`docs/superpowers/specs/2026-04-25-product-shelf-validation-design.md`、`ruoyi-system/pom.xml`、`ruoyi-system/src/test/java/com/ruoyi/system/service/creative/impl/CreativeProductServiceImplTest.java`、`ruoyi-system/src/main/java/com/ruoyi/system/service/creative/{ICreativeProductService.java,impl/CreativeProductServiceImpl.java}`、`ruoyi-admin/src/main/java/com/ruoyi/web/controller/creative/CreativeProductController.java`、`ruoyi-ui/src/api/creative/product.js`、`ruoyi-ui/src/views/creative/product/index.vue` | `mvn --% -Dmaven.repo.local=.m2repo -DfailIfNoTests=false -pl ruoyi-system -am -Dtest=CreativeProductServiceImplTest test`；`mvn --% -Dmaven.repo.local=.m2repo -DskipTests -pl ruoyi-admin -am package`；`npm.cmd run build:prod` | Codex | 新增独立上架/下架接口与 Service 校验；商品表单默认以下架创建，列表改用动作按钮触发上下架 |
-| 2026-04-25 | 创作者认证审核流程 | `docs/collaboration.md`、`docs/superpowers/plans/2026-04-25-creator-certification-audit.md`、`sql/{creative_platform_tables.sql,creative_creator_audit_upgrade_20260425.sql}`、`ruoyi-system/src/test/java/com/ruoyi/system/service/creative/impl/CreativeCreatorServiceImplTest.java`、`ruoyi-system/src/main/java/com/ruoyi/system/domain/creative/CreativeCreator.java`、`ruoyi-system/src/main/java/com/ruoyi/system/service/creative/{ICreativeCreatorService.java,impl/CreativeCreatorServiceImpl.java}`、`ruoyi-system/src/main/resources/mapper/creative/CreativeCreatorMapper.xml`、`ruoyi-admin/src/main/java/com/ruoyi/web/controller/creative/CreativeCreatorController.java`、`ruoyi-ui/src/api/creative/creator.js`、`ruoyi-ui/src/views/creative/creator/index.vue` | `mvn --% -Dmaven.repo.local=.m2repo -DfailIfNoTests=false -pl ruoyi-system -am -Dtest=CreativeCreatorServiceImplTest test`；`mvn --% -Dmaven.repo.local=.m2repo -DskipTests -pl ruoyi-admin -am package`；`npm.cmd run build:prod` | Codex | 新增申请/通过/驳回审核闭环，审核通过时追加 `creator` 角色；后台创作者页展示审核状态并提供通过/驳回动作 |
-| 2026-04-25 | 买家角色自动绑定 | `docs/collaboration.md`、`docs/superpowers/specs/2026-04-25-buyer-role-auto-binding-design.md`、`docs/superpowers/plans/2026-04-25-buyer-role-auto-binding.md`、`sql/{ry_20260417.sql,buyer_role_upgrade_20260425.sql}`、`ruoyi-system/src/test/java/com/ruoyi/system/service/{impl/SysUserServiceImplTest.java,creative/impl/CreativeCreatorServiceImplTest.java}`、`ruoyi-system/src/main/java/com/ruoyi/system/service/{ISysUserService.java,impl/SysUserServiceImpl.java,creative/impl/CreativeCreatorServiceImpl.java}` | `mvn --% -Dmaven.repo.local=.m2repo -DfailIfNoTests=false -pl ruoyi-system -am -Dtest=SysUserServiceImplTest,CreativeCreatorServiceImplTest test`；`mvn --% -Dmaven.repo.local=.m2repo -DskipTests -pl ruoyi-admin -am package`；`npm.cmd run build:prod` | Codex | 新增按 `roleKey` 追加角色的通用能力；注册成功后自动绑定 `buyer`，创作者审核改为复用同一角色追加逻辑；补 `buyer` 角色初始化和历史 `common` 用户回填脚本 |
-| 2026-04-25 | 后端数据权限 | `docs/collaboration.md`、`docs/superpowers/specs/2026-04-25-backend-data-permissions-design.md`、`docs/superpowers/plans/2026-04-25-backend-data-permissions.md`、`ruoyi-system/src/main/java/com/ruoyi/system/service/creative/support/CreativeDataPermissionService.java`、`ruoyi-system/src/main/java/com/ruoyi/system/service/creative/impl/{CreativeDemandServiceImpl.java,CreativeFavoriteServiceImpl.java,CreativeOrderServiceImpl.java,CreativeProductServiceImpl.java,CreativeQuoteServiceImpl.java}`、`ruoyi-admin/src/main/java/com/ruoyi/web/controller/creative/{CreativeDemandController.java,CreativeFavoriteController.java,CreativeProductController.java,CreativeQuoteController.java}`、`ruoyi-system/src/test/java/com/ruoyi/system/service/creative/{support/CreativeDataPermissionServiceTest.java,impl/CreativeDemandServiceImplTest.java,impl/CreativeFavoriteServiceImplTest.java,impl/CreativeOrderServiceImplTest.java,impl/CreativeProductServiceImplTest.java,impl/CreativeQuoteServiceImplTest.java}` | `mvn --% -Dmaven.repo.local=.m2repo -DfailIfNoTests=false -pl ruoyi-system -am -Dtest=CreativeDataPermissionServiceTest,CreativeDemandServiceImplTest,CreativeFavoriteServiceImplTest,CreativeProductServiceImplTest,CreativeQuoteServiceImplTest,CreativeOrderServiceImplTest,CreativeCreatorServiceImplTest test`；`mvn --% -Dmaven.repo.local=.m2repo -DskipTests -pl ruoyi-admin -am package`；`npm.cmd run build:prod` | Codex | 新增统一业务权限组件；买家仅可访问本人需求/收藏/买家订单，创作者仅可访问本人商品/报价/卖家订单；订单列表按买家和卖家双视角合并去重 |
-| 2026-04-26 | 创作者主页（个人中心） | `ruoyi-system/src/main/java/com/ruoyi/system/domain/creative/CreativeCreatorProfile.java`、`ruoyi-system/src/main/java/com/ruoyi/system/service/creative/{ICreativeCreatorService.java,impl/CreativeCreatorServiceImpl.java}`、`ruoyi-admin/src/main/java/com/ruoyi/web/controller/creative/CreativeCreatorController.java`、`ruoyi-ui/src/api/creative/creator.js`、`ruoyi-ui/src/views/creative/me/index.vue`、`sql/creator_me_menu_20260426.sql`、`ruoyi-system/src/test/java/com/ruoyi/system/service/creative/impl/CreativeCreatorServiceImplTest.java` | `mvn -Dmaven.repo.local=.m2repo -DfailIfNoTests=false -pl ruoyi-system -am -Dtest=CreativeCreatorServiceImplTest,...其他 7 项 test`（43/43 通过）；`mvn -Dmaven.repo.local=.m2repo -DskipTests -pl ruoyi-admin -am package`；`npm.cmd run build:prod` 全部通过 | Claude | 新增 `CreativeCreatorProfile` VO（档案 + 商品/上架/待报价/进行中订单/完成订单/累计成交额）；`GET /creative/creator/me` 复用 mapper 直接聚合；前端 `creative/me/index.vue` 卡片+统计；菜单 SQL `creator_me_menu_20260426.sql` 注册菜单 2150 + 自动给 creator 角色绑定可见。pending/rejected/disabled 状态返回档案但统计为 0，由前端引导 |
-| 2026-04-26 | 后端注解化数据权限（@CreativeDataScope + AOP） | `ruoyi-common/src/main/java/com/ruoyi/common/annotation/CreativeDataScope.java`、`ruoyi-framework/src/main/java/com/ruoyi/framework/aspectj/CreativeDataScopeAspect.java`、`ruoyi-system/src/main/java/com/ruoyi/system/service/creative/support/CreativeDataPermissionService.java`、`ruoyi-system/src/main/java/com/ruoyi/system/service/creative/impl/{CreativeDemandServiceImpl.java,CreativeFavoriteServiceImpl.java,CreativeOrderServiceImpl.java,CreativeProductServiceImpl.java,CreativeQuoteServiceImpl.java}`、`ruoyi-system/src/test/java/com/ruoyi/system/service/creative/{support/CreativeDataPermissionServiceTest.java,impl/CreativeDemandServiceImplTest.java,impl/CreativeFavoriteServiceImplTest.java,impl/CreativeOrderServiceImplTest.java,impl/CreativeProductServiceImplTest.java,impl/CreativeQuoteServiceImplTest.java}` | `mvn -Dmaven.repo.local=.m2repo -DfailIfNoTests=false -pl ruoyi-system -am -Dtest=CreativeDataPermissionServiceTest,CreativeDemandServiceImplTest,CreativeFavoriteServiceImplTest,CreativeProductServiceImplTest,CreativeQuoteServiceImplTest,CreativeOrderServiceImplTest,CreativeCreatorServiceImplTest,SysUserServiceImplTest test`（40/40 通过）；`mvn -Dmaven.repo.local=.m2repo -DskipTests -pl ruoyi-admin -am package` 通过 | Claude | 新增 `@CreativeDataScope(owner, field)` 注解 + `CreativeDataScopeAspect`：list 注入买家/创作者归属字段，创作者无生效身份时短路返回空列表；`ensureBuyerOwned/ensureCreatorOwned/ensureOrderOwned` 下沉到 `CreativeDataPermissionService`，5 个 Service 删除内联 ensureXxxOwned 私有方法；行为不变，重复模板退化为声明式注解 |
+| 2026-04-25 | 项目路线对齐 | README、协作文档、阶段路线 | 阅读资料 | Claude | 根据开题报告整理方向 |
+| 2026-04-25 | 后台 CRUD 补齐 | creator/post/comment/favorite/product/demand/quote/order 前端页面 | 前端 build 通过 | Claude | 后台管理基础可用 |
+| 2026-04-25 | README 重写 | 背景、目标、技术栈、启动说明、状态机 | 文档检查 | Claude | 面向毕设说明 |
+| 2026-04-25 | 状态机与业务闭环 | `CreativeStatusFlow`、需求/报价/订单 Service 与 Controller | 后端打包通过 | Claude | 选中报价自动生成订单 |
+| 2026-04-25 | 前端业务按钮 | 报价选中、订单推进按钮 | 前端 build 通过 | Claude | 后台可操作业务流 |
+| 2026-04-25 | 商品上下架校验 | 商品上下架接口、Service 校验、前端按钮 | 单测、后端打包、前端 build | Codex | 上架前校验名称、价格、创作者、分类 |
+| 2026-04-25 | 创作者认证审核 | 申请、通过、驳回、追加 creator 角色 | 单测、后端打包、前端 build | Codex | 新增审核字段与增量 SQL |
+| 2026-04-25 | 买家角色自动绑定 | 注册后绑定 `buyer`，历史 common 用户回填 | 单测、后端打包、前端 build | Codex | 新增 `buyer` 角色 SQL |
+| 2026-04-25 | 后端数据权限 | 统一权限服务，收敛买家/创作者数据范围 | 单测、后端打包、前端 build | Codex | 防止只靠前端隐藏 |
+| 2026-04-26 | 创作者个人中心 | `CreativeCreatorProfile`、`/creative/creator/me`、前端页面、菜单 SQL | 相关单测、后端打包、前端 build | Claude | 创作者可看档案与统计 |
+| 2026-04-26 | 注解化数据权限 | `@CreativeDataScope`、AOP 切面、Service 简化 | 相关单测、后端打包 | Claude | 重复权限模板收敛 |
+| 2026-04-27 | 协作文档与 SQL 顺序整理 | `docs/collaboration.md`、`sql/README.md`、README 数据库段落 | 文档检查 | Codex | 让后续接手更容易 |
+| 2026-04-27 | 创作者申请表单去除用户 ID 输入 | `CreativeCreatorController.java`、`views/creative/creator/index.vue` | 后端 package、前端 build | Codex | 新增申请自动绑定当前登录用户，页面显示“申请账号”而不是要求填写用户 ID |
+| 2026-04-27 | Review 业务边界处理 | `CreativeOrderServiceImpl.java`、`CreativeQuoteServiceImpl.java` 及相关测试 | 订单/报价单测、后端 package | Codex | 订单动作按买家/创作者角色限制；报价校验需求存在和状态 |
+| 2026-04-27 | 前台用户端基础页面 | `CreativePortalController.java`、`api/creative/portal.js`、`views/portal/*`、`router/index.js` | 后端 package、前端 build | Codex | 新增 `/portal` 首页、商品浏览、需求广场、订单中心；前台商品/需求使用只读门户接口，避免被后台数据权限挡住 |
+| 2026-04-27 | 注册登录入口与身份选择 | `views/login.vue`、`views/register.vue`、`sql/register_enable_20260427.sql`、`sql/ry_20260417.sql` | 后端 package、前端 build | Codex | 登录页显示“立即注册”；注册页提供买家/创作者选择；SQL 默认开启自助注册，创作者注册后走认证申请流程 |
+| 2026-04-27 | 开题需求对齐文档 | `README.md`、`docs/collaboration.md` | 文档检查 | Codex | 按开题截图补充需求对照表、阶段 4.5 交易闭环任务，并修正 README 当前进度 |
+
+更细的设计与实施记录在 `docs/superpowers/specs/` 和 `docs/superpowers/plans/`。
 
 ---
 
-## 六、未决问题与待确认
+## 6. 未决问题
 
-> 任何 AI 都可以在条目下用 `> @Claude:` / `> @Codex:` / `> @Gemini:` 追加意见。问题敲定后由发起方在条目末尾写 `**结论：xxx**` 并归档到 §3 路线说明里。
+- [ ] 推荐算法使用“基于内容”还是“协同过滤”？
+  - 建议：做协同过滤。外文翻译能对上，论文亮点也更明确。
 
-- [ ] 推荐算法到底用"基于内容"（开题）还是"协同过滤"（外文翻译）？
-  > @Claude: 建议直接做协同过滤以呼应外文翻译，论文写作时只把开题里的"内容推荐"改成"协同过滤"即可。
-- [ ] 模拟支付是否需要接入沙箱（支付宝/微信沙箱），还是纯前端模拟跳转？
-  > @Claude: 建议纯模拟，毕设够用。
-- [ ] 前台是否独立部署一个端口？还是和后台共用 ruoyi-ui？
-  > @Claude: 建议同 ruoyi-ui，加 `/portal` 路由组。
-- [ ] 三方 AI 任务分工建议（待补充）：
-  > @Claude: 初步建议——Claude 负责后端业务闭环 + 文档；Codex 负责前台页面与样式；Gemini 负责推荐算法与论文图表/数据准备。各方可在此调整。
-- [ ] 商品上下架业务校验设计
-  > @Codex: 本次仅做轻量校验，不修改订单/商品数据模型。新增独立上架/下架业务接口，保留 `creative_product.status` 的 `0/1` 语义。上架校验商品名、价格、创作者状态、分类状态；下架仅校验商品存在且当前为上架。由于 `creative_custom_order` 尚未关联 `product_id` / `source_id`，本轮不实现“存在进行中订单禁止下架”。
-- [ ] 创作者认证审核流程设计
-  > @Codex: `creative_creator.status` 继续表示档案是否启用；新增 `audit_status`、`audit_remark`、`audit_by`、`audit_time` 承担审核语义。申请走独立 `apply` 接口并落为 `pending`，审核通过时把状态改为 `approved` 且追加 `creator` 角色，驳回时写入原因并保留记录。
-- [x] 买家角色自动绑定设计
-  > @Codex: 阶段 3 先落“业务角色语义化”。`admin` 继续充当平台管理员，不新增 `platform_admin` 角色；新增显式 `buyer` 角色，并在用户注册成功后自动绑定。`creator` 保持审核通过后追加。为兼容当前无门户端的现状，`buyer` 初始化时先复制 `common` 的菜单/部门授权，后续再在数据权限阶段收紧。
-- [ ] 后端数据权限设计
-  > @Codex: 本轮只做后端数据权限，不混入前端按钮隐藏。采用“Service 层统一归属校验，Controller 只补当前用户上下文”的方案：买家只看/改/删自己的需求、收藏、买家视角订单，并且只能选中自己需求下的报价；创作者只看/改/删自己的商品、报价、卖家视角订单，并且只能上下架自己的商品。管理员保持全量访问。批量删除逐条校验，只要混入非本人数据就整体拒绝，避免部分成功。
-- [x] 后端数据权限设计
-  > @Codex: 已落地后端数据权限。新增 `CreativeDataPermissionService` 统一解析当前用户、管理员绕过和 `userId -> creatorId` 映射；`demand/favorite/product/quote/order` 服务层已接入查询收敛与按 ID 所有权校验，订单列表采用“买家查询 + 卖家查询 + 去重合并”实现“任一命中可见”。
+- [ ] 模拟支付要不要接支付宝/微信沙箱？
+  - 建议：先做纯前端模拟支付。毕设演示够用，风险更低。
+
+- [ ] 前台是否独立部署？
+  - 建议：继续放在 `ruoyi-ui`，用 `/portal` 路由组。少一个工程，少一堆麻烦。
+
+- [ ] 商品下架是否需要校验进行中订单？
+  - 当前订单表没有绑定 `product_id` / `source_id`，暂不做。
+  - 后续如果补现货订单，需要增加订单来源字段后再实现。
+
+- [ ] 评论审核与敏感词过滤谁先做？
+  - 建议：先做敏感词过滤，再做审核动作。论文和演示都更好讲。
 
 ---
 
-## 七、常用命令速查
+## 7. SQL 执行说明
+
+SQL 顺序不要靠猜。完整说明见 [`../sql/README.md`](../sql/README.md)。
+
+新库最短顺序：
+
+```sql
+source sql/ry_20260417.sql;
+source sql/quartz.sql;
+source sql/creative_platform_tables.sql;
+source sql/creative_platform_menu.sql;
+source sql/creative_creator_audit_upgrade_20260425.sql;
+source sql/buyer_role_upgrade_20260425.sql;
+source sql/creator_me_menu_20260426.sql;
+source sql/register_enable_20260427.sql;
+```
+
+如果是已经执行过 `creative_platform_tables.sql` 的旧库，先看 `sql/README.md` 的“旧库升级顺序”。别硬怼，数据库不会因为你勇敢就原谅你。
+
+---
+
+## 8. 常用命令
 
 ```powershell
 # 当前改动
 git status --short
 
-# 后端打包（JDK17）
+# 后端打包
 mvn -pl ruoyi-admin -am -DskipTests package
 
 # 前端构建
 cd ruoyi-ui
 npm.cmd run build:prod
 
-# 启动（仅当用户明确要求时）
-.\bin\run-admin-jdk17.bat        # 后端
-cd ruoyi-ui && npm.cmd run dev   # 前端
+# 启动后端
+.\bin\run-admin-jdk17.bat
+
+# 启动前端
+cd ruoyi-ui
+npm.cmd run dev
 
 # 检查端口占用
 Get-NetTCPConnection -State Listen | Where-Object { $_.LocalPort -in 80,8080 }

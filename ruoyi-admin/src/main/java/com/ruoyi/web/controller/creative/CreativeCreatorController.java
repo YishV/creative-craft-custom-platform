@@ -5,6 +5,7 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.system.domain.creative.CreativeCreator;
 import com.ruoyi.system.service.creative.ICreativeCreatorService;
 import java.util.List;
@@ -53,6 +54,7 @@ public class CreativeCreatorController extends BaseController
     @PostMapping("/apply")
     public AjaxResult apply(@RequestBody CreativeCreator creativeCreator)
     {
+        creativeCreator.setUserId(SecurityUtils.getUserId());
         creativeCreator.setCreateBy(getUsername());
         return toAjax(creativeCreatorService.applyCreator(creativeCreator));
     }
