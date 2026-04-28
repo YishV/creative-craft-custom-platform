@@ -29,10 +29,20 @@
           <el-tag :type="statusMeta(scope.row.orderStatus).type" size="mini">{{ statusMeta(scope.row.orderStatus).label }}</el-tag>
         </template>
       </el-table-column>
+      <el-table-column label="支付" width="100">
+        <template slot-scope="scope">
+          <el-tag :type="scope.row.payStatus === 'paid' ? 'success' : 'info'" size="mini">
+            {{ scope.row.payStatus === 'paid' ? '已支付' : '未支付' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="商品" min-width="160" :show-overflow-tooltip="true">
+        <template slot-scope="scope">{{ scope.row.sourceName || '-' }} × {{ scope.row.quantity || 1 }}</template>
+      </el-table-column>
       <el-table-column label="买家/卖家" width="160">
         <template slot-scope="scope">#{{ scope.row.buyerId || '-' }} / #{{ scope.row.sellerId || '-' }}</template>
       </el-table-column>
-      <el-table-column label="说明" prop="remark" min-width="220" :show-overflow-tooltip="true" />
+      <el-table-column label="收货信息" prop="addressSnapshot" min-width="220" :show-overflow-tooltip="true" />
       <el-table-column label="操作" width="230" align="center">
         <template slot-scope="scope">
           <el-button v-if="scope.row.orderStatus === 'created'" type="text" @click="start(scope.row)">开始制作</el-button>

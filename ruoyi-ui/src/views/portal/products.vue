@@ -29,7 +29,11 @@
           <p>{{ item.remark || '这件作品暂时没有详细介绍' }}</p>
           <div class="foot">
             <strong>￥{{ money(item.price) }}</strong>
-            <el-button type="primary" plain size="mini" @click="showDetail(item)">查看详情</el-button>
+            <div>
+              <el-button size="mini" icon="el-icon-star-off" @click="favoriteProduct(item)">收藏</el-button>
+              <el-button size="mini" icon="el-icon-shopping-cart-2" @click="addToCart(item)">加入购物车</el-button>
+              <el-button type="primary" plain size="mini" @click="showDetail(item)">查看详情</el-button>
+            </div>
           </div>
         </div>
       </article>
@@ -50,12 +54,18 @@
         <el-descriptions-item label="创作者">#{{ detail.creatorId || '-' }}</el-descriptions-item>
         <el-descriptions-item label="说明">{{ detail.remark || '暂无说明' }}</el-descriptions-item>
       </el-descriptions>
+      <div slot="footer">
+        <el-button @click="detailOpen = false">关闭</el-button>
+        <el-button icon="el-icon-star-off" @click="favoriteProduct(detail)">收藏商品</el-button>
+        <el-button type="primary" icon="el-icon-shopping-cart-2" @click="addToCart(detail)">加入购物车</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listPortalProduct, getPortalProduct } from '@/api/creative/portal'
+import { addPortalFavorite, listPortalProduct, getPortalProduct } from '@/api/creative/portal'
+import { addCartItem } from '@/utils/portalCart'
 
 export default {
   name: 'PortalProducts',
@@ -105,6 +115,15 @@ export default {
       getPortalProduct(row.productId).then(res => {
         this.detail = res.data || row
         this.detailOpen = true
+      })
+    },
+    addToCart(product) {
+      addCartItem(product, 1)
+      this.$modal.msgSuccess('已加入购物车')
+    },
+    favoriteProduct(product) {
+      addPortalFavorite({ targetType: 'product', targetId: product.productId }).then(() => {
+        this.$modal.msgSuccess('已收藏商品')
       })
     },
     money(value) {

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.creative.CreativeChatMessageMapper">
+
+    <resultMap id="CreativeChatMessageResult" type="com.ruoyi.system.domain.creative.CreativeChatMessage">
+        <result property="messageId" column="message_id"/>
+        <result property="sessionId" column="session_id"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="receiverId" column="receiver_id"/>
+        <result property="messageType" column="message_type"/>
+        <result property="content" column="content"/>
+        <result property="readStatus" column="read_status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selectCreativeChatMessageVo">
+        select message_id, session_id, sender_id, receiver_id, message_type, content,
+               read_status, create_by, create_time
+        from creative_chat_message
+    </sql>
+
+    <select id="selectCreativeChatMessageByMessageId" parameterType="Long" resultMap="CreativeChatMessageResult">
+        <include refid="selectCreativeChatMessageVo"/>
+        where message_id = #{messageId}
+    </select>
+
+    <select id="selectMessagesBySessionId" parameterType="Long" resultMap="CreativeChatMessageResult">
+        <include refid="selectCreativeChatMessageVo"/>
+        where session_id = #{sessionId}
+        order by message_id asc
+    </select>
+
+    <insert id="insertCreativeChatMessage" parameterType="com.ruoyi.system.domain.creative.CreativeChatMessage" useGeneratedKeys="true" keyProperty="messageId">
+        insert into creative_chat_message
+        (session_id, sender_id, receiver_id, message_type, content, read_status, create_by, create_time)
+        values
+        (#{sessionId}, #{senderId}, #{receiverId}, #{messageType}, #{content}, #{readStatus}, #{createBy}, sysdate())
+    </insert>
+
+    <update id="markSessionMessagesRead">
+        update creative_chat_message
+        set read_status = '1'
+        where session_id = #{sessionId}
+          and receiver_id = #{receiverId}
+          and read_status = '0'
+    </update>
+</mapper>

@@ -16,6 +16,9 @@
 | `buyer_role_upgrade_20260425.sql` | 增量 | 初始化 buyer 角色，并给历史 common 用户补 buyer | 可重复执行 |
 | `creator_me_menu_20260426.sql` | 增量 | 新增创作者个人中心菜单 2150，并授权 creator | 可重复执行 |
 | `register_enable_20260427.sql` | 增量 | 开启若依自助注册开关 | 可重复执行 |
+| `order_payment_upgrade_20260428.sql` | 增量 | 给订单表补商品来源、购买数量、支付状态、收货信息快照 | 可重复执行 |
+| `chat_upgrade_20260428.sql` | 增量 | 新增实时在线沟通会话表和消息表，支持文字、图片、历史记录和未读数 | 可重复执行 |
+| `hide_ruoyi_brand_upgrade_20260428.sql` | 增量 | 隐藏默认若依官网菜单，替换默认公告中的若依官网信息 | 可重复执行 |
 
 ---
 
@@ -32,6 +35,9 @@ source sql/creative_creator_audit_upgrade_20260425.sql;
 source sql/buyer_role_upgrade_20260425.sql;
 source sql/creator_me_menu_20260426.sql;
 source sql/register_enable_20260427.sql;
+source sql/order_payment_upgrade_20260428.sql;
+source sql/chat_upgrade_20260428.sql;
+source sql/hide_ruoyi_brand_upgrade_20260428.sql;
 ```
 
 说明：
@@ -40,7 +46,7 @@ source sql/register_enable_20260427.sql;
 - `quartz.sql` 和业务表没有强依赖，但属于若依运行基础表，建议放在基础库之后。
 - `creative_platform_tables.sql` 创建文创业务表。
 - `creative_platform_menu.sql` 依赖 `sys_menu`，所以必须在若依基础 SQL 后执行。
-- 三个增量脚本放在最后，用来补角色、审核字段、个人中心菜单。
+- 增量脚本放在最后，用来补角色、审核字段、个人中心菜单、注册开关、订单支付字段，并隐藏默认若依外链。
 
 ---
 
@@ -53,6 +59,9 @@ source sql/creative_creator_audit_upgrade_20260425.sql;
 source sql/buyer_role_upgrade_20260425.sql;
 source sql/creator_me_menu_20260426.sql;
 source sql/register_enable_20260427.sql;
+source sql/order_payment_upgrade_20260428.sql;
+source sql/chat_upgrade_20260428.sql;
+source sql/hide_ruoyi_brand_upgrade_20260428.sql;
 ```
 
 如果后台菜单异常，再补执行：
@@ -85,6 +94,9 @@ source D:/workspace/sihuo/RuoYi-Vue-master/sql/creative_creator_audit_upgrade_20
 source D:/workspace/sihuo/RuoYi-Vue-master/sql/buyer_role_upgrade_20260425.sql;
 source D:/workspace/sihuo/RuoYi-Vue-master/sql/creator_me_menu_20260426.sql;
 source D:/workspace/sihuo/RuoYi-Vue-master/sql/register_enable_20260427.sql;
+source D:/workspace/sihuo/RuoYi-Vue-master/sql/order_payment_upgrade_20260428.sql;
+source D:/workspace/sihuo/RuoYi-Vue-master/sql/chat_upgrade_20260428.sql;
+source D:/workspace/sihuo/RuoYi-Vue-master/sql/hide_ruoyi_brand_upgrade_20260428.sql;
 ```
 
 如果你在 MySQL 命令行里已经切到项目根目录，也可以使用相对路径：
@@ -100,6 +112,10 @@ source sql/ry_20260417.sql;
 ```sql
 show tables like 'creative_%';
 
+show columns from creative_custom_order like 'pay_status';
+show columns from creative_custom_order like 'source_type';
+show columns from creative_custom_order like 'address_snapshot';
+
 select role_id, role_name, role_key
 from sys_role
 where role_key in ('admin', 'common', 'buyer', 'creator');
@@ -108,6 +124,10 @@ select menu_id, menu_name, perms
 from sys_menu
 where menu_id between 2000 and 2150
 order by menu_id;
+
+select menu_id, menu_name, visible
+from sys_menu
+where menu_id = 4;
 ```
 
-能看到文创业务表、`buyer` / `creator` 角色、2000-2150 菜单，才算初始化基本完成。
+能看到文创业务表、订单支付与来源字段、`buyer` / `creator` 角色、2000-2150 菜单，并且 `menu_id = 4` 的菜单处于隐藏状态，才算初始化基本完成。

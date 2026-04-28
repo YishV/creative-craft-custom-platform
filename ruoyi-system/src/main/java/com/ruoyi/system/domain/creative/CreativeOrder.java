@@ -13,6 +13,12 @@ public class CreativeOrder extends BaseEntity
     private Long sellerId;
     private BigDecimal orderAmount;
     private String orderStatus;
+    private String payStatus;
+    private String sourceType;
+    private Long sourceId;
+    private String sourceName;
+    private Integer quantity;
+    private String addressSnapshot;
 
     public Long getOrderId()
     {
@@ -72,5 +78,65 @@ public class CreativeOrder extends BaseEntity
     public void setOrderStatus(String orderStatus)
     {
         this.orderStatus = orderStatus;
+    }
+
+    public String getPayStatus()
+    {
+        return payStatus;
+    }
+
+    public void setPayStatus(String payStatus)
+    {
+        this.payStatus = payStatus;
+    }
+
+    public String getSourceType()
+    {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType)
+    {
+        this.sourceType = sourceType;
+    }
+
+    public Long getSourceId()
+    {
+        return sourceId;
+    }
+
+    public void setSourceId(Long sourceId)
+    {
+        this.sourceId = sourceId;
+    }
+
+    public String getSourceName()
+    {
+        return sourceName;
+    }
+
+    public void setSourceName(String sourceName)
+    {
+        this.sourceName = sourceName;
+    }
+
+    public Integer getQuantity()
+    {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity)
+    {
+        this.quantity = quantity;
+    }
+
+    public String getAddressSnapshot()
+    {
+        return addressSnapshot;
+    }
+
+    public void setAddressSnapshot(String addressSnapshot)
+    {
+        this.addressSnapshot = addressSnapshot;
     }
 }

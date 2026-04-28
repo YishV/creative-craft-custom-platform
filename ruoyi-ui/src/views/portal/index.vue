@@ -4,13 +4,24 @@
       <div>
         <p class="eyebrow">文创手作定制交易平台</p>
         <h1>从作品浏览到定制跟进，一条线演示清楚</h1>
-        <p class="hero-copy">这里是买家和创作者共用的前台入口，可浏览上架商品、查看开放需求、跟踪自己的订单。</p>
+        <p class="hero-copy">这里是买家和创作者共用的前台入口，可浏览上架商品、查看开放需求、跟踪自己的订单，也能进入社区和收藏中心。</p>
         <div class="hero-actions">
           <el-button type="primary" icon="el-icon-goods" @click="$router.push('/portal/products')">浏览商品</el-button>
           <el-button icon="el-icon-edit-outline" @click="$router.push('/portal/demands')">查看需求</el-button>
+          <el-button icon="el-icon-shopping-cart-2" @click="$router.push('/portal/cart')">购物车</el-button>
         </div>
       </div>
     </section>
+
+    <el-row :gutter="16" class="quick-row">
+      <el-col :xs="12" :sm="6" v-for="item in quickLinks" :key="item.title">
+        <button class="quick-card" type="button" @click="$router.push(item.path)">
+          <i :class="item.icon"></i>
+          <span>{{ item.title }}</span>
+          <small>{{ item.desc }}</small>
+        </button>
+      </el-col>
+    </el-row>
 
     <el-row :gutter="16" class="stat-row">
       <el-col :xs="12" :sm="6" v-for="item in stats" :key="item.label">
@@ -80,7 +91,13 @@ export default {
       demands: [],
       orderTotal: 0,
       productTotal: 0,
-      demandTotal: 0
+      demandTotal: 0,
+      quickLinks: [
+        { title: '购物车', desc: '结算与支付', path: '/portal/cart', icon: 'el-icon-shopping-cart-2' },
+        { title: '社区作品', desc: '分享与评论', path: '/portal/community', icon: 'el-icon-chat-dot-square' },
+        { title: '创作者', desc: '关注手作人', path: '/portal/creators', icon: 'el-icon-user' },
+        { title: '收藏关注', desc: '我的收藏', path: '/portal/favorites', icon: 'el-icon-star-off' }
+      ]
     }
   },
   computed: {
@@ -160,15 +177,47 @@ export default {
   margin-left: 10px;
 }
 
+.quick-row,
 .stat-row {
   margin-top: 16px;
 }
 
+.quick-card,
 .stat-card,
 .portal-section {
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(15, 35, 52, .06);
+}
+
+.quick-card {
+  width: 100%;
+  height: 96px;
+  border: 0;
+  text-align: left;
+  padding: 16px;
+  cursor: pointer;
+}
+
+.quick-card i {
+  color: #297e7b;
+  font-size: 24px;
+}
+
+.quick-card span,
+.quick-card small {
+  display: block;
+}
+
+.quick-card span {
+  margin-top: 8px;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.quick-card small {
+  margin-top: 4px;
+  color: #6b7280;
 }
 
 .stat-card {
