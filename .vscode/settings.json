@@ -1,5 +1,6 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
     "commentTranslate.targetLanguage": "zh-CN",
-    "commentTranslate.hover.enabled": true
+    "commentTranslate.hover.enabled": true,
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

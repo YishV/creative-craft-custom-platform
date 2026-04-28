@@ -16,6 +16,8 @@ public class CreativeChatWebSocketConfig implements WebSocketConfigurer
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry)
     {
-        registry.addHandler(creativeChatWebSocketHandler, "/ws/chat").setAllowedOrigins("*");
+        registry.addHandler(creativeChatWebSocketHandler, "/ws/chat")
+                .setAllowedOriginPatterns("*")
+                .addInterceptors(new org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor());
     }
 }

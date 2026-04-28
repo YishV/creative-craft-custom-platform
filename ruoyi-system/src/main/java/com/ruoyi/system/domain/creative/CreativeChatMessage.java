@@ -14,6 +14,12 @@ public class CreativeChatMessage extends BaseEntity
     private String content;
     private String readStatus;
 
+    @Override
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public java.util.Map<String, Object> getParams() {
+        return super.getParams();
+    }
+
     public Long getMessageId()
     {
         return messageId;

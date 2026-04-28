@@ -141,11 +141,10 @@ export default {
     initWebSocket() {
       const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
       const host = window.location.host;
-      // 注意：这里需要根据实际后端地址调整，如果是通过开发代理，通常用当前的 host
-      this.socket = new WebSocket(`${protocol}${host}${process.env.VUE_APP_BASE_API}/chat/${this.userId}`);
-      
-      this.socket.onmessage = (event) => {
-        const msg = JSON.parse(event.data);
+      const token = require('@/utils/auth').getToken();
+      this.socket = new WebSocket(`${protocol}${host}${process.env.VUE_APP_BASE_API}/ws/chat?token=${encodeURIComponent(token)}`);
+
+      this.socket.onmessage = (event) => {        const msg = JSON.parse(event.data);
         // 如果当前正在聊天窗口，且消息属于当前会话，则直接添加
         if (this.currentSessionId === msg.sessionId) {
           this.messageList.push(msg);

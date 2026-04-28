@@ -5,46 +5,106 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.core.domain.BaseEntity;
 
 /**
- * 社区交互-评论对象 creative_interaction_comment
+ * 评论互动对象 CreativeComment
+ * 兼容 creative_comment 和 creative_interaction_comment 两张表
  */
 public class CreativeComment extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
+    /** 评论ID */
     private Long commentId;
+
+    // --- 以下字段用于 creative_comment 表 (旧版/特定逻辑) ---
+    /** 作品ID */
+    private Long postId;
+    /** 评论内容 (旧版名称) */
+    private String commentContent;
+    /** 审核状态 (旧版名称) */
+    private String auditStatus;
+
+    // --- 以下字段用于 creative_interaction_comment 表 (新版/通用交互) ---
+    /** 目标类型(product-商品, post-社区帖子) */
     private String targetType;
+    /** 目标ID */
     private Long targetId;
-    private Long userId;
+    /** 评论人昵称 */
     private String userName;
+    /** 评论人头像 */
     private String avatar;
+    /** 评论内容 */
     private String content;
+    /** 父评论ID */
     private Long parentId;
+    /** 评分(1-5星) */
     private Integer score;
+    /** 状态(0显示 1隐藏) */
     private String status;
+    /** 评论用户ID */
+    private Long userId;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date gmtCreate;
 
-    // Getters and Setters
-    public Long getCommentId() { return commentId; }
     public void setCommentId(Long commentId) { this.commentId = commentId; }
-    public String getTargetType() { return targetType; }
+    public Long getCommentId() { return commentId; }
+
+    public void setPostId(Long postId) { this.postId = postId; }
+    public Long getPostId() { return postId; }
+
+    public void setCommentContent(String commentContent) { this.commentContent = commentContent; }
+    public String getCommentContent() { return commentContent; }
+
+    public void setAuditStatus(String auditStatus) { this.auditStatus = auditStatus; }
+    public String getAuditStatus() { return auditStatus; }
+
     public void setTargetType(String targetType) { this.targetType = targetType; }
-    public Long getTargetId() { return targetId; }
+    public String getTargetType() { return targetType; }
+
     public void setTargetId(Long targetId) { this.targetId = targetId; }
-    public Long getUserId() { return userId; }
+    public Long getTargetId() { return targetId; }
+
     public void setUserId(Long userId) { this.userId = userId; }
-    public String getUserName() { return userName; }
+    public Long getUserId() { return userId; }
+
     public void setUserName(String userName) { this.userName = userName; }
-    public String getAvatar() { return avatar; }
+    public String getUserName() { return userName; }
+
     public void setAvatar(String avatar) { this.avatar = avatar; }
-    public String getContent() { return content; }
+    public String getAvatar() { return avatar; }
+
     public void setContent(String content) { this.content = content; }
-    public Long getParentId() { return parentId; }
+    public String getContent() { return content; }
+
     public void setParentId(Long parentId) { this.parentId = parentId; }
-    public Integer getScore() { return score; }
+    public Long getParentId() { return parentId; }
+
     public void setScore(Integer score) { this.score = score; }
-    public String getStatus() { return status; }
+    public Integer getScore() { return score; }
+
     public void setStatus(String status) { this.status = status; }
-    public Date getGmtCreate() { return gmtCreate; }
+    public String getStatus() { return status; }
+
     public void setGmtCreate(Date gmtCreate) { this.gmtCreate = gmtCreate; }
+    public Date getGmtCreate() { return gmtCreate; }
+
+    @Override
+    public String toString() {
+        return "CreativeComment{" +
+            "commentId=" + commentId +
+            ", postId=" + postId +
+            ", commentContent='" + commentContent + '\'' +
+            ", auditStatus='" + auditStatus + '\'' +
+            ", targetType='" + targetType + '\'' +
+            ", targetId=" + targetId +
+            ", userId=" + userId +
+            ", userName='" + userName + '\'' +
+            ", avatar='" + avatar + '\'' +
+            ", content='" + content + '\'' +
+            ", parentId=" + parentId +
+            ", score=" + score +
+            ", status='" + status + '\'' +
+            ", gmtCreate=" + gmtCreate +
+            "} " + super.toString();
+    }
 }

@@ -27,6 +27,12 @@ public class CreativeChatSession extends BaseEntity
     private Long peerUserId;
     private Integer unreadCount;
 
+    @Override
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public java.util.Map<String, Object> getParams() {
+        return super.getParams();
+    }
+
     public Long getSessionId()
     {
         return sessionId;

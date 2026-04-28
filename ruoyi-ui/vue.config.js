@@ -38,6 +38,7 @@ module.exports = {
       [process.env.VUE_APP_BASE_API]: {
         target: baseUrl,
         changeOrigin: true,
+        ws: true,
         pathRewrite: {
           ['^' + process.env.VUE_APP_BASE_API]: ''
         }

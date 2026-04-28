@@ -1,4 +1,6 @@
--- 文创手作定制交易平台基础业务表
+-- ----------------------------
+-- 1. 业务基础表
+-- ----------------------------
 
 drop table if exists creative_creator;
 create table creative_creator (
@@ -106,48 +108,3 @@ create table creative_custom_order (
   update_time datetime default null comment '更新时间',
   primary key (order_id)
 ) engine=innodb comment='定制订单表';
-
-drop table if exists creative_post;
-create table creative_post (
-  post_id bigint(20) not null auto_increment comment '作品ID',
-  creator_id bigint(20) default null comment '创作者ID',
-  post_title varchar(128) not null comment '作品标题',
-  post_type varchar(32) default 'work' comment '内容类型',
-  status char(1) default '0' comment '状态',
-  remark varchar(500) default null comment '备注',
-  create_by varchar(64) default '' comment '创建者',
-  create_time datetime default current_timestamp comment '创建时间',
-  update_by varchar(64) default '' comment '更新者',
-  update_time datetime default null comment '更新时间',
-  primary key (post_id)
-) engine=innodb comment='作品分享表';
-
-drop table if exists creative_comment;
-create table creative_comment (
-  comment_id bigint(20) not null auto_increment comment '评论ID',
-  post_id bigint(20) default null comment '作品ID',
-  user_id bigint(20) default null comment '评论用户ID',
-  comment_content varchar(500) default null comment '评论内容',
-  audit_status varchar(32) default 'pending' comment '审核状态',
-  remark varchar(500) default null comment '备注',
-  create_by varchar(64) default '' comment '创建者',
-  create_time datetime default current_timestamp comment '创建时间',
-  update_by varchar(64) default '' comment '更新者',
-  update_time datetime default null comment '更新时间',
-  primary key (comment_id)
-) engine=innodb comment='评论互动表';
-
-drop table if exists creative_favorite_follow;
-create table creative_favorite_follow (
-  favorite_id bigint(20) not null auto_increment comment '关系ID',
-  user_id bigint(20) default null comment '用户ID',
-  target_type varchar(32) default 'creator' comment '目标类型',
-  target_id bigint(20) default null comment '目标ID',
-  status char(1) default '0' comment '状态',
-  remark varchar(500) default null comment '备注',
-  create_by varchar(64) default '' comment '创建者',
-  create_time datetime default current_timestamp comment '创建时间',
-  update_by varchar(64) default '' comment '更新者',
-  update_time datetime default null comment '更新时间',
-  primary key (favorite_id)
-) engine=innodb comment='收藏关注表';

@@ -42,8 +42,7 @@ public class CreativeChatWebSocketHandler extends TextWebSocketHandler
     @Autowired
     private ICreativeChatService creativeChatService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception
