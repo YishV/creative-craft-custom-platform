@@ -1,5 +1,7 @@
 package com.ruoyi.system.service.creative.impl;
 
+import com.alibaba.fastjson2.JSON;
+import com.ruoyi.common.core.domain.event.ChatPushEvent;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.creative.CreativeChatMessage;
@@ -18,6 +20,7 @@ import com.ruoyi.system.service.creative.ICreativeChatService;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -49,6 +52,9 @@ public class CreativeChatServiceImpl implements ICreativeChatService
 
     @Autowired
     private CreativeOrderMapper orderMapper;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     public List<CreativeChatSession> listMySessions(Long userId)
@@ -105,6 +111,10 @@ public class CreativeChatServiceImpl implements ICreativeChatService
         update.setUpdateBy(username);
         sessionMapper.updateCreativeChatSession(update);
         sessionMapper.incrementUnread(session.getSessionId(), receiverId.equals(session.getBuyerId()) ? BUYER_UNREAD : CREATOR_UNREAD);
+
+        // 发送实时推送事件
+        eventPublisher.publishEvent(new ChatPushEvent(this, receiverId, JSON.toJSONString(message)));
+
         return message;
     }
 

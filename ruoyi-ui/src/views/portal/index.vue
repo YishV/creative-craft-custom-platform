@@ -94,7 +94,7 @@ export default {
       demandTotal: 0,
       quickLinks: [
         { title: '购物车', desc: '结算与支付', path: '/portal/cart', icon: 'el-icon-shopping-cart-2' },
-        { title: '社区作品', desc: '分享与评论', path: '/portal/community', icon: 'el-icon-chat-dot-square' },
+        { title: '在线沟通', desc: '实时消息对话', path: '/portal/chat', icon: 'el-icon-chat-dot-round' },
         { title: '创作者', desc: '关注手作人', path: '/portal/creators', icon: 'el-icon-user' },
         { title: '收藏关注', desc: '我的收藏', path: '/portal/favorites', icon: 'el-icon-star-off' }
       ]

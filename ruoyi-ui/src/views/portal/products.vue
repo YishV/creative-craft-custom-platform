@@ -54,8 +54,35 @@
         <el-descriptions-item label="创作者">#{{ detail.creatorId || '-' }}</el-descriptions-item>
         <el-descriptions-item label="说明">{{ detail.remark || '暂无说明' }}</el-descriptions-item>
       </el-descriptions>
+
+      <!-- 交互区 -->
+      <div class="interaction-bar">
+        <el-button :type="isLiked ? 'danger' : 'default'" icon="el-icon-caret-top" size="mini" @click="handleLike">
+          {{ isLiked ? '已点赞' : '点赞' }}
+        </el-button>
+        <el-button icon="el-icon-share" size="mini" @click="handleShare">分享</el-button>
+      </div>
+
+      <!-- 评论区 -->
+      <div class="comment-section">
+        <h3>用户评价 ({{ commentTotal }})</h3>
+        <div class="comment-input">
+          <el-input v-model="newComment" placeholder="说说你的看法..." size="small">
+            <el-button slot="append" @click="submitComment">发表</el-button>
+          </el-input>
+        </div>
+        <div class="comment-list">
+          <div v-for="c in comments" :key="c.commentId" class="comment-item">
+            <div class="comment-user"><strong>{{ c.userName }}</strong> <span>{{ c.gmtCreate }}</span></div>
+            <div class="comment-content">{{ c.content }}</div>
+          </div>
+          <div v-if="!comments.length" class="no-comment">暂无评价，快来抢沙发吧~</div>
+        </div>
+      </div>
+
       <div slot="footer">
         <el-button @click="detailOpen = false">关闭</el-button>
+        <el-button icon="el-icon-chat-dot-round" type="success" @click="handleContact(detail)">私聊创作者</el-button>
         <el-button icon="el-icon-star-off" @click="favoriteProduct(detail)">收藏商品</el-button>
         <el-button type="primary" icon="el-icon-shopping-cart-2" @click="addToCart(detail)">加入购物车</el-button>
       </div>
@@ -65,7 +92,9 @@
 
 <script>
 import { addPortalFavorite, listPortalProduct, getPortalProduct } from '@/api/creative/portal'
+import { openSession } from '@/api/creative/chat'
 import { addCartItem } from '@/utils/portalCart'
+import { listComments, addComment, toggleLike, checkInteractionStatus, addShare } from '@/api/creative/interaction'
 
 export default {
   name: 'PortalProducts',
@@ -81,6 +110,11 @@ export default {
       total: 0,
       detailOpen: false,
       detail: {},
+      // 交互相关
+      comments: [],
+      commentTotal: 0,
+      newComment: '',
+      isLiked: false,
       queryParams: {
         pageNum: 1,
         pageSize: 8,
@@ -115,6 +149,39 @@ export default {
       getPortalProduct(row.productId).then(res => {
         this.detail = res.data || row
         this.detailOpen = true
+        this.loadInteractionData()
+      })
+    },
+    loadInteractionData() {
+      listComments({ targetType: 'product', targetId: this.detail.productId, pageSize: 5 }).then(res => {
+        this.comments = res.rows
+        this.commentTotal = res.total
+      })
+      checkInteractionStatus('product', this.detail.productId, this.detail.creatorId).then(res => {
+        this.isLiked = res.liked
+      })
+    },
+    handleLike() {
+      toggleLike('product', this.detail.productId).then(() => {
+        this.isLiked = !this.isLiked
+        this.$modal.msgSuccess(this.isLiked ? '点赞成功' : '已取消点赞')
+      })
+    },
+    submitComment() {
+      if (!this.newComment.trim()) return
+      addComment({
+        targetType: 'product',
+        targetId: this.detail.productId,
+        content: this.newComment
+      }).then(() => {
+        this.$modal.msgSuccess('发表成功')
+        this.newComment = ''
+        this.loadInteractionData()
+      })
+    },
+    handleShare() {
+      addShare('product', this.detail.productId, 'link').then(() => {
+        this.$modal.msgSuccess('分享链接已复制(模拟)')
       })
     },
     addToCart(product) {
@@ -125,6 +192,17 @@ export default {
       addPortalFavorite({ targetType: 'product', targetId: product.productId }).then(() => {
         this.$modal.msgSuccess('已收藏商品')
       })
+    },
+    handleContact(product) {
+      this.detailOpen = false;
+      const data = {
+        targetType: 'product',
+        targetId: product.productId
+      };
+      openSession(data).then(res => {
+        // 跳转到聊天页面
+        this.$router.push('/portal/chat');
+      });
     },
     money(value) {
       return Number(value || 0).toFixed(2)
@@ -204,5 +282,55 @@ p {
 .foot strong {
   color: #d97706;
   font-size: 18px;
+}
+
+.interaction-bar {
+  margin: 15px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.comment-section {
+  margin-top: 25px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.comment-section h3 {
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+.comment-input {
+  margin-bottom: 20px;
+}
+
+.comment-item {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #eee;
+}
+
+.comment-user {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+.comment-user span {
+  color: #999;
+}
+
+.comment-content {
+  font-size: 14px;
+  color: #333;
+}
+
+.no-comment {
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+  padding: 20px 0;
 }
 </style>
