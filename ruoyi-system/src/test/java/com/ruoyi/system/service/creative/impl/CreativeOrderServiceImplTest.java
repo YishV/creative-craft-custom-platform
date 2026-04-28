@@ -11,8 +11,11 @@ import static org.mockito.Mockito.when;
 
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.system.domain.creative.CreativeOrder;
+import com.ruoyi.system.domain.creative.CreativeProduct;
+import com.ruoyi.system.domain.creative.CreativeProductOrderRequest;
 import com.ruoyi.system.domain.creative.CreativeStatusFlow;
 import com.ruoyi.system.mapper.creative.CreativeOrderMapper;
+import com.ruoyi.system.mapper.creative.CreativeProductMapper;
 import com.ruoyi.system.service.creative.support.CreativeDataPermissionService;
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,6 +31,9 @@ class CreativeOrderServiceImplTest
 {
     @Mock
     private CreativeOrderMapper creativeOrderMapper;
+
+    @Mock
+    private CreativeProductMapper creativeProductMapper;
 
     @Mock
     private CreativeDataPermissionService permissionService;
@@ -124,6 +130,73 @@ class CreativeOrderServiceImplTest
         verify(permissionService).ensureOrderOwned(eq(4L), eq(10L));
     }
 
+    @Test
+    void createProductOrderShouldInsertOrderFromOnShelfProduct()
+    {
+        CreativeProduct product = buildProduct(12L, 6L, "手作杯垫", BigDecimal.valueOf(39.90), "0");
+        when(creativeProductMapper.selectCreativeProductByProductId(12L)).thenReturn(product);
+        when(permissionService.getCurrentUserId()).thenReturn(5L);
+
+        CreativeProductOrderRequest request = new CreativeProductOrderRequest();
+        request.setProductId(12L);
+        request.setQuantity(2);
+        request.setReceiverName("易水寒");
+        request.setReceiverPhone("13800000000");
+        request.setReceiverAddress("浙江省杭州市");
+
+        CreativeOrder result = creativeOrderService.createProductOrder(request, "buyer");
+
+        ArgumentCaptor<CreativeOrder> captor = ArgumentCaptor.forClass(CreativeOrder.class);
+        verify(creativeOrderMapper).insertCreativeOrder(captor.capture());
+        CreativeOrder inserted = captor.getValue();
+        assertEquals(5L, inserted.getBuyerId());
+        assertEquals(6L, inserted.getSellerId());
+        assertEquals(0, BigDecimal.valueOf(79.80).compareTo(inserted.getOrderAmount()));
+        assertEquals("created", inserted.getOrderStatus());
+        assertEquals("unpaid", inserted.getPayStatus());
+        assertEquals("product", inserted.getSourceType());
+        assertEquals(12L, inserted.getSourceId());
+        assertEquals("手作杯垫", inserted.getSourceName());
+        assertEquals(2, inserted.getQuantity());
+        assertEquals("易水寒 / 13800000000 / 浙江省杭州市", inserted.getAddressSnapshot());
+        assertEquals(inserted, result);
+    }
+
+    @Test
+    void createProductOrderShouldRejectOffShelfProduct()
+    {
+        CreativeProduct product = buildProduct(12L, 6L, "手作杯垫", BigDecimal.valueOf(39.90), "1");
+        when(creativeProductMapper.selectCreativeProductByProductId(12L)).thenReturn(product);
+
+        CreativeProductOrderRequest request = new CreativeProductOrderRequest();
+        request.setProductId(12L);
+        request.setQuantity(1);
+        request.setReceiverName("易水寒");
+        request.setReceiverPhone("13800000000");
+        request.setReceiverAddress("浙江省杭州市");
+
+        ServiceException exception = assertThrows(ServiceException.class,
+            () -> creativeOrderService.createProductOrder(request, "buyer"));
+
+        assertEquals("商品不存在或已下架", exception.getMessage());
+        verify(creativeOrderMapper, never()).insertCreativeOrder(any(CreativeOrder.class));
+    }
+
+    @Test
+    void payOrderShouldMarkBuyerOrderPaid()
+    {
+        CreativeOrder order = buildOrder(7L, 5L, 6L, CreativeStatusFlow.Order.CREATED);
+        order.setPayStatus("unpaid");
+        when(creativeOrderMapper.selectCreativeOrderByOrderId(7L)).thenReturn(order);
+
+        creativeOrderService.payOrder(7L, "buyer");
+
+        ArgumentCaptor<CreativeOrder> captor = ArgumentCaptor.forClass(CreativeOrder.class);
+        verify(creativeOrderMapper).updateCreativeOrder(captor.capture());
+        assertEquals("paid", captor.getValue().getPayStatus());
+        verify(permissionService).ensureBuyerOwned(5L);
+    }
+
     private CreativeOrder buildOrder(Long orderId, Long buyerId, Long sellerId, String status)
     {
         CreativeOrder order = new CreativeOrder();
@@ -134,5 +207,16 @@ class CreativeOrderServiceImplTest
         order.setOrderAmount(BigDecimal.valueOf(199));
         order.setOrderStatus(status);
         return order;
+    }
+
+    private CreativeProduct buildProduct(Long productId, Long creatorId, String name, BigDecimal price, String status)
+    {
+        CreativeProduct product = new CreativeProduct();
+        product.setProductId(productId);
+        product.setCreatorId(creatorId);
+        product.setProductName(name);
+        product.setPrice(price);
+        product.setStatus(status);
+        return product;
     }
 }

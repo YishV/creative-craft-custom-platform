@@ -11,6 +11,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="sellerId" column="seller_id"/>
         <result property="orderAmount" column="order_amount"/>
         <result property="orderStatus" column="order_status"/>
+        <result property="payStatus" column="pay_status"/>
+        <result property="sourceType" column="source_type"/>
+        <result property="sourceId" column="source_id"/>
+        <result property="sourceName" column="source_name"/>
+        <result property="quantity" column="quantity"/>
+        <result property="addressSnapshot" column="address_snapshot"/>
         <result property="createBy" column="create_by"/>
         <result property="createTime" column="create_time"/>
         <result property="updateBy" column="update_by"/>
@@ -19,7 +25,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectCreativeOrderVo">
-        select order_id, order_no, buyer_id, seller_id, order_amount, order_status, create_by, create_time, update_by, update_time, remark
+        select order_id, order_no, buyer_id, seller_id, order_amount, order_status, pay_status, source_type, source_id, source_name, quantity, address_snapshot, create_by, create_time, update_by, update_time, remark
         from creative_custom_order
     </sql>
 
@@ -33,6 +39,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <where>
             <if test="orderNo != null and orderNo != ''">and order_no like concat('%', #{orderNo}, '%')</if>
             <if test="orderStatus != null and orderStatus != ''">and order_status = #{orderStatus}</if>
+            <if test="payStatus != null and payStatus != ''">and pay_status = #{payStatus}</if>
             <if test="buyerId != null">and buyer_id = #{buyerId}</if>
             <if test="sellerId != null">and seller_id = #{sellerId}</if>
         </where>
@@ -40,8 +47,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <insert id="insertCreativeOrder" parameterType="com.ruoyi.system.domain.creative.CreativeOrder" useGeneratedKeys="true" keyProperty="orderId">
-        insert into creative_custom_order (order_no, buyer_id, seller_id, order_amount, order_status, remark, create_by, create_time)
-        values (#{orderNo}, #{buyerId}, #{sellerId}, #{orderAmount}, #{orderStatus}, #{remark}, #{createBy}, sysdate())
+        insert into creative_custom_order (order_no, buyer_id, seller_id, order_amount, order_status, pay_status, source_type, source_id, source_name, quantity, address_snapshot, remark, create_by, create_time)
+        values (#{orderNo}, #{buyerId}, #{sellerId}, #{orderAmount}, #{orderStatus}, #{payStatus}, #{sourceType}, #{sourceId}, #{sourceName}, #{quantity}, #{addressSnapshot}, #{remark}, #{createBy}, sysdate())
     </insert>
 
     <update id="updateCreativeOrder" parameterType="com.ruoyi.system.domain.creative.CreativeOrder">
@@ -52,6 +59,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sellerId != null">seller_id = #{sellerId},</if>
             <if test="orderAmount != null">order_amount = #{orderAmount},</if>
             <if test="orderStatus != null">order_status = #{orderStatus},</if>
+            <if test="payStatus != null">pay_status = #{payStatus},</if>
+            <if test="sourceType != null">source_type = #{sourceType},</if>
+            <if test="sourceId != null">source_id = #{sourceId},</if>
+            <if test="sourceName != null">source_name = #{sourceName},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="addressSnapshot != null">address_snapshot = #{addressSnapshot},</if>
             <if test="remark != null">remark = #{remark},</if>
             update_by = #{updateBy},
             update_time = sysdate()

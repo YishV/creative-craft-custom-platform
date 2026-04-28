@@ -112,6 +112,24 @@ export const constantRoutes = [
         meta: { title: '商品浏览', icon: 'shopping' }
       },
       {
+        path: 'cart',
+        component: () => import('@/views/portal/cart'),
+        name: 'PortalCart',
+        meta: { title: '购物车', icon: 'shopping' }
+      },
+      {
+        path: 'checkout',
+        component: () => import('@/views/portal/checkout'),
+        name: 'PortalCheckout',
+        meta: { title: '结算', icon: 'clipboard' }
+      },
+      {
+        path: 'payment',
+        component: () => import('@/views/portal/payment'),
+        name: 'PortalPayment',
+        meta: { title: '模拟支付', icon: 'money' }
+      },
+      {
         path: 'demands',
         component: () => import('@/views/portal/demands'),
         name: 'PortalDemands',
@@ -122,6 +140,31 @@ export const constantRoutes = [
         component: () => import('@/views/portal/orders'),
         name: 'PortalOrders',
         meta: { title: '订单中心', icon: 'list' }
+      },
+      {
+        path: 'community',
+        component: () => import('@/views/portal/community'),
+        name: 'PortalCommunity',
+        meta: { title: '社区作品', icon: 'message' }
+      },
+      {
+        path: 'post/:postId',
+        component: () => import('@/views/portal/post-detail'),
+        name: 'PortalPostDetail',
+        hidden: true,
+        meta: { title: '作品详情', icon: 'message' }
+      },
+      {
+        path: 'creators',
+        component: () => import('@/views/portal/creators'),
+        name: 'PortalCreators',
+        meta: { title: '创作者', icon: 'user' }
+      },
+      {
+        path: 'favorites',
+        component: () => import('@/views/portal/favorites'),
+        name: 'PortalFavorites',
+        meta: { title: '收藏关注', icon: 'star' }
       }
     ]
   }
