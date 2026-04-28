@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.creative.CreativeChatSessionMapper">
+
+    <resultMap id="CreativeChatSessionResult" type="com.ruoyi.system.domain.creative.CreativeChatSession">
+        <result property="sessionId" column="session_id"/>
+        <result property="buyerId" column="buyer_id"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="creatorUserId" column="creator_user_id"/>
+        <result property="targetType" column="target_type"/>
+        <result property="targetId" column="target_id"/>
+        <result property="targetName" column="target_name"/>
+        <result property="lastMessage" column="last_message"/>
+        <result property="lastMessageTime" column="last_message_time"/>
+        <result property="buyerUnread" column="buyer_unread"/>
+        <result property="creatorUnread" column="creator_unread"/>
+        <result property="status" column="status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectCreativeChatSessionVo">
+        select session_id, buyer_id, creator_id, creator_user_id, target_type, target_id,
+               target_name, last_message, last_message_time, buyer_unread, creator_unread,
+               status, create_by, create_time, update_by, update_time, remark
+        from creative_chat_session
+    </sql>
+
+    <select id="selectCreativeChatSessionBySessionId" parameterType="Long" resultMap="CreativeChatSessionResult">
+        <include refid="selectCreativeChatSessionVo"/>
+        where session_id = #{sessionId}
+    </select>
+
+    <select id="selectExistingSession" resultMap="CreativeChatSessionResult">
+        <include refid="selectCreativeChatSessionVo"/>
+        where buyer_id = #{buyerId}
+          and creator_user_id = #{creatorUserId}
+          and target_type = #{targetType}
+          and target_id = #{targetId}
+        limit 1
+    </select>
+
+    <select id="selectSessionListByUserId" parameterType="Long" resultMap="CreativeChatSessionResult">
+        <include refid="selectCreativeChatSessionVo"/>
+        where status = '0'
+          and (buyer_id = #{userId} or creator_user_id = #{userId})
+        order by ifnull(last_message_time, create_time) desc, session_id desc
+    </select>
+
+    <insert id="insertCreativeChatSession" parameterType="com.ruoyi.system.domain.creative.CreativeChatSession" useGeneratedKeys="true" keyProperty="sessionId">
+        insert into creative_chat_session
+        (buyer_id, creator_id, creator_user_id, target_type, target_id, target_name, last_message,
+         last_message_time, buyer_unread, creator_unread, status, create_by, create_time, remark)
+        values
+        (#{buyerId}, #{creatorId}, #{creatorUserId}, #{targetType}, #{targetId}, #{targetName}, #{lastMessage},
+         #{lastMessageTime}, #{buyerUnread}, #{creatorUnread}, #{status}, #{createBy}, sysdate(), #{remark})
+    </insert>
+
+    <update id="updateCreativeChatSession" parameterType="com.ruoyi.system.domain.creative.CreativeChatSession">
+        update creative_chat_session
+        <set>
+            <if test="lastMessage != null">last_message = #{lastMessage},</if>
+            <if test="lastMessageTime != null">last_message_time = #{lastMessageTime},</if>
+            <if test="buyerUnread != null">buyer_unread = #{buyerUnread},</if>
+            <if test="creatorUnread != null">creator_unread = #{creatorUnread},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where session_id = #{sessionId}
+    </update>
+
+    <update id="incrementUnread">
+        update creative_chat_session
+        <set>
+            <choose>
+                <when test="fieldName == 'buyer_unread'">
+                    buyer_unread = buyer_unread + 1,
+                    update_time = sysdate()
+                </when>
+                <when test="fieldName == 'creator_unread'">
+                    creator_unread = creator_unread + 1,
+                    update_time = sysdate()
+                </when>
+                <otherwise>update_time = update_time</otherwise>
+            </choose>
+        </set>
+        where session_id = #{sessionId}
+    </update>
+
+    <update id="clearUnread">
+        update creative_chat_session
+        <set>
+            <choose>
+                <when test="fieldName == 'buyer_unread'">
+                    buyer_unread = 0,
+                    update_time = sysdate()
+                </when>
+                <when test="fieldName == 'creator_unread'">
+                    creator_unread = 0,
+                    update_time = sysdate()
+                </when>
+                <otherwise>update_time = update_time</otherwise>
+            </choose>
+        </set>
+        where session_id = #{sessionId}
+    </update>
+</mapper>
