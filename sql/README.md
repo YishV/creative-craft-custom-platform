@@ -131,19 +131,3 @@ where menu_id = 4;
 ```
 
 能看到文创业务表、订单支付与来源字段、`buyer` / `creator` 角色、2000-2150 菜单，并且 `menu_id = 4` 的菜单处于隐藏状态，才算初始化基本完成。
-
----
-
-## 6. 下一步可能新增的 SQL
-
-后续如果继续做推荐算法，建议新增一个独立增量脚本，例如：
-
-```text
-recommendation_behavior_upgrade_20260428.sql
-```
-
-建议包含：
-
-- `creative_user_behavior`：记录浏览、收藏、下单、评论等行为。
-- 推荐演示样例数据：至少覆盖 5 个用户、10 个商品、20 条行为记录。
-- 必要索引：`user_id`、`target_type + target_id`、`behavior_type`。
