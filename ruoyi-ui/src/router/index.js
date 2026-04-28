@@ -148,6 +148,12 @@ export const constantRoutes = [
         meta: { title: '社区作品', icon: 'message' }
       },
       {
+        path: 'chat',
+        component: () => import('@/views/creative/chat/index'),
+        name: 'PortalChat',
+        meta: { title: '在线沟通', icon: 'chat' }
+      },
+      {
         path: 'post/:postId',
         component: () => import('@/views/portal/post-detail'),
         name: 'PortalPostDetail',

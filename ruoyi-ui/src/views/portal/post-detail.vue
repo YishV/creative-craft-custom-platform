@@ -11,28 +11,43 @@
         <p>{{ post.remark || '暂无作品说明' }}</p>
         <div class="actions">
           <el-button icon="el-icon-user" @click="$router.push('/portal/creators?creatorId=' + post.creatorId)">查看创作者</el-button>
-          <el-button type="primary" icon="el-icon-star-off" @click="favoritePost">收藏作品</el-button>
+          <el-button 
+            :type="isFollowed ? 'success' : 'default'" 
+            :icon="isFollowed ? 'el-icon-check' : 'el-icon-plus'" 
+            @click="handleFollow">
+            {{ isFollowed ? '已关注创作者' : '关注创作者' }}
+          </el-button>
+          <el-button 
+            :type="isLiked ? 'danger' : 'primary'" 
+            :icon="isLiked ? 'el-icon-caret-top' : 'el-icon-star-off'" 
+            @click="handleLike">
+            {{ isLiked ? '已点赞' : '点赞' }}
+          </el-button>
         </div>
       </div>
     </el-card>
 
     <el-card shadow="never" class="comment-card">
-      <div slot="header">评论</div>
+      <div slot="header">评论区</div>
       <el-form :model="commentForm" class="comment-form">
-        <el-input v-model="commentForm.commentContent" type="textarea" :rows="3" placeholder="写点评论，别只会潜水。" />
+        <el-input v-model="commentForm.commentContent" type="textarea" :rows="3" placeholder="写点评论，给作者一点鼓励吧~" />
         <el-button type="primary" :loading="submitting" @click="submitComment">发表评论</el-button>
       </el-form>
       <el-empty v-if="!comments.length" description="暂无评论" />
       <div v-for="item in comments" :key="item.commentId" class="comment-item">
-        <strong>用户 #{{ item.userId || '-' }}</strong>
-        <p>{{ item.commentContent }}</p>
+        <div class="comment-header">
+          <strong>{{ item.userName }}</strong>
+          <span>{{ item.gmtCreate }}</span>
+        </div>
+        <p>{{ item.content }}</p>
       </div>
     </el-card>
   </div>
 </template>
 
 <script>
-import { addPortalComment, addPortalFavorite, getPortalPost, listPortalComment } from '@/api/creative/portal'
+import { getPortalPost } from '@/api/creative/portal'
+import { listComments, addComment, toggleLike, checkInteractionStatus, toggleFollow } from '@/api/creative/interaction'
 
 export default {
   name: 'PortalPostDetail',
@@ -49,7 +64,9 @@ export default {
       comments: [],
       commentForm: {
         commentContent: ''
-      }
+      },
+      isLiked: false,
+      isFollowed: false
     }
   },
   created() {
@@ -61,12 +78,19 @@ export default {
       getPortalPost(this.$route.params.postId).then(res => {
         this.post = res.data || {}
         this.getComments()
+        this.checkStatus()
       }).finally(() => {
         this.loading = false
       })
     },
+    checkStatus() {
+      checkInteractionStatus('post', this.post.postId, this.post.creatorId).then(res => {
+        this.isLiked = res.liked
+        this.isFollowed = res.followed
+      })
+    },
     getComments() {
-      listPortalComment({ postId: this.$route.params.postId, pageNum: 1, pageSize: 20 }).then(res => {
+      listComments({ targetType: 'post', targetId: this.$route.params.postId, pageNum: 1, pageSize: 20 }).then(res => {
         this.comments = res.rows || []
       })
     },
@@ -76,9 +100,10 @@ export default {
         return
       }
       this.submitting = true
-      addPortalComment({
-        postId: this.post.postId,
-        commentContent: this.commentForm.commentContent
+      addComment({
+        targetType: 'post',
+        targetId: this.post.postId,
+        content: this.commentForm.commentContent
       }).then(() => {
         this.commentForm.commentContent = ''
         this.$modal.msgSuccess('评论成功')
@@ -87,9 +112,16 @@ export default {
         this.submitting = false
       })
     },
-    favoritePost() {
-      addPortalFavorite({ targetType: 'post', targetId: this.post.postId }).then(() => {
-        this.$modal.msgSuccess('已收藏作品')
+    handleLike() {
+      toggleLike('post', this.post.postId).then(() => {
+        this.isLiked = !this.isLiked
+        this.$modal.msgSuccess(this.isLiked ? '已点赞' : '取消点赞')
+      })
+    },
+    handleFollow() {
+      toggleFollow(this.post.creatorId).then(() => {
+        this.isFollowed = !this.isFollowed
+        this.$modal.msgSuccess(this.isFollowed ? '关注成功' : '取消关注')
       })
     },
     typeLabel(type) {
@@ -162,5 +194,17 @@ h1 {
 .comment-item {
   padding: 12px 0;
   border-top: 1px solid #edf0f5;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.comment-header span {
+  color: #999;
+  font-size: 12px;
 }
 </style>

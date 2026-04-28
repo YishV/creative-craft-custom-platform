@@ -22,7 +22,13 @@
         </div>
         <div class="actions">
           <el-button size="mini" icon="el-icon-goods" @click="$router.push('/portal/products?creatorId=' + item.creatorId)">看商品</el-button>
-          <el-button type="primary" plain size="mini" icon="el-icon-star-off" @click="followCreator(item)">关注</el-button>
+          <el-button 
+            :type="followedMap[item.creatorId] ? 'success' : 'primary'" 
+            plain size="mini" 
+            :icon="followedMap[item.creatorId] ? 'el-icon-check' : 'el-icon-star-off'" 
+            @click="followCreator(item)">
+            {{ followedMap[item.creatorId] ? '已关注' : '关注' }}
+          </el-button>
         </div>
       </article>
     </div>
@@ -38,7 +44,8 @@
 </template>
 
 <script>
-import { addPortalFavorite, listPortalCreator } from '@/api/creative/portal'
+import { listPortalCreator } from '@/api/creative/portal'
+import { toggleFollow, checkInteractionStatus } from '@/api/creative/interaction'
 
 export default {
   name: 'PortalCreators',
@@ -52,6 +59,7 @@ export default {
       loading: false,
       creators: [],
       total: 0,
+      followedMap: {}, // 关注状态映射
       queryParams: {
         pageNum: 1,
         pageSize: 12,
@@ -71,6 +79,12 @@ export default {
       listPortalCreator(this.queryParams).then(res => {
         this.creators = res.rows || []
         this.total = res.total || 0
+        // 批量检查关注状态
+        this.creators.forEach(item => {
+          checkInteractionStatus('creator', item.creatorId, item.creatorId).then(resStatus => {
+            this.$set(this.followedMap, item.creatorId, resStatus.followed)
+          })
+        })
       }).finally(() => {
         this.loading = false
       })
@@ -85,8 +99,10 @@ export default {
       this.handleQuery()
     },
     followCreator(item) {
-      addPortalFavorite({ targetType: 'creator', targetId: item.creatorId }).then(() => {
-        this.$modal.msgSuccess('已关注创作者')
+      toggleFollow(item.creatorId).then(() => {
+        const newState = !this.followedMap[item.creatorId]
+        this.$set(this.followedMap, item.creatorId, newState)
+        this.$modal.msgSuccess(newState ? '关注成功' : '已取消关注')
       })
     },
     levelLabel(level) {
