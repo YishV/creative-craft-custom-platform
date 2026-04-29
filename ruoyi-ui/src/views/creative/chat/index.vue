@@ -47,6 +47,21 @@
 
           <!-- 输入框 -->
           <div class="input-area">
+            <div class="tool-row">
+              <el-upload
+                :action="uploadUrl"
+                :headers="uploadHeaders"
+                :show-file-list="false"
+                :before-upload="beforeImageUpload"
+                :on-success="handleImageSuccess"
+                :on-error="handleImageError"
+              >
+                <el-button size="mini" icon="el-icon-picture-outline">图片</el-button>
+              </el-upload>
+              <span :class="['socket-state', socketReady ? 'online' : 'offline']">
+                {{ socketReady ? '实时在线' : '实时连接中' }}
+              </span>
+            </div>
             <el-input
               type="textarea"
               :rows="3"
@@ -76,13 +91,18 @@ export default {
   name: "CreativeChat",
   data() {
     return {
-      userId: this.$store.getters.userId,
+      userId: this.$store.getters.id,
       sessionList: [],
       messageList: [],
       currentSessionId: null,
       currentSession: {},
       inputMsg: "",
-      socket: null
+      socket: null,
+      socketReady: false,
+      uploadUrl: process.env.VUE_APP_BASE_API + "/common/upload",
+      uploadHeaders: {
+        Authorization: "Bearer " + getToken()
+      }
     };
   },
   created() {
@@ -117,17 +137,27 @@ export default {
       const data = {
         sessionId: this.currentSessionId,
         messageType: 'text',
-        content: this.inputMsg
+        content: this.inputMsg.trim()
       };
-      sendMessage(data).then(res => {
-        this.messageList.push(res.data);
+      if (this.sendBySocket(data)) {
         this.inputMsg = "";
-        this.scrollToBottom();
-        // 更新左侧列表预览
-        const s = this.sessionList.find(i => i.sessionId === this.currentSessionId);
-        if (s) {
-          s.lastMessage = data.content;
-          s.lastMessageTime = new Date();
+        return;
+      }
+      this.sendByRest(data);
+    },
+    sendBySocket(data) {
+      if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+        return false;
+      }
+      this.socket.send(JSON.stringify(data));
+      return true;
+    },
+    sendByRest(data) {
+      sendMessage(data).then(res => {
+        this.appendMessage(res.data);
+        this.refreshCurrentSession(data.messageType === 'image' ? '[图片]' : data.content);
+        if (data.messageType === 'text') {
+          this.inputMsg = "";
         }
       });
     },
@@ -141,24 +171,79 @@ export default {
     initWebSocket() {
       const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
       const host = window.location.host;
-      const token = require('@/utils/auth').getToken();
+      const token = getToken();
       this.socket = new WebSocket(`${protocol}${host}${process.env.VUE_APP_BASE_API}/ws/chat?token=${encodeURIComponent(token)}`);
 
-      this.socket.onmessage = (event) => {        const msg = JSON.parse(event.data);
-        // 如果当前正在聊天窗口，且消息属于当前会话，则直接添加
+      this.socket.onopen = () => {
+        this.socketReady = true;
+      };
+
+      this.socket.onmessage = (event) => {
+        const payload = JSON.parse(event.data);
+        if (payload.type === 'error') {
+          this.$modal.msgError(payload.message || '消息发送失败');
+          return;
+        }
+        if (payload.type !== 'message' || !payload.data) {
+          return;
+        }
+        const msg = payload.data;
         if (this.currentSessionId === msg.sessionId) {
-          this.messageList.push(msg);
-          this.scrollToBottom();
+          this.appendMessage(msg);
           this.handleMarkRead(this.currentSession);
         } else {
-          // 否则更新列表状态
           this.getList();
         }
       };
+
+      this.socket.onerror = () => {
+        this.socketReady = false;
+      };
       
       this.socket.onclose = () => {
+        this.socketReady = false;
         console.log("WebSocket连接已关闭");
       };
+    },
+    appendMessage(message) {
+      if (!message) return;
+      const exists = this.messageList.some(item => item.messageId && item.messageId === message.messageId);
+      if (!exists) {
+        this.messageList.push(message);
+      }
+      this.refreshCurrentSession(message.messageType === 'image' ? '[图片]' : message.content);
+      this.scrollToBottom();
+    },
+    refreshCurrentSession(lastMessage) {
+      const session = this.sessionList.find(i => i.sessionId === this.currentSessionId);
+      if (session) {
+        session.lastMessage = lastMessage;
+        session.lastMessageTime = new Date();
+      }
+    },
+    beforeImageUpload(file) {
+      const isImage = file.type && file.type.indexOf('image/') === 0;
+      if (!isImage) {
+        this.$modal.msgError('只能上传图片');
+      }
+      return isImage;
+    },
+    handleImageSuccess(res) {
+      if (res.code !== 200) {
+        this.$modal.msgError(res.msg || '图片上传失败');
+        return;
+      }
+      const data = {
+        sessionId: this.currentSessionId,
+        messageType: 'image',
+        content: res.url
+      };
+      if (!this.sendBySocket(data)) {
+        this.sendByRest(data);
+      }
+    },
+    handleImageError() {
+      this.$modal.msgError('图片上传失败');
     },
     scrollToBottom() {
       this.$nextTick(() => {
@@ -230,6 +315,17 @@ export default {
       border-top: 1px solid #f0f0f0;
       padding: 15px;
       background-color: #fff;
+      .tool-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+      .socket-state {
+        font-size: 12px;
+        &.online { color: #67c23a; }
+        &.offline { color: #909399; }
+      }
       .btn-group { text-align: right; margin-top: 10px; }
     }
   }
