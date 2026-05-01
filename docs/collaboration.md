@@ -6,15 +6,17 @@
 
 ## 1. 先看结论
 
-**当前阶段**：阶段 5 · 推荐算法与论文亮点。
+**当前阶段**：阶段 6 · 管理后台增强（数据看板已上线，下一站敏感词过滤）。
 
-阶段 1 到阶段 4 已基础完成，后台 CRUD、定制业务闭环、买家/创作者角色、后端数据权限、创作者个人中心、前台门户、购物车、模拟支付、社区和收藏都已经落地。
+阶段 1 ~ 4.6 已落地：后台 CRUD、定制业务闭环、买家/创作者角色与数据权限、创作者个人中心、前台门户、购物车、模拟支付、社区收藏、实时聊天、数据看板均可演示。
+
+阶段 5（推荐算法）已 ❌ 取消，论文方向调整。
 
 下一步优先做：
 
-1. 推荐算法：用户行为表、基于用户的协同过滤、首页“猜你喜欢”。
-2. 数据统计大屏：商品数、订单数、销售额、热门分类、活跃创作者。
-3. 文档测试：E-R 图、接口文档、JUnit、JMeter、答辩 PPT。
+1. **动态敏感词过滤**（论文唯一算法亮点）：词库表 + 后台 CRUD + DFA 算法 + 接入评论 / 聊天文本拦截。
+2. 商品 / 评论审核流（阶段 6 剩余）。
+3. 文档测试（阶段 7）：E-R 图、Swagger 接口文档、JUnit、JMeter、答辩 PPT。
 
 ---
 
@@ -66,11 +68,11 @@
 |---|---|---|---|
 | 用户 | 注册登录、身份选择、个人信息、收货地址 | 注册登录、买家/创作者选择已完成；个人中心复用系统页；结算页支持收货信息快照 | 后续可补地址簿 |
 | 商品 | 分类、创作者发布、搜索浏览、详情 | 分类、发布、上下架、前台商品列表/详情、加入购物车已完成 | 可继续优化商品详情页 |
-| 定制 | 需求发布、列表匹配、报价沟通、进度跟踪 | 需求广场、报价、选中报价、订单状态机已完成；沟通为备注说明版 | 后续可加站内消息 |
+| 定制 | 需求发布、列表匹配、报价沟通、进度跟踪 | 需求广场、报价、选中报价、订单状态机已完成；实时聊天 `/portal/chat` 已落地 | 后续可加聊天消息搜索 |
 | 交易 | 购物车、订单生成、模拟支付、订单状态 | 购物车、结算、商品订单生成、模拟支付、订单状态流转已完成基础演示版 | 后续可补真实支付或售后 |
 | 社区 | 评价、作品分享、点赞评论、关注创作者 | 社区作品列表、详情评论、商品收藏、作品收藏、关注创作者、收藏中心已完成基础演示版 | 后续可补点赞计数 |
-| 后台 | 用户、商品、订单、评论、数据统计 | 基础管理已完成 | 补统计大屏、审核演示 |
-| 算法 | 基于内容或行为的推荐 | 尚未实现 | 建议做用户行为 + 协同过滤 |
+| 后台 | 用户、商品、订单、评论、数据统计 | 基础管理已完成；数据看板（6 卡 + 趋势图 + 饼图 + 活跃创作者表）已上线 | 补审核演示 / 敏感词词库后台 |
+| 算法 | 基于内容或行为的推荐 | 协同过滤已取消；论文方向调整为"动态敏感词过滤" | 做 DFA 敏感词过滤（论文核心亮点） |
 
 说明：本项目是毕设演示系统，安全能力不作为当前优先开发项。后续只保留必要的权限边界和演示稳定性，别又把精力全砸到安全配置里，没必要。
 
@@ -132,7 +134,7 @@
 
 ### 阶段 4.5 · 交易演示闭环
 
-> 这是从开题报告截图倒推出来的最高优先级。答辩时老师最容易问“用户怎么下单、怎么支付、怎么收货”，所以先补这里。
+> 这是从开题报告截图倒推出来的最高优先级。答辩时老师最容易问"用户怎么下单、怎么支付、怎么收货"，所以先补这里。
 
 - [x] 商品详情加入购物车
 - [x] 购物车数量修改、删除、结算
@@ -141,18 +143,32 @@
 - [x] 支付成功后订单 `pay_status` 进入 `paid` 状态
 - [x] 订单中心展示支付状态与物流/制作状态
 
-### 阶段 5 · 推荐算法
+### 阶段 4.6 · 实时在线沟通
 
-- [ ] 用户行为收集表：浏览、收藏、下单
-- [ ] 基于用户的协同过滤实现
-- [ ] 皮尔逊相关系数计算用户相似度
-- [ ] 推荐接口
-- [ ] 首页“猜你喜欢”
-- [ ] 推荐效果样例数据，论文用
+> 开题报告里"报价沟通"原本只用备注承载，老师可能追问"买家和创作者怎么聊"。补上 WebSocket 聊天作为答辩亮点。
+
+- [x] 聊天表结构：`creative_chat_session` + `creative_chat_message`
+- [x] 聊天领域模型 + Mapper
+- [x] 聊天服务核心逻辑（开启会话、收发消息、标记已读）
+- [x] REST 接口：`/portal/chat/session/list`、`/session`、`/message/list`、`/message`、`/session/{id}/read`
+- [x] WebSocket 端点：`/ws/chat`（query token 鉴权 + 多端会话广播）
+- [x] 前端 `views/creative/chat/index.vue`：会话列表 + 消息历史 + 输入框 + 图片上传
+- [x] 实时收发与图片消息修复
+
+### 阶段 5 · 推荐算法 ❌ 已取消
+
+> 论文方向调整：外文翻译《Online Shopping Mall Based on Collaborative Filtering》原本对齐协同过滤，后决定不做。改为以"动态敏感词过滤"作为唯一论文算法亮点（外文翻译的第二个亮点）。本阶段保留行号便于追溯，不要再拾起这些任务。
+
+- [x] ~~用户行为收集表~~ 已取消
+- [x] ~~基于用户的协同过滤实现~~ 已取消
+- [x] ~~皮尔逊相关系数计算用户相似度~~ 已取消
+- [x] ~~推荐接口~~ 已取消
+- [x] ~~首页"猜你喜欢"~~ 已取消
+- [x] ~~推荐效果样例数据~~ 已取消
 
 ### 阶段 6 · 管理后台增强
 
-- [ ] 数据统计大屏：商品数、订单数、销售额、活跃创作者、热门分类
+- [x] 数据统计大屏：商品数、订单数、销售额、活跃创作者、热门分类
 - [ ] 商品审核流
 - [ ] 评论审核流
 - [ ] 敏感词过滤模块
@@ -194,6 +210,10 @@
 | 2026-04-28 | 交易演示闭环 | `CreativePortalController.java`、`CreativeOrderServiceImpl.java`、`CreativeOrderMapper.xml`、`views/portal/{products,cart,checkout,payment,orders}.vue`、`sql/order_payment_upgrade_20260428.sql` | 订单单测、后端 package、前端 build | Codex | 商品加入购物车，本地购物车结算，提交收货信息生成商品订单，模拟支付后订单标记已支付 |
 | 2026-04-28 | 前台社区与收藏 | `CreativePortalController.java`、`api/creative/portal.js`、`views/portal/{community,post-detail,creators,favorites}.vue`、`router/index.js` | 后端 package、前端 build | Codex | 新增社区作品列表/详情、评论、商品/作品收藏、关注创作者、收藏中心 |
 | 2026-04-28 | 前台入口与文档状态整理 | `views/portal/index.vue`、`README.md`、`docs/collaboration.md`、`sql/README.md`、`docs/project-review.md` | 前端 build、文档检查 | Codex | 首页补购物车、社区、创作者、收藏快捷入口；文档同步到阶段 5 |
+| 2026-04-28 | SQL 安装包整合 | `sql/install/01-05_*.sql`、`sql/README.md` | SQL 检查 | Codex | 把零散历史补丁合并为 5 个安装文件；移除推荐算法相关后续建议（commit `9e8412f`） |
+| 2026-04-28 | 实时在线沟通 | `creative_chat_session/message` 表、`CreativeChatSession/Message/Request` 领域模型与 Mapper、`ICreativeChatService` + Impl、`CreativeChatController`(`/portal/chat/*`)、`web/websocket/CreativeChatWebSocketConfig` + `Handler`(`/ws/chat`)、`api/creative/chat.js`、`views/creative/chat/index.vue` | 后端 package、前端 build | Codex / Gemini | WebSocket token 鉴权 + 多端会话广播；REST 兜底；Gemini 在 `8f7f294` 参与了细节调整 |
+| 2026-04-29 | 实时聊天问题修复 | `CreativeChatWebSocketHandler.java`、`views/creative/chat/index.vue`（图片上传与 socket 重连） | 后端 package、前端 build | Codex | 修复实时收发消息和图片消息（commit `16cc9ed`） |
+| 2026-05-01 | 数据统计看板 | `CreativeDashboardController/Service/Mapper`、`CreativeDashboardStats` DTO、`mapper/creative/CreativeDashboardMapper.xml`、`api/creative/dashboard.js`、`views/creative/dashboard/index.vue`、`sql/install/04_system_menus.sql`、`sql/dashboard_menu_upgrade_20260501.sql` | 后端 mvn package、前端 build:prod | Claude | 顶级菜单"数据看板"，6 卡（商品/订单/GMV/活跃创作者/热门分类数/支付率）+ 近 7 日订单趋势折柱混合图 + 热门分类 Top5 饼图 + 活跃创作者 Top5 表格；权限 `creative:dashboard:view`，admin 默认可见 |
 
 更细的设计与实施记录在 `docs/superpowers/specs/` 和 `docs/superpowers/plans/`。
 
@@ -201,8 +221,8 @@
 
 ## 6. 未决问题
 
-- [ ] 推荐算法使用“基于内容”还是“协同过滤”？
-  - 建议：做协同过滤。外文翻译能对上，论文亮点也更明确。
+- [x] 推荐算法做"基于内容"还是"协同过滤"？
+  - 已定：**都不做**，论文方向调整。仅保留"动态敏感词过滤"作为算法亮点。
 
 - [x] 模拟支付要不要接支付宝/微信沙箱？
   - 已定：做纯前端模拟支付。毕设演示够用，风险更低。
@@ -213,8 +233,10 @@
 - [ ] 商品下架是否需要校验进行中订单？
   - 订单表已补 `source_type` / `source_id`，后续可以校验商品是否存在未完成订单。
 
-- [ ] 评论审核与敏感词过滤谁先做？
-  - 建议：先做审核动作或统计大屏。敏感词过滤作为可选增强，别抢推荐算法时间。
+- [ ] 敏感词过滤的拦截范围？
+  - 必做：评论提交时（接 `creative_comment.audit_status`）。
+  - 建议带上：聊天文本（`CreativeChatServiceImpl#sendMessage` 入口拦截，命中时返回 ServiceException 让前端提示）。
+  - 可选：作品标题、商品描述。
 
 ---
 
@@ -222,22 +244,25 @@
 
 SQL 顺序不要靠猜。完整说明见 [`../sql/README.md`](../sql/README.md)。
 
-新库最短顺序：
+零散历史补丁已经合并为 `sql/install/` 下的 5 个安装文件。
+
+**新库**按编号顺序执行：
 
 ```sql
-source sql/ry_20260417.sql;
-source sql/quartz.sql;
-source sql/creative_platform_tables.sql;
-source sql/creative_platform_menu.sql;
-source sql/creative_creator_audit_upgrade_20260425.sql;
-source sql/buyer_role_upgrade_20260425.sql;
-source sql/creator_me_menu_20260426.sql;
-source sql/register_enable_20260427.sql;
-source sql/order_payment_upgrade_20260428.sql;
-source sql/hide_ruoyi_brand_upgrade_20260428.sql;
+source sql/install/01_framework_base.sql;       -- 若依基础 + Quartz + 注册开关
+source sql/install/02_business_core.sql;        -- 创作者/分类/商品/需求/报价/订单/支付
+source sql/install/03_social_interaction.sql;   -- 作品/评论/互动/聊天/品牌去标识
+source sql/install/04_system_menus.sql;         -- 菜单 + 角色 + 权限（含数据看板顶级菜单）
+source sql/install/05_test_data.sql;            -- 演示数据（可选）
 ```
 
-如果是已经执行过 `creative_platform_tables.sql` 的旧库，先看 `sql/README.md` 的“旧库升级顺序”。别硬怼，数据库不会因为你勇敢就原谅你。
+**已经跑过 04 的旧库**追加数据看板菜单：
+
+```sql
+source sql/dashboard_menu_upgrade_20260501.sql;
+```
+
+如果你手上是更早期的库（执行过散文件 `creative_platform_tables.sql` 等），重导一遍 `01-04` 最稳；想原地升级先看 `sql/README.md`。别硬怼，数据库不会因为你勇敢就原谅你。
 
 ---
 

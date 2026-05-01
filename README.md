@@ -27,9 +27,10 @@
 设计并实现一个支持 **用户注册登录、商品浏览、定制需求发布、在线沟通、订单管理、模拟支付、社区互动** 的 Web 应用：
 
 - 实现 **手工艺人（创作者/商家）** 与 **普通用户（买家）** 端的功能分离与差异化界面；
-- 引入 **协同过滤推荐算法**（基于用户的协同过滤 + 皮尔逊相关系数），按浏览/收藏/下单行为推荐相关手作商品或创作者；
 - 设计合理的 **定制交易流程状态机**，保障买卖双方权益、降低交易纠纷；
-- 提供完善的 **后台管理模块**，支持平台运营方对用户、商品、订单、评论进行有效管理。
+- 提供 **实时在线沟通**（WebSocket）支持买家与创作者异步沟通；
+- 提供 **动态敏感词过滤**（DFA 算法，规划中）作为内容治理论文亮点；
+- 提供完善的 **后台管理模块**，支持平台运营方对用户、商品、订单、评论进行有效管理，并通过 **数据统计看板** 监控核心运营指标。
 
 ### 2.2 功能模块
 
@@ -40,8 +41,9 @@
 | **定制模块** | 定制需求发布（买家）、需求广场与匹配、报价与沟通、定制进度跟踪 |
 | **交易模块** | 购物车、订单生成、模拟在线支付、订单状态流转 |
 | **社区模块** | 用户评价、作品分享、点赞评论、关注创作者 |
-| **后台管理** | 用户管理、商品管理、订单监控、评论管理、数据统计大屏 |
-| **算法模块** | 基于用户的协同过滤推荐；敏感词过滤作为可选增强 |
+| **后台管理** | 用户管理、商品管理、订单监控、评论管理、数据统计看板 |
+| **沟通模块** | 买家与创作者一对一实时聊天（WebSocket + 离线消息列表 + 图片发送） |
+| **算法模块** | 动态敏感词过滤（DFA 算法，规划中） |
 
 ### 2.3 开题需求对照
 
@@ -58,7 +60,7 @@
 | 商品搜索与浏览 | `/portal/products` 提供前台商品浏览、搜索、详情查看 | 基础完成 |
 | 定制需求发布（买家） | `/portal/demands` 可发布需求，后台也有需求管理 | 基础完成 |
 | 需求列表与匹配 | 需求广场展示开放需求，创作者可查看并报价 | 基础完成 |
-| 需求报价与沟通 | 已有报价流程；在线沟通目前用需求说明、报价说明承载，实时聊天未做 | 演示版 |
+| 需求报价与沟通 | 已有报价流程；新增实时聊天 `/portal/chat`（WebSocket + 历史消息 + 图片发送） | 已完成 |
 | 定制进度跟踪 | 需求、报价、订单均有状态机，订单支持制作、发货、完成、取消 | 已完成 |
 | 购物车 | `/portal/cart` 支持加入商品、数量修改、删除、结算；购物车数据保存在浏览器本地 | 演示版 |
 | 订单生成 | 选中报价自动生成订单；订单模块可管理状态 | 已完成 |
@@ -66,10 +68,11 @@
 | 用户评价、作品分享 | `/portal/community` 展示作品列表，`/portal/post/:id` 支持详情与评论 | 基础完成 |
 | 点赞评论、关注创作者 | 支持商品/作品收藏、关注创作者、收藏中心；点赞计数暂未单独实现 | 基础完成 |
 | 后台管理 | 用户、商品、需求、报价、订单、评论、作品等后台管理已具备 | 已完成 |
-| 数据统计 | 暂未做独立统计大屏 | 待完善 |
-| 推荐算法 | 计划实现用户行为表 + 协同过滤 + 首页推荐 | 待完善 |
+| 数据统计 | 顶级菜单"数据看板"：6 卡 + 近 7 日订单趋势折柱图 + 热门分类饼图 + 活跃创作者表 | 已完成 |
+| 推荐算法 | 论文方向已调整，不再实现协同过滤 | 已取消 |
+| 敏感词过滤 | DFA 算法 + 词库后台 + 评论/聊天文本拦截 | 待完善 |
 
-优先级建议：交易演示闭环和社区前台已具备基础版本，下一步补 **推荐算法 + 数据统计大屏**，用于提升论文和演示亮点。
+优先级建议：交易演示闭环、社区前台、实时聊天、数据看板均已落地。剩余亮点工作集中在 **动态敏感词过滤**（论文亮点）与 **答辩文档/测试**（E-R、Swagger、JUnit、JMeter、PPT）。
 
 ### 2.4 待解决的关键问题
 
@@ -121,48 +124,56 @@
 
 ```
 creative-craft-custom-platform/
-├── ruoyi-admin/        # 启动模块 + 业务 Controller
-│   └── src/main/java/com/ruoyi/web/controller/creative/
-│       ├── CreativeCategoryController.java   # 文创分类
-│       ├── CreativeCreatorController.java    # 创作者档案
-│       ├── CreativeProductController.java    # 手作商品
-│       ├── CreativeDemandController.java     # 定制需求
-│       ├── CreativeQuoteController.java      # 定制报价
-│       ├── CreativeOrderController.java      # 定制订单
-│       ├── CreativePostController.java       # 社区作品
-│       ├── CreativeCommentController.java    # 评论
-│       ├── CreativeFavoriteController.java   # 收藏
-│       └── CreativePortalController.java     # 前台门户商品/需求接口
+├── ruoyi-admin/        # 启动模块 + 业务 Controller + WebSocket
+│   └── src/main/java/com/ruoyi/web/
+│       ├── controller/creative/
+│       │   ├── CreativeCategoryController.java   # 文创分类
+│       │   ├── CreativeCreatorController.java    # 创作者档案
+│       │   ├── CreativeProductController.java    # 手作商品
+│       │   ├── CreativeDemandController.java     # 定制需求
+│       │   ├── CreativeQuoteController.java      # 定制报价
+│       │   ├── CreativeOrderController.java      # 定制订单
+│       │   ├── CreativePostController.java       # 社区作品
+│       │   ├── CreativeCommentController.java    # 评论
+│       │   ├── CreativeFavoriteController.java   # 收藏
+│       │   ├── CreativePortalController.java     # 前台门户商品/需求/社区/收藏
+│       │   ├── CreativeChatController.java       # 实时聊天 REST 接口
+│       │   └── CreativeDashboardController.java  # 管理后台数据看板
+│       └── websocket/
+│           ├── CreativeChatWebSocketConfig.java  # /ws/chat 注册
+│           └── CreativeChatWebSocketHandler.java # token 鉴权 + 消息广播
 ├── ruoyi-system/       # 业务 Domain / Mapper / Service
 │   └── src/main/java/com/ruoyi/system/
-│       ├── domain/creative/
-│       ├── mapper/creative/
-│       └── service/creative/
-├── ruoyi-framework/    # 框架配置（拦截器、AOP）
+│       ├── domain/creative/        # 含 chat / dashboard DTO
+│       ├── mapper/creative/        # 含 chat / dashboard mapper
+│       └── service/creative/       # 含 chat / dashboard service
+├── ruoyi-framework/    # 框架配置（拦截器、AOP、@CreativeDataScope）
 ├── ruoyi-common/       # 通用工具（含本地 RedisCache 兜底）
 ├── ruoyi-quartz/       # 定时任务
 ├── ruoyi-generator/    # 代码生成
 ├── ruoyi-ui/           # 前端工程
 │   └── src/
-│       ├── api/creative/        # 后台业务 API + 前台门户 API
-│       ├── views/creative/      # 后台业务页面
-│       └── views/portal/        # 前台首页、商品、需求、购物车、支付、社区、收藏页面
+│       ├── api/creative/        # 后台业务 + 前台门户 + chat + dashboard API
+│       ├── views/creative/      # 后台业务页面（含 chat、dashboard）
+│       └── views/portal/        # 前台首页、商品、需求、购物车、支付、社区、收藏
 ├── sql/
-│   ├── ry_20260417.sql              # 若依基础 SQL
-│   ├── creative_platform_tables.sql # 文创业务表
-│   ├── creative_platform_menu.sql   # 业务菜单 + 按钮权限
-│   ├── creative_creator_audit_upgrade_20260425.sql # 创作者审核字段与角色
-│   ├── buyer_role_upgrade_20260425.sql             # 买家角色初始化
-│   ├── creator_me_menu_20260426.sql                # 创作者个人中心菜单
-│   ├── register_enable_20260427.sql                # 开启自助注册
-│   ├── order_payment_upgrade_20260428.sql          # 商品订单/模拟支付字段
-│   ├── hide_ruoyi_brand_upgrade_20260428.sql       # 隐藏默认若依外链与公告
-│   └── quartz.sql
+│   ├── install/                              # 整合后的 5 个安装文件（推荐用于新库）
+│   │   ├── 01_framework_base.sql             # 若依基础 + Quartz + 注册开关
+│   │   ├── 02_business_core.sql              # 创作者/分类/商品/需求/报价/订单/支付
+│   │   ├── 03_social_interaction.sql         # 作品/评论/互动/聊天/品牌去标识
+│   │   ├── 04_system_menus.sql               # 菜单 + 角色 + 权限（含数据看板顶级菜单）
+│   │   └── 05_test_data.sql                  # 演示数据（可选）
+│   ├── dashboard_menu_upgrade_20260501.sql   # 旧库追加"数据看板"菜单的升级补丁
+│   └── README.md                             # 数据库安装指南
 ├── doc/
 │   ├── 软件225 徐浩 前期材料.docx     # 任务书 / 开题报告 / 外文翻译
 │   └── 若依环境使用手册.docx
 ├── docs/
-│   └── collaboration.md             # 三方 AI 协作文档（路线、进度、约定）
+│   ├── collaboration.md             # 三方 AI 协作文档（路线、进度、约定）
+│   ├── project-review.md            # 2026-04-27 时间点的代码 review 快照
+│   └── superpowers/                 # 设计 spec 与实施 plan 历史档案
+│       ├── plans/
+│       └── specs/
 ├── bin/
 │   └── run-admin-jdk17.bat          # JDK 17 启动脚本
 └── pom.xml
@@ -185,6 +196,8 @@ creative-craft-custom-platform/
 | `creative_post` | 社区作品分享 |
 | `creative_comment` | 评论（含审核状态） |
 | `creative_favorite` | 收藏（支持商品/创作者/作品三种 targetType） |
+| `creative_chat_session` | 买家 ↔ 创作者聊天会话（按 target 业务对象唯一） |
+| `creative_chat_message` | 聊天消息（text / image，含已读状态） |
 
 ### 5.2 定制交易状态机
 
@@ -207,9 +220,11 @@ creative-craft-custom-platform/
 
 ### 5.3 算法亮点（论文）
 
-1. **基于用户的协同过滤推荐**：使用皮尔逊相关系数计算用户相似度，找到目标用户的"最近邻"，按其偏好预测推荐商品 / 创作者（与外文翻译《Online Shopping Mall Based on Collaborative Filtering》对齐）。
-2. **行为数据驱动推荐**：后续通过浏览、收藏、下单等行为形成用户偏好矩阵，用于首页“猜你喜欢”和论文实验说明。
-3. **动态敏感词过滤机制（可选增强）**：如时间允许，可在评论提交前做敏感词匹配与替换，用于补充内容治理说明。
+1. **动态敏感词过滤机制（规划中，论文核心算法亮点）**：构建词库表 `creative_sensitive_word` 支持运营动态维护；使用 **DFA（Deterministic Finite Automaton）** 算法进行多模式匹配，性能优于正则；命中后按策略 `reject / replace / pending` 处理，接入 `creative_comment.audit_status` 与聊天消息文本，作为论文外文翻译第二亮点。
+2. **定制交易状态机**：将非标定制流程标准化为可追溯的状态变迁（需求 / 报价 / 订单三套互锁状态机），保障买卖双方权益。
+3. **数据看板聚合查询**：通过 SQL 聚合 + Java 补零方式生成近 7 日订单趋势、热门分类 Top 5、活跃创作者 Top 5，避免引入额外的 OLAP 组件。
+
+> 备注：早期方案曾计划做 **基于用户的协同过滤推荐**，后因论文方向调整已取消。改为以"动态敏感词过滤"作为唯一算法亮点。
 
 ---
 
@@ -231,21 +246,25 @@ creative-craft-custom-platform/
 
 ### 7.1 数据库初始化
 
-更详细的 SQL 作用和新库/旧库执行顺序见 [`sql/README.md`](sql/README.md)。
+零散历史补丁已整合为 `sql/install/` 下的 5 个安装文件。详细说明见 [`sql/README.md`](sql/README.md)。
+
+**新库**（推荐）按编号顺序执行：
 
 ```sql
--- MySQL 中按顺序导入
-source sql/ry_20260417.sql;
-source sql/quartz.sql;
-source sql/creative_platform_tables.sql;
-source sql/creative_platform_menu.sql;
-source sql/creative_creator_audit_upgrade_20260425.sql;
-source sql/buyer_role_upgrade_20260425.sql;
-source sql/creator_me_menu_20260426.sql;
-source sql/register_enable_20260427.sql;
-source sql/order_payment_upgrade_20260428.sql;
-source sql/hide_ruoyi_brand_upgrade_20260428.sql;
+source sql/install/01_framework_base.sql;       -- 若依基础 + Quartz + 注册开关
+source sql/install/02_business_core.sql;        -- 创作者/分类/商品/需求/报价/订单/支付
+source sql/install/03_social_interaction.sql;   -- 作品/评论/互动/聊天/品牌去标识
+source sql/install/04_system_menus.sql;         -- 菜单 + 角色 + 权限（含数据看板顶级菜单）
+source sql/install/05_test_data.sql;            -- 演示数据（可选）
 ```
+
+**已经跑过 04 的旧库**追加数据看板菜单：
+
+```sql
+source sql/dashboard_menu_upgrade_20260501.sql;  -- 仅当 04 是 2026-05-01 之前版本时执行
+```
+
+执行后管理员重新登录刷新菜单即可看到顶级"数据看板"。
 
 ### 7.2 启动后端（JDK 17）
 
@@ -302,8 +321,10 @@ npm.cmd run build:prod
 | 阶段 2：业务闭环（状态机、报价选中生成订单） | ✅ 已完成 |
 | 阶段 3：角色权限细化（管理员/买家/创作者） | ✅ 已完成 |
 | 阶段 4：前台用户端（首页/商品详情/需求广场/订单中心/购物车/社区） | ✅ 基础完成 |
-| 阶段 5：协同过滤推荐（论文亮点） | ⬜ 待开始 |
-| 阶段 6：管理后台增强（数据统计大屏、审核流、可选敏感词过滤） | ⬜ 待开始 |
+| 阶段 4.5：交易演示闭环（购物车 → 模拟支付 → 订单流转） | ✅ 已完成 |
+| 阶段 4.6：实时在线沟通（WebSocket 聊天 + 历史消息 + 图片发送） | ✅ 已完成 |
+| 阶段 5：协同过滤推荐 | ❌ 已取消（论文方向调整） |
+| 阶段 6：管理后台增强（数据看板 ✅ / 审核流 ⬜ / 敏感词过滤 ⬜） | 🟡 进行中 |
 | 阶段 7：文档与测试（E-R 图、Swagger、JUnit、JMeter、答辩 PPT） | ⬜ 待开始 |
 
 ---

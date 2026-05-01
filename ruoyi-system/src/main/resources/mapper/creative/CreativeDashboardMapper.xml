@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.creative.CreativeDashboardMapper">
+
+    <resultMap id="SummaryResult" type="com.ruoyi.system.domain.creative.CreativeDashboardStats$Summary">
+        <result property="productCount" column="product_count"/>
+        <result property="productOnSaleCount" column="product_on_sale_count"/>
+        <result property="orderCount" column="order_count"/>
+        <result property="paidOrderCount" column="paid_order_count"/>
+        <result property="gmv" column="gmv"/>
+        <result property="activeCreatorCount" column="active_creator_count"/>
+    </resultMap>
+
+    <select id="selectSummary" resultMap="SummaryResult">
+        select
+            (select count(1) from creative_product) as product_count,
+            (select count(1) from creative_product where status = '0') as product_on_sale_count,
+            (select count(1) from creative_custom_order) as order_count,
+            (select count(1) from creative_custom_order where pay_status = 'paid') as paid_order_count,
+            (select coalesce(sum(order_amount), 0) from creative_custom_order where pay_status = 'paid') as gmv,
+            (select count(distinct c.creator_id)
+               from creative_creator c
+               left join creative_product p on p.creator_id = c.creator_id and p.create_time >= #{activeSince}
+               left join creative_post pt on pt.creator_id = c.creator_id and pt.create_time >= #{activeSince}
+              where p.product_id is not null or pt.post_id is not null) as active_creator_count
+    </select>
+
+    <resultMap id="TrendResult" type="com.ruoyi.system.domain.creative.CreativeDashboardStats$TrendItem">
+        <result property="date" column="day"/>
+        <result property="orderCount" column="order_count"/>
+        <result property="gmv" column="gmv"/>
+    </resultMap>
+
+    <select id="selectOrderTrend" resultMap="TrendResult">
+        select
+            date_format(create_time, '%Y-%m-%d') as day,
+            count(1) as order_count,
+            coalesce(sum(case when pay_status = 'paid' then order_amount else 0 end), 0) as gmv
+        from creative_custom_order
+        where create_time &gt;= #{since}
+        group by date_format(create_time, '%Y-%m-%d')
+        order by day
+    </select>
+
+    <resultMap id="CategoryResult" type="com.ruoyi.system.domain.creative.CreativeDashboardStats$CategoryStat">
+        <result property="categoryName" column="category_name"/>
+        <result property="orderCount" column="order_count"/>
+    </resultMap>
+
+    <select id="selectHotCategories" resultMap="CategoryResult">
+        select c.category_name, count(o.order_id) as order_count
+          from creative_custom_order o
+          inner join creative_product p on p.product_id = o.source_id
+          inner join creative_category c on c.category_id = p.category_id
+         where o.source_type = 'product'
+         group by c.category_id, c.category_name
+         order by order_count desc
+         limit #{limit}
+    </select>
+
+    <resultMap id="ActiveCreatorResult" type="com.ruoyi.system.domain.creative.CreativeDashboardStats$ActiveCreator">
+        <result property="creatorName" column="creator_name"/>
+        <result property="productCount" column="product_count"/>
+    </resultMap>
+
+    <select id="selectActiveCreators" resultMap="ActiveCreatorResult">
+        select c.creator_name, count(p.product_id) as product_count
+          from creative_creator c
+          inner join creative_product p on p.creator_id = c.creator_id
+         where p.create_time &gt;= #{since}
+         group by c.creator_id, c.creator_name
+         order by product_count desc
+         limit #{limit}
+    </select>
+
+</mapper>
