@@ -42,6 +42,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="payStatus != null and payStatus != ''">and pay_status = #{payStatus}</if>
             <if test="buyerId != null">and buyer_id = #{buyerId}</if>
             <if test="sellerId != null">and seller_id = #{sellerId}</if>
+            <if test="sourceType != null and sourceType != ''">and source_type = #{sourceType}</if>
+            <if test="sourceId != null">and source_id = #{sourceId}</if>
         </where>
         order by order_id desc
     </select>

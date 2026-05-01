@@ -12,11 +12,15 @@ import static org.mockito.Mockito.when;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.system.domain.creative.CreativeCategory;
 import com.ruoyi.system.domain.creative.CreativeCreator;
+import com.ruoyi.system.domain.creative.CreativeOrder;
 import com.ruoyi.system.domain.creative.CreativeProduct;
+import com.ruoyi.system.domain.creative.CreativeStatusFlow;
 import com.ruoyi.system.mapper.creative.CreativeCategoryMapper;
 import com.ruoyi.system.mapper.creative.CreativeCreatorMapper;
+import com.ruoyi.system.mapper.creative.CreativeOrderMapper;
 import com.ruoyi.system.mapper.creative.CreativeProductMapper;
 import com.ruoyi.system.service.creative.support.CreativeDataPermissionService;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -35,6 +39,9 @@ class CreativeProductServiceImplTest
 
     @Mock
     private CreativeCategoryMapper creativeCategoryMapper;
+
+    @Mock
+    private CreativeOrderMapper creativeOrderMapper;
 
     @Mock
     private CreativeDataPermissionService permissionService;
@@ -113,6 +120,7 @@ class CreativeProductServiceImplTest
     void takeOffShelfShouldUpdateStatusWhenProductIsOnShelf()
     {
         when(creativeProductMapper.selectCreativeProductByProductId(1L)).thenReturn(buildProduct(1L, "0", 11L));
+        when(creativeOrderMapper.selectCreativeOrderList(any(CreativeOrder.class))).thenReturn(Collections.emptyList());
         when(creativeProductMapper.updateCreativeProduct(any(CreativeProduct.class))).thenReturn(1);
 
         int rows = creativeProductService.takeOffShelf(1L, "codex");
@@ -136,6 +144,20 @@ class CreativeProductServiceImplTest
         verify(creativeProductMapper, never()).updateCreativeProduct(any(CreativeProduct.class));
     }
 
+    @Test
+    void takeOffShelfShouldFailWhenProductHasUnfinishedOrder()
+    {
+        when(creativeProductMapper.selectCreativeProductByProductId(1L)).thenReturn(buildProduct(1L, "0", 11L));
+        when(creativeOrderMapper.selectCreativeOrderList(any(CreativeOrder.class)))
+            .thenReturn(Collections.singletonList(buildOrder(CreativeStatusFlow.Order.MAKING)));
+
+        ServiceException exception = assertThrows(ServiceException.class,
+            () -> creativeProductService.takeOffShelf(1L, "codex"));
+
+        assertEquals("商品存在未完成订单，不能下架", exception.getMessage());
+        verify(creativeProductMapper, never()).updateCreativeProduct(any(CreativeProduct.class));
+    }
+
     private CreativeProduct buildProduct(Long productId, String status, Long creatorId)
     {
         CreativeProduct product = new CreativeProduct();
@@ -146,7 +168,18 @@ class CreativeProductServiceImplTest
         product.setProductType("spot");
         product.setPrice(java.math.BigDecimal.valueOf(199.00));
         product.setStatus(status);
+        product.setAuditStatus("approved");
         return product;
+    }
+
+    private CreativeOrder buildOrder(String status)
+    {
+        CreativeOrder order = new CreativeOrder();
+        order.setOrderId(99L);
+        order.setOrderStatus(status);
+        order.setSourceType("product");
+        order.setSourceId(1L);
+        return order;
     }
 
     private CreativeCreator buildCreator(String status)

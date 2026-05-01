@@ -22,6 +22,7 @@ import com.ruoyi.system.mapper.creative.CreativeCreatorMapper;
 import com.ruoyi.system.mapper.creative.CreativeDemandMapper;
 import com.ruoyi.system.mapper.creative.CreativeOrderMapper;
 import com.ruoyi.system.mapper.creative.CreativeProductMapper;
+import com.ruoyi.system.service.creative.ISensitiveWordService;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -56,6 +57,9 @@ class CreativeChatServiceImplTest
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
+
+    @Mock
+    private ISensitiveWordService sensitiveWordService;
 
     @InjectMocks
     private CreativeChatServiceImpl chatService;
@@ -198,6 +202,7 @@ class CreativeChatServiceImplTest
         verify(messageMapper).insertCreativeChatMessage(messageCaptor.capture());
         verify(sessionMapper).updateCreativeChatSession(sessionCaptor.capture());
         verify(sessionMapper).incrementUnread(1L, "creator_unread");
+        verify(sensitiveWordService).enforceClean("可以定制颜色吗", "聊天内容");
         assertSame(messageCaptor.getValue(), message);
         assertEquals(5L, message.getSenderId());
         assertEquals(8L, message.getReceiverId());
@@ -220,6 +225,7 @@ class CreativeChatServiceImplTest
         verify(messageMapper).insertCreativeChatMessage(messageCaptor.capture());
         verify(sessionMapper).updateCreativeChatSession(sessionCaptor.capture());
         verify(sessionMapper).incrementUnread(1L, "buyer_unread");
+        verify(sensitiveWordService, never()).enforceClean(any(String.class), any(String.class));
         assertEquals(5L, messageCaptor.getValue().getReceiverId());
         assertEquals("/profile/upload/a.png", messageCaptor.getValue().getContent());
         assertEquals("[图片]", sessionCaptor.getValue().getLastMessage());

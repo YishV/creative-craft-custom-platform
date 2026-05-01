@@ -5,9 +5,12 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.creative.CreativeCategory;
 import com.ruoyi.system.domain.creative.CreativeCreator;
+import com.ruoyi.system.domain.creative.CreativeOrder;
 import com.ruoyi.system.domain.creative.CreativeProduct;
+import com.ruoyi.system.domain.creative.CreativeStatusFlow;
 import com.ruoyi.system.mapper.creative.CreativeCategoryMapper;
 import com.ruoyi.system.mapper.creative.CreativeCreatorMapper;
+import com.ruoyi.system.mapper.creative.CreativeOrderMapper;
 import com.ruoyi.system.mapper.creative.CreativeProductMapper;
 import com.ruoyi.system.service.creative.ICreativeProductService;
 import com.ruoyi.system.service.creative.support.CreativeDataPermissionService;
@@ -25,6 +28,7 @@ public class CreativeProductServiceImpl implements ICreativeProductService
     private static final String AUDIT_PENDING = "pending";
     private static final String AUDIT_APPROVED = "approved";
     private static final String AUDIT_REJECTED = "rejected";
+    private static final String SOURCE_PRODUCT = "product";
 
     @Autowired
     private CreativeProductMapper creativeProductMapper;
@@ -34,6 +38,9 @@ public class CreativeProductServiceImpl implements ICreativeProductService
 
     @Autowired
     private CreativeCategoryMapper creativeCategoryMapper;
+
+    @Autowired
+    private CreativeOrderMapper creativeOrderMapper;
 
     @Autowired
     private CreativeDataPermissionService permissionService;
@@ -112,6 +119,7 @@ public class CreativeProductServiceImpl implements ICreativeProductService
         {
             throw new ServiceException("商品已处于下架状态");
         }
+        ensureNoUnfinishedProductOrder(productId);
 
         CreativeProduct update = new CreativeProduct();
         update.setProductId(productId);
@@ -260,5 +268,31 @@ public class CreativeProductServiceImpl implements ICreativeProductService
         {
             throw new ServiceException("商品分类已停用，不能上架商品");
         }
+    }
+
+    private void ensureNoUnfinishedProductOrder(Long productId)
+    {
+        CreativeOrder query = new CreativeOrder();
+        query.setSourceType(SOURCE_PRODUCT);
+        query.setSourceId(productId);
+        List<CreativeOrder> orders = creativeOrderMapper.selectCreativeOrderList(query);
+        if (orders == null || orders.isEmpty())
+        {
+            return;
+        }
+        for (CreativeOrder order : orders)
+        {
+            if (isUnfinishedOrder(order.getOrderStatus()))
+            {
+                throw new ServiceException("商品存在未完成订单，不能下架");
+            }
+        }
+    }
+
+    private boolean isUnfinishedOrder(String orderStatus)
+    {
+        return CreativeStatusFlow.Order.CREATED.equals(orderStatus)
+            || CreativeStatusFlow.Order.MAKING.equals(orderStatus)
+            || CreativeStatusFlow.Order.SHIPPED.equals(orderStatus);
     }
 }
