@@ -11,9 +11,9 @@
       </el-form-item>
       <el-form-item label="审核状态" prop="auditStatus">
         <el-select v-model="queryParams.auditStatus" placeholder="请选择状态" clearable>
-          <el-option label="待审核" value="0" />
-          <el-option label="通过" value="1" />
-          <el-option label="驳回" value="2" />
+          <el-option label="待审核" value="pending" />
+          <el-option label="通过" value="approved" />
+          <el-option label="驳回" value="rejected" />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -53,9 +53,11 @@
           <span>{{ parseTime(scope.row.createTime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="150">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="240">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['creative:comment:edit']">审核</el-button>
+          <el-button size="mini" type="text" icon="el-icon-check" style="color:#67c23a" @click="handleApproveAudit(scope.row)" v-if="scope.row.auditStatus === 'pending'" v-hasPermi="['creative:comment:audit']">通过</el-button>
+          <el-button size="mini" type="text" icon="el-icon-close" style="color:#f56c6c" @click="handleRejectAudit(scope.row)" v-if="scope.row.auditStatus !== 'rejected'" v-hasPermi="['creative:comment:audit']">驳回</el-button>
+          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['creative:comment:edit']">编辑</el-button>
           <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)" v-hasPermi="['creative:comment:remove']">删除</el-button>
         </template>
       </el-table-column>
@@ -78,9 +80,9 @@
         </el-form-item>
         <el-form-item label="审核状态" prop="auditStatus">
           <el-radio-group v-model="form.auditStatus">
-            <el-radio label="0">待审核</el-radio>
-            <el-radio label="1">通过</el-radio>
-            <el-radio label="2">驳回</el-radio>
+            <el-radio label="pending">待审核</el-radio>
+            <el-radio label="approved">通过</el-radio>
+            <el-radio label="rejected">驳回</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="备注" prop="remark">
@@ -96,11 +98,11 @@
 </template>
 
 <script>
-import { listComment, getComment, delComment, addComment, updateComment } from '@/api/creative/comment'
+import { listComment, getComment, delComment, addComment, updateComment, approveCommentAudit, rejectCommentAudit } from '@/api/creative/comment'
 import { listPost } from '@/api/creative/post'
 
-const AUDIT_MAP = { '0': '待审核', '1': '通过', '2': '驳回' }
-const AUDIT_TAG = { '0': 'warning', '1': 'success', '2': 'danger' }
+const AUDIT_MAP = { pending: '待审核', approved: '通过', rejected: '驳回' }
+const AUDIT_TAG = { pending: 'warning', approved: 'success', rejected: 'danger' }
 
 export default {
   name: 'CreativeComment',
@@ -169,7 +171,7 @@ export default {
         postId: undefined,
         userId: undefined,
         commentContent: undefined,
-        auditStatus: '0',
+        auditStatus: 'pending',
         remark: undefined
       }
       this.resetForm('form')
@@ -228,6 +230,28 @@ export default {
         this.getList()
         this.$modal.msgSuccess('删除成功')
       }).catch(() => {})
+    },
+    handleApproveAudit(row) {
+      this.$modal.confirm('确认通过该评论吗？').then(() => approveCommentAudit(row.commentId))
+        .then(() => {
+          this.getList()
+          this.$modal.msgSuccess('审核通过')
+        })
+        .catch(() => {})
+    },
+    handleRejectAudit(row) {
+      this.$prompt('请输入驳回理由（必填）', '驳回评论', {
+        confirmButtonText: '驳回',
+        cancelButtonText: '取消',
+        inputValidator: v => !!v && v.trim().length > 0,
+        inputErrorMessage: '驳回理由不能为空'
+      })
+        .then(({ value }) => rejectCommentAudit(row.commentId, value))
+        .then(() => {
+          this.getList()
+          this.$modal.msgSuccess('已驳回')
+        })
+        .catch(() => {})
     }
   }
 }

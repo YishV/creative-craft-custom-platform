@@ -27,6 +27,8 @@ insert into sys_menu values ('2110', '敏感词查询', '2011', '1', '', '', '',
 insert into sys_menu values ('2111', '敏感词新增', '2011', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'creative:sensitive:add',    '#', 'admin', sysdate(), '', null, '');
 insert into sys_menu values ('2112', '敏感词修改', '2011', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'creative:sensitive:edit',   '#', 'admin', sysdate(), '', null, '');
 insert into sys_menu values ('2113', '敏感词删除', '2011', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'creative:sensitive:remove', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values ('2114', '商品审核', '2003', '5', '', '', '', '', 1, 0, 'F', '0', '0', 'creative:product:audit', '#', 'admin', sysdate(), '', null, '商品上架前审核');
+insert into sys_menu values ('2115', '评论审核', '2008', '5', '', '', '', '', 1, 0, 'F', '0', '0', 'creative:comment:audit', '#', 'admin', sysdate(), '', null, '评论审核');
 -- ... (其他按钮权限保持不变)
 
 -- ----------------------------

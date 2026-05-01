@@ -16,4 +16,10 @@ public interface ICreativeCommentService
     int deleteCreativeCommentByCommentId(Long commentId);
 
     int deleteCreativeCommentByCommentIds(Long[] commentIds);
+
+    /** 审核通过：pending -> approved */
+    int approveAudit(Long commentId, String operator);
+
+    /** 审核驳回：pending/approved -> rejected（前台不再展示） */
+    int rejectAudit(Long commentId, String remark, String operator);
 }

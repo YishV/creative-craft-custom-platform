@@ -19,6 +19,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.system.domain.creative.CreativeProduct;
 import com.ruoyi.system.service.creative.ICreativeProductService;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/creative/product")
@@ -79,6 +80,32 @@ public class CreativeProductController extends BaseController
     public AjaxResult takeOffShelf(@PathVariable Long productId)
     {
         return toAjax(creativeProductService.takeOffShelf(productId, getUsername()));
+    }
+
+    @PreAuthorize("@ss.hasPermi('creative:product:edit')")
+    @Log(title = "手作商品", businessType = BusinessType.UPDATE)
+    @PostMapping("/{productId}/submitAudit")
+    public AjaxResult submitAudit(@PathVariable Long productId)
+    {
+        return toAjax(creativeProductService.submitAudit(productId, getUsername()));
+    }
+
+    @PreAuthorize("@ss.hasPermi('creative:product:audit')")
+    @Log(title = "手作商品", businessType = BusinessType.UPDATE)
+    @PostMapping("/{productId}/approveAudit")
+    public AjaxResult approveAudit(@PathVariable Long productId, @RequestBody(required = false) Map<String, String> body)
+    {
+        String remark = body == null ? null : body.get("remark");
+        return toAjax(creativeProductService.approveAudit(productId, remark, getUsername()));
+    }
+
+    @PreAuthorize("@ss.hasPermi('creative:product:audit')")
+    @Log(title = "手作商品", businessType = BusinessType.UPDATE)
+    @PostMapping("/{productId}/rejectAudit")
+    public AjaxResult rejectAudit(@PathVariable Long productId, @RequestBody Map<String, String> body)
+    {
+        String remark = body == null ? null : body.get("remark");
+        return toAjax(creativeProductService.rejectAudit(productId, remark, getUsername()));
     }
 
     @PreAuthorize("@ss.hasPermi('creative:product:remove')")

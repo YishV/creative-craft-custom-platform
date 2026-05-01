@@ -16,6 +16,13 @@
           <el-option label="下架" value="1" />
         </el-select>
       </el-form-item>
+      <el-form-item label="审核" prop="auditStatus">
+        <el-select v-model="queryParams.auditStatus" placeholder="审核状态" clearable>
+          <el-option label="待审核" value="pending" />
+          <el-option label="已通过" value="approved" />
+          <el-option label="已驳回" value="rejected" />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -54,14 +61,25 @@
           <el-tag :type="scope.row.status === '0' ? 'success' : 'info'" size="mini">{{ scope.row.status === '0' ? '上架' : '下架' }}</el-tag>
         </template>
       </el-table-column>
+      <el-table-column label="审核" align="center" prop="auditStatus" width="100">
+        <template slot-scope="scope">
+          <el-tooltip v-if="scope.row.auditStatus === 'rejected' && scope.row.auditRemark" :content="scope.row.auditRemark" placement="top">
+            <el-tag type="danger" size="mini">已驳回</el-tag>
+          </el-tooltip>
+          <el-tag v-else :type="auditTagType(scope.row.auditStatus)" size="mini">{{ auditLabel(scope.row.auditStatus) }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="创建时间" align="center" prop="createTime" width="160">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createTime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="220">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="320">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" icon="el-icon-top" @click="handlePutOnShelf(scope.row)" v-if="scope.row.status === '1'" v-hasPermi="['creative:product:edit']">上架</el-button>
+          <el-button size="mini" type="text" icon="el-icon-document-checked" @click="handleSubmitAudit(scope.row)" v-if="scope.row.auditStatus === 'rejected'" v-hasPermi="['creative:product:edit']">重提审核</el-button>
+          <el-button size="mini" type="text" icon="el-icon-check" style="color:#67c23a" @click="handleApproveAudit(scope.row)" v-if="scope.row.auditStatus === 'pending'" v-hasPermi="['creative:product:audit']">通过</el-button>
+          <el-button size="mini" type="text" icon="el-icon-close" style="color:#f56c6c" @click="handleRejectAudit(scope.row)" v-if="scope.row.auditStatus === 'pending'" v-hasPermi="['creative:product:audit']">驳回</el-button>
+          <el-button size="mini" type="text" icon="el-icon-top" @click="handlePutOnShelf(scope.row)" v-if="scope.row.status === '1' && scope.row.auditStatus === 'approved'" v-hasPermi="['creative:product:edit']">上架</el-button>
           <el-button size="mini" type="text" icon="el-icon-bottom" @click="handleTakeOffShelf(scope.row)" v-if="scope.row.status === '0'" v-hasPermi="['creative:product:edit']">下架</el-button>
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['creative:product:edit']">修改</el-button>
           <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)" v-hasPermi="['creative:product:remove']">删除</el-button>
@@ -108,7 +126,7 @@
 </template>
 
 <script>
-import { listProduct, getProduct, delProduct, addProduct, updateProduct, putOnShelf, takeOffShelf } from '@/api/creative/product'
+import { listProduct, getProduct, delProduct, addProduct, updateProduct, putOnShelf, takeOffShelf, submitProductAudit, approveProductAudit, rejectProductAudit } from '@/api/creative/product'
 import { listCategory } from '@/api/creative/category'
 import { listCreator } from '@/api/creative/creator'
 
@@ -132,7 +150,8 @@ export default {
         pageSize: 10,
         productName: undefined,
         productType: undefined,
-        status: undefined
+        status: undefined,
+        auditStatus: undefined
       },
       form: {},
       rules: {
@@ -265,6 +284,43 @@ export default {
         this.getList()
         this.$modal.msgSuccess('下架成功')
       }).catch(() => {})
+    },
+    auditLabel(s) {
+      return { pending: '待审核', approved: '已通过', rejected: '已驳回' }[s] || s || '-'
+    },
+    auditTagType(s) {
+      return { pending: 'warning', approved: 'success', rejected: 'danger' }[s] || 'info'
+    },
+    handleSubmitAudit(row) {
+      this.$modal.confirm('确认重新提交“' + row.productName + '”进入审核队列？').then(function() {
+        return submitProductAudit(row.productId)
+      }).then(() => {
+        this.getList()
+        this.$modal.msgSuccess('已提交审核')
+      }).catch(() => {})
+    },
+    handleApproveAudit(row) {
+      this.$prompt('请输入审核备注（可选）', '审核通过', { confirmButtonText: '通过', cancelButtonText: '取消' })
+        .then(({ value }) => approveProductAudit(row.productId, value))
+        .then(() => {
+          this.getList()
+          this.$modal.msgSuccess('审核通过')
+        })
+        .catch(() => {})
+    },
+    handleRejectAudit(row) {
+      this.$prompt('请输入驳回理由（必填）', '审核驳回', {
+        confirmButtonText: '驳回',
+        cancelButtonText: '取消',
+        inputValidator: v => !!v && v.trim().length > 0,
+        inputErrorMessage: '驳回理由不能为空'
+      })
+        .then(({ value }) => rejectProductAudit(row.productId, value))
+        .then(() => {
+          this.getList()
+          this.$modal.msgSuccess('已驳回')
+        })
+        .catch(() => {})
     }
   }
 }

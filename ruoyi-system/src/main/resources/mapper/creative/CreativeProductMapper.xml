@@ -5,22 +5,28 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.ruoyi.system.mapper.creative.CreativeProductMapper">
 
     <resultMap id="CreativeProductResult" type="com.ruoyi.system.domain.creative.CreativeProduct">
-        <result property="productId" column="product_id"/>
-        <result property="creatorId" column="creator_id"/>
-        <result property="categoryId" column="category_id"/>
+        <result property="productId"   column="product_id"/>
+        <result property="creatorId"   column="creator_id"/>
+        <result property="categoryId"  column="category_id"/>
         <result property="productName" column="product_name"/>
         <result property="productType" column="product_type"/>
-        <result property="price" column="price"/>
-        <result property="status" column="status"/>
-        <result property="createBy" column="create_by"/>
-        <result property="createTime" column="create_time"/>
-        <result property="updateBy" column="update_by"/>
-        <result property="updateTime" column="update_time"/>
-        <result property="remark" column="remark"/>
+        <result property="price"       column="price"/>
+        <result property="status"      column="status"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="auditBy"     column="audit_by"/>
+        <result property="auditTime"   column="audit_time"/>
+        <result property="createBy"    column="create_by"/>
+        <result property="createTime"  column="create_time"/>
+        <result property="updateBy"    column="update_by"/>
+        <result property="updateTime"  column="update_time"/>
+        <result property="remark"      column="remark"/>
     </resultMap>
 
     <sql id="selectCreativeProductVo">
-        select product_id, creator_id, category_id, product_name, product_type, price, status, create_by, create_time, update_by, update_time, remark
+        select product_id, creator_id, category_id, product_name, product_type, price, status,
+               audit_status, audit_remark, audit_by, audit_time,
+               create_by, create_time, update_by, update_time, remark
         from creative_product
     </sql>
 
@@ -35,13 +41,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="productName != null and productName != ''">and product_name like concat('%', #{productName}, '%')</if>
             <if test="productType != null and productType != ''">and product_type = #{productType}</if>
             <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="auditStatus != null and auditStatus != ''">and audit_status = #{auditStatus}</if>
         </where>
         order by product_id desc
     </select>
 
     <insert id="insertCreativeProduct" parameterType="com.ruoyi.system.domain.creative.CreativeProduct" useGeneratedKeys="true" keyProperty="productId">
-        insert into creative_product (creator_id, category_id, product_name, product_type, price, status, remark, create_by, create_time)
-        values (#{creatorId}, #{categoryId}, #{productName}, #{productType}, #{price}, #{status}, #{remark}, #{createBy}, sysdate())
+        insert into creative_product (creator_id, category_id, product_name, product_type, price, status, audit_status, remark, create_by, create_time)
+        values (#{creatorId}, #{categoryId}, #{productName}, #{productType}, #{price},
+                ifnull(#{status},'1'), ifnull(#{auditStatus},'pending'), #{remark}, #{createBy}, sysdate())
     </insert>
 
     <update id="updateCreativeProduct" parameterType="com.ruoyi.system.domain.creative.CreativeProduct">
@@ -53,6 +61,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="productType != null">product_type = #{productType},</if>
             <if test="price != null">price = #{price},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="auditStatus != null">audit_status = #{auditStatus},</if>
+            <if test="auditRemark != null">audit_remark = #{auditRemark},</if>
+            <if test="auditBy != null">audit_by = #{auditBy},</if>
+            <if test="auditTime != null">audit_time = #{auditTime},</if>
             <if test="remark != null">remark = #{remark},</if>
             update_by = #{updateBy},
             update_time = sysdate()

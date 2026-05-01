@@ -40,18 +40,22 @@ create table creative_category (
 
 drop table if exists creative_product;
 create table creative_product (
-  product_id bigint(20) not null auto_increment comment '商品ID',
-  creator_id bigint(20) default null comment '创作者ID',
-  category_id bigint(20) default null comment '分类ID',
-  product_name varchar(128) not null comment '商品名称',
-  product_type varchar(32) default 'spot' comment '商品类型',
-  price decimal(10,2) default 0.00 comment '售价',
-  status char(1) default '0' comment '状态',
-  remark varchar(500) default null comment '备注',
-  create_by varchar(64) default '' comment '创建者',
-  create_time datetime default current_timestamp comment '创建时间',
-  update_by varchar(64) default '' comment '更新者',
-  update_time datetime default null comment '更新时间',
+  product_id    bigint(20)   not null auto_increment comment '商品ID',
+  creator_id    bigint(20)   default null comment '创作者ID',
+  category_id   bigint(20)   default null comment '分类ID',
+  product_name  varchar(128) not null comment '商品名称',
+  product_type  varchar(32)  default 'spot' comment '商品类型',
+  price         decimal(10,2) default 0.00 comment '售价',
+  status        char(1)      default '1' comment '状态：0上架 1下架',
+  audit_status  varchar(32)  default 'pending' comment '审核状态：pending/approved/rejected',
+  audit_remark  varchar(500) default null comment '审核备注',
+  audit_by      varchar(64)  default '' comment '审核人',
+  audit_time    datetime     default null comment '审核时间',
+  remark        varchar(500) default null comment '备注',
+  create_by     varchar(64)  default '' comment '创建者',
+  create_time   datetime     default current_timestamp comment '创建时间',
+  update_by     varchar(64)  default '' comment '更新者',
+  update_time   datetime     default null comment '更新时间',
   primary key (product_id)
 ) engine=innodb comment='手作商品表';
 

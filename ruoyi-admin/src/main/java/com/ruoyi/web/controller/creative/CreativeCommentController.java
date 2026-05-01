@@ -18,6 +18,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.creative.CreativeComment;
 import com.ruoyi.system.service.creative.ICreativeCommentService;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/creative/comment")
@@ -58,6 +59,23 @@ public class CreativeCommentController extends BaseController
     {
         creativeComment.setUpdateBy(getUsername());
         return toAjax(creativeCommentService.updateCreativeComment(creativeComment));
+    }
+
+    @PreAuthorize("@ss.hasPermi('creative:comment:audit')")
+    @Log(title = "评论互动", businessType = BusinessType.UPDATE)
+    @PostMapping("/{commentId}/approveAudit")
+    public AjaxResult approveAudit(@PathVariable Long commentId)
+    {
+        return toAjax(creativeCommentService.approveAudit(commentId, getUsername()));
+    }
+
+    @PreAuthorize("@ss.hasPermi('creative:comment:audit')")
+    @Log(title = "评论互动", businessType = BusinessType.UPDATE)
+    @PostMapping("/{commentId}/rejectAudit")
+    public AjaxResult rejectAudit(@PathVariable Long commentId, @RequestBody Map<String, String> body)
+    {
+        String remark = body == null ? null : body.get("remark");
+        return toAjax(creativeCommentService.rejectAudit(commentId, remark, getUsername()));
     }
 
     @PreAuthorize("@ss.hasPermi('creative:comment:remove')")

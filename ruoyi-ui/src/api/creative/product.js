@@ -51,3 +51,26 @@ export function delProduct(productId) {
     method: 'delete'
   })
 }
+
+export function submitProductAudit(productId) {
+  return request({
+    url: '/creative/product/' + productId + '/submitAudit',
+    method: 'post'
+  })
+}
+
+export function approveProductAudit(productId, remark) {
+  return request({
+    url: '/creative/product/' + productId + '/approveAudit',
+    method: 'post',
+    data: { remark }
+  })
+}
+
+export function rejectProductAudit(productId, remark) {
+  return request({
+    url: '/creative/product/' + productId + '/rejectAudit',
+    method: 'post',
+    data: { remark }
+  })
+}

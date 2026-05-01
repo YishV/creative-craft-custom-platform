@@ -1,6 +1,8 @@
 package com.ruoyi.system.domain.creative;
 
 import java.math.BigDecimal;
+import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.core.domain.BaseEntity;
 
 public class CreativeProduct extends BaseEntity
@@ -14,6 +16,12 @@ public class CreativeProduct extends BaseEntity
     private String productType;
     private BigDecimal price;
     private String status;
+    /** 审核状态：pending/approved/rejected */
+    private String auditStatus;
+    private String auditRemark;
+    private String auditBy;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date auditTime;
 
     public Long getProductId()
     {
@@ -83,5 +91,45 @@ public class CreativeProduct extends BaseEntity
     public void setStatus(String status)
     {
         this.status = status;
+    }
+
+    public String getAuditStatus()
+    {
+        return auditStatus;
+    }
+
+    public void setAuditStatus(String auditStatus)
+    {
+        this.auditStatus = auditStatus;
+    }
+
+    public String getAuditRemark()
+    {
+        return auditRemark;
+    }
+
+    public void setAuditRemark(String auditRemark)
+    {
+        this.auditRemark = auditRemark;
+    }
+
+    public String getAuditBy()
+    {
+        return auditBy;
+    }
+
+    public void setAuditBy(String auditBy)
+    {
+        this.auditBy = auditBy;
+    }
+
+    public Date getAuditTime()
+    {
+        return auditTime;
+    }
+
+    public void setAuditTime(Date auditTime)
+    {
+        this.auditTime = auditTime;
     }
 }

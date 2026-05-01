@@ -37,3 +37,18 @@ export function delComment(commentId) {
     method: 'delete'
   })
 }
+
+export function approveCommentAudit(commentId) {
+  return request({
+    url: '/creative/comment/' + commentId + '/approveAudit',
+    method: 'post'
+  })
+}
+
+export function rejectCommentAudit(commentId, remark) {
+  return request({
+    url: '/creative/comment/' + commentId + '/rejectAudit',
+    method: 'post',
+    data: { remark }
+  })
+}
