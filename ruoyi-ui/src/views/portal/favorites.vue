@@ -1,12 +1,16 @@
 <template>
   <div class="portal-page">
     <el-tabs v-model="queryParams.targetType" @tab-click="handleQuery">
-      <el-tab-pane label="关注创作者" name="creator" />
-      <el-tab-pane label="收藏商品" name="product" />
-      <el-tab-pane label="收藏作品" name="post" />
+      <el-tab-pane label="关注的创作者" name="creator" />
+      <el-tab-pane label="收藏的商品" name="product" />
+      <el-tab-pane label="收藏的作品" name="post" />
     </el-tabs>
 
-    <el-table v-loading="loading" :data="favorites" class="portal-table">
+    <el-empty v-if="!loading && !favorites.length" :description="emptyText">
+      <el-button type="primary" @click="goEmptyTarget">去看看</el-button>
+    </el-empty>
+
+    <el-table v-else v-loading="loading" :data="favorites" class="portal-table">
       <el-table-column label="类型" width="130">
         <template slot-scope="scope">
           <el-tag size="mini">{{ typeLabel(scope.row.targetType) }}</el-tag>
@@ -69,7 +73,7 @@ export default {
     },
     cancel(row) {
       cancelPortalFavorite(row.favoriteId).then(() => {
-        this.$modal.msgSuccess('已取消')
+        this.$modal.msgSuccess('已取消收藏')
         this.getList()
       })
     },
@@ -84,6 +88,26 @@ export default {
     },
     typeLabel(type) {
       return { creator: '创作者', product: '商品', post: '作品' }[type] || type
+    },
+    goEmptyTarget() {
+      if (this.queryParams.targetType === 'product') {
+        this.$router.push('/portal/products')
+        return
+      }
+      if (this.queryParams.targetType === 'post') {
+        this.$router.push('/portal/community')
+        return
+      }
+      this.$router.push('/portal/creators')
+    }
+  },
+  computed: {
+    emptyText() {
+      return {
+        creator: '暂无关注的创作者',
+        product: '暂无收藏的商品',
+        post: '暂无收藏的作品'
+      }[this.queryParams.targetType] || '暂无收藏内容'
     }
   }
 }

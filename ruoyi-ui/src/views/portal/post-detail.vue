@@ -28,9 +28,9 @@
     </el-card>
 
     <el-card shadow="never" class="comment-card">
-      <div slot="header">评论区</div>
+      <div slot="header">评论列表</div>
       <el-form :model="commentForm" class="comment-form">
-        <el-input v-model="commentForm.commentContent" type="textarea" :rows="3" placeholder="写点评论，给作者一点鼓励吧~" />
+        <el-input v-model="commentForm.commentContent" type="textarea" :rows="3" placeholder="写下你的想法或建议" />
         <el-button type="primary" :loading="submitting" @click="submitComment">发表评论</el-button>
       </el-form>
       <el-empty v-if="!comments.length" description="暂无评论" />
@@ -96,7 +96,7 @@ export default {
     },
     submitComment() {
       if (!this.commentForm.commentContent) {
-        this.$modal.msgWarning('先写评论内容')
+        this.$modal.msgWarning('请先填写评论内容')
         return
       }
       this.submitting = true
@@ -115,13 +115,13 @@ export default {
     handleLike() {
       toggleLike('post', this.post.postId).then(() => {
         this.isLiked = !this.isLiked
-        this.$modal.msgSuccess(this.isLiked ? '已点赞' : '取消点赞')
+        this.$modal.msgSuccess(this.isLiked ? '点赞成功' : '已取消点赞')
       })
     },
     handleFollow() {
       toggleFollow(this.post.creatorId).then(() => {
         this.isFollowed = !this.isFollowed
-        this.$modal.msgSuccess(this.isFollowed ? '关注成功' : '取消关注')
+        this.$modal.msgSuccess(this.isFollowed ? '关注成功' : '已取消关注')
       })
     },
     typeLabel(type) {

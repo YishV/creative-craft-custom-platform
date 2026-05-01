@@ -3,12 +3,12 @@
     <div class="page-head">
       <div>
         <h2>购物车</h2>
-        <p>挑好东西再结算，别空着手去支付，怪尴尬的。</p>
+        <p>确认商品和数量后即可进入结算流程。</p>
       </div>
       <el-button type="primary" :disabled="!items.length" @click="$router.push('/portal/checkout')">去结算</el-button>
     </div>
 
-    <el-empty v-if="!items.length" description="购物车还是空的">
+    <el-empty v-if="!items.length" description="购物车暂无商品">
       <el-button type="primary" @click="$router.push('/portal/products')">去逛商品</el-button>
     </el-empty>
 

@@ -44,6 +44,7 @@ source sql/install/05_test_data.sql;       -- 可选
 | 2026-05-01 | `dashboard_menu_upgrade_20260501.sql`       | 数据看板顶级菜单 | `sys_menu` |
 | 2026-05-01 | `sensitive_word_upgrade_20260501.sql`       | 敏感词词库表 + 词库后台菜单 + 初始 8 条 | `creative_sensitive_word`、`sys_menu` |
 | 2026-05-01 | `product_comment_audit_upgrade_20260501.sql`| 商品审核字段 + 商品/评论审核按钮权限；存量商品自动回填 approved | `creative_product`、`sys_menu` |
+| 2026-05-01 | `menu_icon_fix_20260501.sql`                | 修复旧库作品分享/评论互动菜单图标 | `sys_menu` |
 
 每个补丁内部都是幂等的（`drop ... if exists` / `delete ... where id in`），重跑无副作用。新库已合并到 §1 的安装脚本，**不要重复执行**。
 

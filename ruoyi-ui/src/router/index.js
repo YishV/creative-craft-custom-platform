@@ -145,13 +145,13 @@ export const constantRoutes = [
         path: 'community',
         component: () => import('@/views/portal/community'),
         name: 'PortalCommunity',
-        meta: { title: '社区作品', icon: 'message' }
+        meta: { title: '社区作品', icon: 'post' }
       },
       {
         path: 'chat',
         component: () => import('@/views/creative/chat/index'),
         name: 'PortalChat',
-        meta: { title: '在线沟通', icon: 'chat' }
+        meta: { title: '在线沟通', icon: 'online' }
       },
       {
         path: 'post/:postId',
@@ -164,7 +164,7 @@ export const constantRoutes = [
         path: 'creators',
         component: () => import('@/views/portal/creators'),
         name: 'PortalCreators',
-        meta: { title: '创作者', icon: 'user' }
+        meta: { title: '创作者', icon: 'people' }
       },
       {
         path: 'favorites',

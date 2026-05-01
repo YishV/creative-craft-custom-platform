@@ -12,6 +12,7 @@
           <span></span><span></span><span></span><span></span>
           <span></span><span></span><span></span><span></span>
         </div>
+        <p>请完成演示支付后返回订单中心查看最新状态。</p>
         <el-button type="primary" :loading="loading" :disabled="!orderIds.length" @click="pay">确认已支付</el-button>
         <el-button type="text" @click="$router.push('/portal/orders')">返回订单中心</el-button>
       </div>
@@ -83,6 +84,7 @@ export default {
 .pay-card p {
   margin: 0 0 10px;
   color: #6b7280;
+  line-height: 1.6;
 }
 
 .pay-card strong {

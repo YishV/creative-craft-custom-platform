@@ -21,7 +21,7 @@
           <span>#{{ item.creatorId }}</span>
         </div>
         <div class="actions">
-          <el-button size="mini" icon="el-icon-goods" @click="$router.push('/portal/products?creatorId=' + item.creatorId)">看商品</el-button>
+          <el-button size="mini" icon="el-icon-goods" @click="$router.push('/portal/products?creatorId=' + item.creatorId)">查看商品</el-button>
           <el-button 
             :type="followedMap[item.creatorId] ? 'success' : 'primary'" 
             plain size="mini" 

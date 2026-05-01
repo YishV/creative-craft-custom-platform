@@ -26,7 +26,7 @@
             <span>创作者 #{{ item.creatorId || '-' }}</span>
           </div>
           <h2>{{ item.productName }}</h2>
-          <p>{{ item.remark || '这件作品暂时没有详细介绍' }}</p>
+          <p>{{ item.remark || '这件商品暂未填写详细介绍' }}</p>
           <div class="foot">
             <strong>￥{{ money(item.price) }}</strong>
             <div>
@@ -52,7 +52,7 @@
         <el-descriptions-item label="商品类型">{{ detail.productType === 'custom' ? '可定制' : '现货' }}</el-descriptions-item>
         <el-descriptions-item label="价格">￥{{ money(detail.price) }}</el-descriptions-item>
         <el-descriptions-item label="创作者">#{{ detail.creatorId || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="说明">{{ detail.remark || '暂无说明' }}</el-descriptions-item>
+        <el-descriptions-item label="说明">{{ detail.remark || '暂无商品说明' }}</el-descriptions-item>
       </el-descriptions>
 
       <!-- 交互区 -->
@@ -67,7 +67,7 @@
       <div class="comment-section">
         <h3>用户评价 ({{ commentTotal }})</h3>
         <div class="comment-input">
-          <el-input v-model="newComment" placeholder="说说你的看法..." size="small">
+          <el-input v-model="newComment" placeholder="写下你的评价" size="small">
             <el-button slot="append" @click="submitComment">发表</el-button>
           </el-input>
         </div>
@@ -76,13 +76,13 @@
             <div class="comment-user"><strong>{{ c.userName }}</strong> <span>{{ c.gmtCreate }}</span></div>
             <div class="comment-content">{{ c.content }}</div>
           </div>
-          <div v-if="!comments.length" class="no-comment">暂无评价，快来抢沙发吧~</div>
+          <div v-if="!comments.length" class="no-comment">暂无评价，欢迎发表第一条评价</div>
         </div>
       </div>
 
       <div slot="footer">
         <el-button @click="detailOpen = false">关闭</el-button>
-        <el-button icon="el-icon-chat-dot-round" type="success" @click="handleContact(detail)">私聊创作者</el-button>
+        <el-button icon="el-icon-chat-dot-round" type="success" @click="handleContact(detail)">联系创作者</el-button>
         <el-button icon="el-icon-star-off" @click="favoriteProduct(detail)">收藏商品</el-button>
         <el-button type="primary" icon="el-icon-shopping-cart-2" @click="addToCart(detail)">加入购物车</el-button>
       </div>
@@ -181,7 +181,7 @@ export default {
     },
     handleShare() {
       addShare('product', this.detail.productId, 'link').then(() => {
-        this.$modal.msgSuccess('分享链接已复制(模拟)')
+        this.$modal.msgSuccess('已生成分享链接（演示）')
       })
     },
     addToCart(product) {

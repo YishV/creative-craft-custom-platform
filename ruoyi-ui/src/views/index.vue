@@ -11,7 +11,7 @@
         </p>
         <p>
           <el-tag type="success">交易闭环基础完成</el-tag>
-          <el-tag type="info">下一步：推荐算法与统计大屏</el-tag>
+          <el-tag type="info">下一步：文档测试与演示材料</el-tag>
         </p>
         <p>
           <el-button type="primary" size="mini" icon="el-icon-s-shop" @click="goRoute('/portal/index')">进入文创前台</el-button>
@@ -44,8 +44,8 @@
           <div class="body">
             <p><i class="el-icon-s-custom"></i> 目标用户：买家、创作者、平台管理员</p>
             <p><i class="el-icon-s-order"></i> 核心流程：浏览商品、发布需求、报价沟通、订单成交</p>
-            <p><i class="el-icon-star-on"></i> 特色方向：定制交易、社区互动、个性化推荐</p>
-            <p><i class="el-icon-data-analysis"></i> 当前阶段：前台交易与社区演示闭环已具备</p>
+            <p><i class="el-icon-star-on"></i> 特色方向：定制交易、社区互动、内容治理</p>
+            <p><i class="el-icon-data-analysis"></i> 当前阶段：前台交易、社区互动和后台运营功能已具备</p>
           </div>
         </el-card>
       </el-col>
@@ -75,10 +75,10 @@
             <span>下一步补充</span>
           </div>
           <div class="body">
-            <p><b>推荐算法：</b>记录浏览、收藏、下单行为，计算用户相似度。</p>
-            <p><b>统计大屏：</b>展示订单数、销售额、热门分类、活跃创作者。</p>
+            <p><b>文档图表：</b>补 E-R 图、系统架构图、用例图和流程图。</p>
+            <p><b>测试材料：</b>整理接口说明、单元测试记录和 JMeter 压测报告。</p>
             <p><b>演示数据：</b>补足商品、需求、报价、订单、社区作品样例。</p>
-            <p><b>论文材料：</b>补 E-R 图、流程图、接口说明和测试记录。</p>
+            <p><b>答辩材料：</b>整理功能截图、演示路径和 PPT 大纲。</p>
           </div>
         </el-card>
       </el-col>

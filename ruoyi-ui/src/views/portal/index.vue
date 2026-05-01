@@ -4,7 +4,7 @@
       <div>
         <p class="eyebrow">文创手作定制交易平台</p>
         <h1>从作品浏览到定制跟进，一条线演示清楚</h1>
-        <p class="hero-copy">这里是买家和创作者共用的前台入口，可浏览上架商品、查看开放需求、跟踪自己的订单，也能进入社区和收藏中心。</p>
+        <p class="hero-copy">这里是买家和创作者共用的前台入口，可浏览上架商品、查看开放需求、跟踪订单进度，并进入社区、聊天和收藏页面。</p>
         <div class="hero-actions">
           <el-button type="primary" icon="el-icon-goods" @click="$router.push('/portal/products')">浏览商品</el-button>
           <el-button icon="el-icon-edit-outline" @click="$router.push('/portal/demands')">查看需求</el-button>
@@ -45,7 +45,7 @@
               <div class="product-cover">{{ product.productName | firstChar }}</div>
               <div class="product-body">
                 <h3>{{ product.productName }}</h3>
-                <p>{{ product.remark || '创作者还没有填写介绍' }}</p>
+                <p>{{ product.remark || '创作者暂未填写商品介绍' }}</p>
                 <div class="price">￥{{ money(product.price) }}</div>
               </div>
             </div>
@@ -94,9 +94,9 @@ export default {
       demandTotal: 0,
       quickLinks: [
         { title: '购物车', desc: '结算与支付', path: '/portal/cart', icon: 'el-icon-shopping-cart-2' },
-        { title: '在线沟通', desc: '实时消息对话', path: '/portal/chat', icon: 'el-icon-chat-dot-round' },
-        { title: '创作者', desc: '关注手作人', path: '/portal/creators', icon: 'el-icon-user' },
-        { title: '收藏关注', desc: '我的收藏', path: '/portal/favorites', icon: 'el-icon-star-off' }
+        { title: '在线沟通', desc: '实时联系创作者', path: '/portal/chat', icon: 'el-icon-chat-dot-round' },
+        { title: '创作者', desc: '浏览创作者主页', path: '/portal/creators', icon: 'el-icon-user' },
+        { title: '收藏关注', desc: '查看我的收藏', path: '/portal/favorites', icon: 'el-icon-star-off' }
       ]
     }
   },

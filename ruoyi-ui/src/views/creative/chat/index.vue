@@ -5,7 +5,7 @@
       <el-col :span="6" class="session-list">
         <el-card class="box-card" shadow="never">
           <div slot="header" class="clearfix">
-            <span>消息列表</span>
+            <span>聊天会话</span>
           </div>
           <div v-for="item in sessionList" :key="item.sessionId" 
                :class="['session-item', currentSessionId === item.sessionId ? 'active' : '']"
@@ -19,7 +19,7 @@
             </div>
             <div class="session-time">{{ parseTime(item.lastMessageTime, '{m}-{d} {h}:{i}') }}</div>
           </div>
-          <div v-if="sessionList.length === 0" class="no-data">暂无会话</div>
+          <div v-if="sessionList.length === 0" class="no-data">暂无聊天会话</div>
         </el-card>
       </el-col>
 
@@ -56,16 +56,16 @@
                 :on-success="handleImageSuccess"
                 :on-error="handleImageError"
               >
-                <el-button size="mini" icon="el-icon-picture-outline">图片</el-button>
+                <el-button size="mini" icon="el-icon-picture-outline">发送图片</el-button>
               </el-upload>
               <span :class="['socket-state', socketReady ? 'online' : 'offline']">
-                {{ socketReady ? '实时在线' : '实时连接中' }}
+                {{ socketReady ? '实时在线' : '连接中' }}
               </span>
             </div>
             <el-input
               type="textarea"
               :rows="3"
-              placeholder="请输入内容..."
+              placeholder="请输入消息内容"
               v-model="inputMsg"
               @keyup.enter.native="handleSend"
             >
@@ -76,7 +76,7 @@
           </div>
         </el-card>
         <div v-else class="no-session">
-          <el-empty description="请选择一个会话开始聊天"></el-empty>
+          <el-empty description="请选择一个会话开始沟通"></el-empty>
         </div>
       </el-col>
     </el-row>

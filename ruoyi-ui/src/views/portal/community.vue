@@ -27,7 +27,7 @@
             <span>创作者 #{{ item.creatorId || '-' }}</span>
           </div>
           <h2>{{ item.postTitle }}</h2>
-          <p>{{ item.remark || '这位创作者很懒，作品说明还没写。' }}</p>
+          <p>{{ item.remark || '创作者暂未填写作品说明' }}</p>
           <el-button type="text">查看详情</el-button>
         </div>
       </article>

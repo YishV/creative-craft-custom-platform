@@ -12,8 +12,8 @@ insert into sys_menu values ('2003', '商品管理', '2000', '3', 'product', 'cr
 insert into sys_menu values ('2004', '定制需求', '2000', '4', 'demand', 'creative/demand/index', '', '', 1, 0, 'C', '0', '0', 'creative:demand:list', 'form', 'admin', sysdate(), '', null, '定制需求菜单');
 insert into sys_menu values ('2005', '定制报价', '2000', '5', 'quote', 'creative/quote/index', '', '', 1, 0, 'C', '0', '0', 'creative:quote:list', 'edit', 'admin', sysdate(), '', null, '定制报价菜单');
 insert into sys_menu values ('2006', '定制订单', '2000', '6', 'order', 'creative/order/index', '', '', 1, 0, 'C', '0', '0', 'creative:order:list', 'shopping', 'admin', sysdate(), '', null, '定制订单菜单');
-insert into sys_menu values ('2007', '作品分享', '2000', '7', 'post', 'creative/post/index', '', '', 1, 0, 'C', '0', '0', 'creative:post:list', 'image', 'admin', sysdate(), '', null, '作品分享菜单');
-insert into sys_menu values ('2008', '评论互动', '2000', '8', 'comment', 'creative/comment/index', '', '', 1, 0, 'C', '0', '0', 'creative:comment:list', 'comment', 'admin', sysdate(), '', null, '评论互动菜单');
+insert into sys_menu values ('2007', '作品分享', '2000', '7', 'post', 'creative/post/index', '', '', 1, 0, 'C', '0', '0', 'creative:post:list', 'post', 'admin', sysdate(), '', null, '作品分享菜单');
+insert into sys_menu values ('2008', '评论互动', '2000', '8', 'comment', 'creative/comment/index', '', '', 1, 0, 'C', '0', '0', 'creative:comment:list', 'message', 'admin', sysdate(), '', null, '评论互动菜单');
 insert into sys_menu values ('2009', '收藏关注', '2000', '9', 'favorite', 'creative/favorite/index', '', '', 1, 0, 'C', '0', '0', 'creative:favorite:list', 'star', 'admin', sysdate(), '', null, '收藏关注菜单');
 insert into sys_menu values ('2010', '消息中心', '2000', '10', 'chat', 'creative/chat/index', '', '', 1, 0, 'C', '0', '0', 'creative:chat:list', 'message', 'admin', sysdate(), '', null, '实时聊天菜单');
 insert into sys_menu values ('2011', '敏感词库', '2000', '11', 'sensitive', 'creative/sensitive/index', '', '', 1, 0, 'C', '0', '0', 'creative:sensitive:list', 'eye-open', 'admin', sysdate(), '', null, '敏感词词库管理');
