@@ -17,6 +17,7 @@ import com.ruoyi.system.mapper.creative.CreativeDemandMapper;
 import com.ruoyi.system.mapper.creative.CreativeOrderMapper;
 import com.ruoyi.system.mapper.creative.CreativeProductMapper;
 import com.ruoyi.system.service.creative.ICreativeChatService;
+import com.ruoyi.system.service.creative.ISensitiveWordService;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,9 @@ public class CreativeChatServiceImpl implements ICreativeChatService
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
+    @Autowired
+    private ISensitiveWordService sensitiveWordService;
+
     @Override
     public List<CreativeChatSession> listMySessions(Long userId)
     {
@@ -93,6 +97,12 @@ public class CreativeChatServiceImpl implements ICreativeChatService
         CreativeChatSession session = requireParticipant(request.getSessionId(), currentUserId);
         Long receiverId = currentUserId.equals(session.getBuyerId()) ? session.getCreatorUserId() : session.getBuyerId();
         String content = request.getContent().trim();
+
+        // 文本消息走敏感词过滤；图片消息内容是 URL，不参与过滤
+        if (MESSAGE_TEXT.equals(request.getMessageType()))
+        {
+            sensitiveWordService.enforceClean(content, "聊天内容");
+        }
 
         CreativeChatMessage message = new CreativeChatMessage();
         message.setSessionId(session.getSessionId());

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.creative.SensitiveWordMapper">
+
+    <resultMap id="SensitiveWordResult" type="com.ruoyi.system.domain.creative.SensitiveWord">
+        <result property="wordId"     column="word_id"/>
+        <result property="word"       column="word"/>
+        <result property="category"   column="category"/>
+        <result property="severity"   column="severity"/>
+        <result property="status"     column="status"/>
+        <result property="remark"     column="remark"/>
+        <result property="createBy"   column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy"   column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectSensitiveWordVo">
+        select word_id, word, category, severity, status, remark,
+               create_by, create_time, update_by, update_time
+          from creative_sensitive_word
+    </sql>
+
+    <select id="selectSensitiveWordById" parameterType="Long" resultMap="SensitiveWordResult">
+        <include refid="selectSensitiveWordVo"/>
+        where word_id = #{wordId}
+    </select>
+
+    <select id="selectSensitiveWordList" parameterType="com.ruoyi.system.domain.creative.SensitiveWord" resultMap="SensitiveWordResult">
+        <include refid="selectSensitiveWordVo"/>
+        <where>
+            <if test="word != null and word != ''">and word like concat('%', #{word}, '%')</if>
+            <if test="category != null and category != ''">and category = #{category}</if>
+            <if test="severity != null and severity != ''">and severity = #{severity}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by word_id desc
+    </select>
+
+    <select id="selectEnabledWords" resultType="String">
+        select word from creative_sensitive_word where status = '0'
+    </select>
+
+    <select id="selectByWord" parameterType="String" resultMap="SensitiveWordResult">
+        <include refid="selectSensitiveWordVo"/>
+        where word = #{word}
+    </select>
+
+    <insert id="insertSensitiveWord" parameterType="com.ruoyi.system.domain.creative.SensitiveWord" useGeneratedKeys="true" keyProperty="wordId">
+        insert into creative_sensitive_word
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="word != null and word != ''">word,</if>
+            <if test="category != null">category,</if>
+            <if test="severity != null">severity,</if>
+            <if test="status != null">status,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="word != null and word != ''">#{word},</if>
+            <if test="category != null">#{category},</if>
+            <if test="severity != null">#{severity},</if>
+            <if test="status != null">#{status},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            sysdate(),
+        </trim>
+    </insert>
+
+    <update id="updateSensitiveWord" parameterType="com.ruoyi.system.domain.creative.SensitiveWord">
+        update creative_sensitive_word
+        <set>
+            <if test="word != null and word != ''">word = #{word},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="severity != null">severity = #{severity},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where word_id = #{wordId}
+    </update>
+
+    <delete id="deleteSensitiveWordByIds" parameterType="Long">
+        delete from creative_sensitive_word where word_id in
+        <foreach collection="array" item="wordId" open="(" separator="," close=")">
+            #{wordId}
+        </foreach>
+    </delete>
+
+</mapper>

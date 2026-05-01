@@ -28,6 +28,33 @@ create table creative_comment (
   primary key (comment_id)
 ) engine=innodb comment='评论互动表';
 
+-- 敏感词词库（动态敏感词过滤模块，2026-05-01）
+drop table if exists creative_sensitive_word;
+create table creative_sensitive_word (
+  word_id     bigint(20)   not null auto_increment comment '词ID',
+  word        varchar(64)  not null comment '敏感词',
+  category    varchar(32)  default 'general' comment '分类：general/politics/abuse/ad 等',
+  severity    char(1)      default '1' comment '等级：1低 2中 3高',
+  status      char(1)      default '0' comment '状态：0启用 1停用',
+  remark      varchar(200) default null comment '备注',
+  create_by   varchar(64)  default '' comment '创建者',
+  create_time datetime     default current_timestamp comment '创建时间',
+  update_by   varchar(64)  default '' comment '更新者',
+  update_time datetime     default null comment '更新时间',
+  primary key (word_id),
+  unique key uk_word (word)
+) engine=innodb comment='敏感词词库';
+
+insert into creative_sensitive_word (word, category, severity, status, create_by) values
+('傻逼',     'abuse',    '2', '0', 'admin'),
+('混蛋',     'abuse',    '1', '0', 'admin'),
+('滚蛋',     'abuse',    '1', '0', 'admin'),
+('草泥马',   'abuse',    '3', '0', 'admin'),
+('法轮',     'politics', '3', '0', 'admin'),
+('赌博',     'general',  '2', '0', 'admin'),
+('代开发票', 'ad',       '2', '0', 'admin'),
+('微信加我', 'ad',       '1', '0', 'admin');
+
 drop table if exists creative_favorite_follow;
 create table creative_favorite_follow (
   favorite_id bigint(20) not null auto_increment comment '关系ID',

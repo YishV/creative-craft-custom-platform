@@ -16,12 +16,17 @@ insert into sys_menu values ('2007', '作品分享', '2000', '7', 'post', 'creat
 insert into sys_menu values ('2008', '评论互动', '2000', '8', 'comment', 'creative/comment/index', '', '', 1, 0, 'C', '0', '0', 'creative:comment:list', 'comment', 'admin', sysdate(), '', null, '评论互动菜单');
 insert into sys_menu values ('2009', '收藏关注', '2000', '9', 'favorite', 'creative/favorite/index', '', '', 1, 0, 'C', '0', '0', 'creative:favorite:list', 'star', 'admin', sysdate(), '', null, '收藏关注菜单');
 insert into sys_menu values ('2010', '消息中心', '2000', '10', 'chat', 'creative/chat/index', '', '', 1, 0, 'C', '0', '0', 'creative:chat:list', 'message', 'admin', sysdate(), '', null, '实时聊天菜单');
+insert into sys_menu values ('2011', '敏感词库', '2000', '11', 'sensitive', 'creative/sensitive/index', '', '', 1, 0, 'C', '0', '0', 'creative:sensitive:list', 'eye-open', 'admin', sysdate(), '', null, '敏感词词库管理');
 
 -- 顶级菜单：数据看板（管理员可见，sort=0 置顶以便答辩演示）
 insert into sys_menu values ('2050', '数据看板', '0', '0', 'creative-dashboard', 'creative/dashboard/index', '', '', 1, 0, 'C', '0', '0', 'creative:dashboard:view', 'chart', 'admin', sysdate(), '', null, '文创平台数据看板');
 
 -- 按钮权限 (省略部分，仅展示核心)
 insert into sys_menu values ('2100', '创作者查询', '2001', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'creative:creator:query', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values ('2110', '敏感词查询', '2011', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'creative:sensitive:query',  '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values ('2111', '敏感词新增', '2011', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'creative:sensitive:add',    '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values ('2112', '敏感词修改', '2011', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'creative:sensitive:edit',   '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values ('2113', '敏感词删除', '2011', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'creative:sensitive:remove', '#', 'admin', sysdate(), '', null, '');
 -- ... (其他按钮权限保持不变)
 
 -- ----------------------------

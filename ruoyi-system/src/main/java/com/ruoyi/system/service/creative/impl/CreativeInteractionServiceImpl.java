@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.creative.CreativeComment;
 import com.ruoyi.system.mapper.creative.CreativeInteractionMapper;
 import com.ruoyi.system.service.creative.ICreativeInteractionService;
+import com.ruoyi.system.service.creative.ISensitiveWordService;
 
 /**
  * 社区交互 Service 业务层处理
@@ -16,6 +17,9 @@ public class CreativeInteractionServiceImpl implements ICreativeInteractionServi
     @Autowired
     private CreativeInteractionMapper interactionMapper;
 
+    @Autowired
+    private ISensitiveWordService sensitiveWordService;
+
     @Override
     public List<CreativeComment> selectCommentList(CreativeComment comment)
     {
@@ -25,6 +29,7 @@ public class CreativeInteractionServiceImpl implements ICreativeInteractionServi
     @Override
     public int insertComment(CreativeComment comment)
     {
+        sensitiveWordService.enforceClean(comment.getContent(), "评论内容");
         return interactionMapper.insertComment(comment);
     }
 
