@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "Bash(mvn -pl ruoyi-admin -am -DskipTests package -q)",
+      "Bash(git add *)",
+      "Bash(npm.cmd run *)",
+      "Bash(export JAVA_HOME=\"D:/Program/Java/jdk18\")",
+      "Bash(export PATH=\"$JAVA_HOME/bin:$PATH\")",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
