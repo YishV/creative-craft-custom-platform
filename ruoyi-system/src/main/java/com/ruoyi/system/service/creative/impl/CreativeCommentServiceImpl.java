@@ -3,6 +3,7 @@ package com.ruoyi.system.service.creative.impl;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.ruoyi.common.annotation.CreativeDataScope;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.creative.CreativeComment;
@@ -30,6 +31,7 @@ public class CreativeCommentServiceImpl implements ICreativeCommentService
     }
 
     @Override
+    @CreativeDataScope(owner = CreativeDataScope.Owner.CREATOR, field = "ownerCreatorId")
     public List<CreativeComment> selectCreativeCommentList(CreativeComment creativeComment)
     {
         return creativeCommentMapper.selectCreativeCommentList(creativeComment);

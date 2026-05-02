@@ -36,6 +36,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="postId != null">and c.post_id = #{postId}</if>
             <if test="userId != null">and c.user_id = #{userId}</if>
             <if test="auditStatus != null and auditStatus != ''">and c.audit_status = #{auditStatus}</if>
+            <if test="ownerCreatorId != null">
+                and exists (select 1 from creative_post p where p.post_id = c.post_id and p.creator_id = #{ownerCreatorId})
+            </if>
         </where>
         order by c.comment_id desc
     </select>

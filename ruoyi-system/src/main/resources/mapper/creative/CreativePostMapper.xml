@@ -34,6 +34,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectCreativePostList" parameterType="com.ruoyi.system.domain.creative.CreativePost" resultMap="CreativePostResult">
         <include refid="selectCreativePostVo"/>
         <where>
+            <if test="creatorId != null">and p.creator_id = #{creatorId}</if>
             <if test="postTitle != null and postTitle != ''">and p.post_title like concat('%', #{postTitle}, '%')</if>
             <if test="postType != null and postType != ''">and p.post_type = #{postType}</if>
             <if test="status != null and status != ''">and p.status = #{status}</if>

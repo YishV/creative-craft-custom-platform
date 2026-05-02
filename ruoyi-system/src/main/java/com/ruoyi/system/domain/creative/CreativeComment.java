@@ -43,6 +43,9 @@ public class CreativeComment extends BaseEntity
     /** 评论用户ID */
     private Long userId;
 
+    /** 数据权限：限定为该 creator 拥有的作品下的评论 (由 @CreativeDataScope 注入) */
+    private Long ownerCreatorId;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date gmtCreate;
 
@@ -87,6 +90,9 @@ public class CreativeComment extends BaseEntity
 
     public void setGmtCreate(Date gmtCreate) { this.gmtCreate = gmtCreate; }
     public Date getGmtCreate() { return gmtCreate; }
+
+    public void setOwnerCreatorId(Long ownerCreatorId) { this.ownerCreatorId = ownerCreatorId; }
+    public Long getOwnerCreatorId() { return ownerCreatorId; }
 
     @Override
     public String toString() {

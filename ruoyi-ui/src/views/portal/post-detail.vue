@@ -17,11 +17,17 @@
             @click="handleFollow">
             {{ isFollowed ? '已关注创作者' : '关注创作者' }}
           </el-button>
-          <el-button 
-            :type="isLiked ? 'danger' : 'primary'" 
-            :icon="isLiked ? 'el-icon-caret-top' : 'el-icon-star-off'" 
+          <el-button
+            :type="isLiked ? 'danger' : 'primary'"
+            :icon="isLiked ? 'el-icon-caret-top' : 'el-icon-star-off'"
             @click="handleLike">
             {{ isLiked ? '已点赞' : '点赞' }}
+          </el-button>
+          <el-button
+            :type="favoriteId ? 'success' : 'warning'"
+            :icon="favoriteId ? 'el-icon-check' : 'el-icon-collection'"
+            @click="handleFavorite">
+            {{ favoriteId ? '已收藏' : '收藏作品' }}
           </el-button>
         </div>
       </div>
@@ -46,7 +52,7 @@
 </template>
 
 <script>
-import { getPortalPost } from '@/api/creative/portal'
+import { getPortalPost, addPortalFavorite, cancelPortalFavorite, listPortalFavorite } from '@/api/creative/portal'
 import { listComments, addComment, toggleLike, checkInteractionStatus, toggleFollow } from '@/api/creative/interaction'
 
 export default {
@@ -66,7 +72,8 @@ export default {
         commentContent: ''
       },
       isLiked: false,
-      isFollowed: false
+      isFollowed: false,
+      favoriteId: null
     }
   },
   created() {
@@ -87,6 +94,26 @@ export default {
       checkInteractionStatus('post', this.post.postId, this.post.creatorId).then(res => {
         this.isLiked = res.liked
         this.isFollowed = res.followed
+      })
+      this.loadFavoriteId()
+    },
+    loadFavoriteId() {
+      listPortalFavorite({ pageNum: 1, pageSize: 1, targetType: 'post', targetId: this.post.postId }).then(res => {
+        const row = (res.rows || [])[0]
+        this.favoriteId = row ? row.favoriteId : null
+      })
+    },
+    handleFavorite() {
+      if (this.favoriteId) {
+        cancelPortalFavorite(this.favoriteId).then(() => {
+          this.favoriteId = null
+          this.$modal.msgSuccess('已取消收藏')
+        })
+        return
+      }
+      addPortalFavorite({ targetType: 'post', targetId: this.post.postId }).then(() => {
+        this.$modal.msgSuccess('已收藏作品')
+        this.loadFavoriteId()
       })
     },
     getComments() {

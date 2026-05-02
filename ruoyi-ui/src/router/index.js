@@ -78,12 +78,13 @@ export const constantRoutes = [
     path: '',
     component: Layout,
     redirect: 'index',
+    hidden: true,
     children: [
       {
         path: 'index',
         component: () => import('@/views/index'),
         name: 'Index',
-        meta: { title: '首页', icon: 'dashboard', affix: true }
+        meta: { title: '首页', icon: 'dashboard' }
       }
     ]
   },
@@ -123,14 +124,15 @@ export const constantRoutes = [
   {
     path: '/portal',
     component: Layout,
-    redirect: '/portal/index',
+    redirect: '/portal/products',
     meta: { title: '买家端', icon: 'education' },
     children: [
       {
         path: 'index',
         component: () => import('@/views/portal/index'),
         name: 'PortalIndex',
-        meta: { title: '文创前台', icon: 'guide', affix: true }
+        hidden: true,
+        meta: { title: '文创前台', icon: 'guide' }
       },
       {
         path: 'products',

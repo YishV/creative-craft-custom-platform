@@ -4,6 +4,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.creative.CreativeComment;
+import com.ruoyi.system.domain.creative.CreativeFavorite;
+import com.ruoyi.system.mapper.creative.CreativeFavoriteMapper;
 import com.ruoyi.system.mapper.creative.CreativeInteractionMapper;
 import com.ruoyi.system.service.creative.ICreativeInteractionService;
 import com.ruoyi.system.service.creative.ISensitiveWordService;
@@ -19,6 +21,9 @@ public class CreativeInteractionServiceImpl implements ICreativeInteractionServi
 
     @Autowired
     private ISensitiveWordService sensitiveWordService;
+
+    @Autowired
+    private CreativeFavoriteMapper favoriteMapper;
 
     @Override
     public List<CreativeComment> selectCommentList(CreativeComment comment)
@@ -63,11 +68,22 @@ public class CreativeInteractionServiceImpl implements ICreativeInteractionServi
     {
         if (interactionMapper.checkIsFollowed(creatorId, userId) > 0)
         {
+            favoriteMapper.deleteByUserAndTarget(userId, "creator", creatorId);
             return interactionMapper.deleteFollow(creatorId, userId);
         }
         else
         {
-            return interactionMapper.insertFollow(creatorId, userId);
+            int rows = interactionMapper.insertFollow(creatorId, userId);
+            if (favoriteMapper.countByUserAndTarget(userId, "creator", creatorId) == 0)
+            {
+                CreativeFavorite favorite = new CreativeFavorite();
+                favorite.setUserId(userId);
+                favorite.setTargetType("creator");
+                favorite.setTargetId(creatorId);
+                favorite.setStatus("0");
+                favoriteMapper.insertCreativeFavorite(favorite);
+            }
+            return rows;
         }
     }
 

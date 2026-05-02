@@ -12,6 +12,8 @@ public class CreativeFavorite extends BaseEntity
     private String targetType;
     private Long targetId;
     private String targetName;
+    private String targetSubtitle;
+    private String targetCover;
     private String status;
 
     public Long getFavoriteId()
@@ -72,6 +74,26 @@ public class CreativeFavorite extends BaseEntity
     public void setTargetName(String targetName)
     {
         this.targetName = targetName;
+    }
+
+    public String getTargetSubtitle()
+    {
+        return targetSubtitle;
+    }
+
+    public void setTargetSubtitle(String targetSubtitle)
+    {
+        this.targetSubtitle = targetSubtitle;
+    }
+
+    public String getTargetCover()
+    {
+        return targetCover;
+    }
+
+    public void setTargetCover(String targetCover)
+    {
+        this.targetCover = targetCover;
     }
 
     public String getStatus()

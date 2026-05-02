@@ -3,6 +3,7 @@ package com.ruoyi.system.service.creative.impl;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.ruoyi.common.annotation.CreativeDataScope;
 import com.ruoyi.system.domain.creative.CreativePost;
 import com.ruoyi.system.mapper.creative.CreativePostMapper;
 import com.ruoyi.system.service.creative.ICreativePostService;
@@ -20,6 +21,7 @@ public class CreativePostServiceImpl implements ICreativePostService
     }
 
     @Override
+    @CreativeDataScope(owner = CreativeDataScope.Owner.CREATOR, field = "creatorId")
     public List<CreativePost> selectCreativePostList(CreativePost creativePost)
     {
         return creativePostMapper.selectCreativePostList(creativePost);

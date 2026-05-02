@@ -147,7 +147,7 @@ npm run dev
 |---|---|---|---|
 | `/login` | 系统管理员 | `admin` / `admin123` | `/index`（后台首页） |
 | `/buyer/login` | 买家 | 注册即可，或用 `  ` ~ `buyer10` / `admin123` | `/portal/index`（前台首页） |
-| `/creator/login` | 创作者/卖家 | 注册即可，或用 `creator01` ~ `creator10` / `admin123` | `/creative/creator/me`（我的店铺） |
+| `/creator/login` | 创作者/卖家 | 注册即可，或用 ` ` ~ `creator10` / `admin123` | `/creative/creator/me`（我的店铺） |
 
 > 三个登录页底部都有"切换其他入口"链接，互通无障碍。
 > 买家/卖家用户的侧边栏只看得到文创业务菜单，**看不到任何系统管理/系统监控/系统工具菜单**，权限由 `sys_role_menu` 表关联控制。

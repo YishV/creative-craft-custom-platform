@@ -11,6 +11,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="targetType" column="target_type"/>
         <result property="targetId" column="target_id"/>
         <result property="targetName" column="target_name"/>
+        <result property="targetSubtitle" column="target_subtitle"/>
+        <result property="targetCover" column="target_cover"/>
         <result property="status" column="status"/>
         <result property="createBy" column="create_by"/>
         <result property="createTime" column="create_time"/>
@@ -23,17 +25,38 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select f.favorite_id, f.user_id, coalesce(u.nick_name, u.user_name) as user_name,
                f.target_type, f.target_id,
                case f.target_type
-                   when 'product' then p.product_name
-                   when 'creator' then coalesce(c.store_name, c.creator_name)
-                   when 'post' then pt.post_title
-                   else null
+                   when 'product' then coalesce(p.product_name, concat('商品已下架 #', f.target_id))
+                   when 'creator' then coalesce(c.store_name, c.creator_name, concat('创作者不存在 #', f.target_id))
+                   when 'post' then coalesce(pt.post_title, concat('作品已删除 #', f.target_id))
+                   else concat('未知 #', f.target_id)
                end as target_name,
+               case f.target_type
+                   when 'product' then case when p.product_id is null then '该商品已不可用'
+                       else concat('￥', format(coalesce(p.price, 0), 2), ' · ', coalesce(pc.store_name, pc.creator_name, '匿名创作者')) end
+                   when 'creator' then case when c.creator_id is null then '该创作者已注销'
+                       else concat(
+                           case c.creator_level when 'master' then '匠心创作者' when 'premium' then '优选创作者' else '普通创作者' end,
+                           ' · ', coalesce(c.creator_name, '')) end
+                   when 'post' then case when pt.post_id is null then '该作品已删除'
+                       else concat(
+                           case pt.post_type when 'process' then '制作过程' when 'idea' then '灵感记录' else '作品分享' end,
+                           ' · ', coalesce(ptc.store_name, ptc.creator_name, '匿名创作者')) end
+                   else '暂无简介'
+               end as target_subtitle,
+               case f.target_type
+                   when 'product' then coalesce(nullif(substr(p.product_name, 1, 1), ''), '商')
+                   when 'creator' then coalesce(nullif(substr(coalesce(c.store_name, c.creator_name), 1, 1), ''), '创')
+                   when 'post' then coalesce(nullif(substr(pt.post_title, 1, 1), ''), '作')
+                   else '?'
+               end as target_cover,
                f.status, f.create_by, f.create_time, f.update_by, f.update_time, f.remark
         from creative_favorite_follow f
         left join sys_user u on u.user_id = f.user_id
         left join creative_product p on p.product_id = f.target_id and f.target_type = 'product'
+        left join creative_creator pc on pc.creator_id = p.creator_id
         left join creative_creator c on c.creator_id = f.target_id and f.target_type = 'creator'
         left join creative_post pt on pt.post_id = f.target_id and f.target_type = 'post'
+        left join creative_creator ptc on ptc.creator_id = pt.creator_id
     </sql>
 
     <select id="selectCreativeFavoriteByFavoriteId" parameterType="Long" resultMap="CreativeFavoriteResult">
@@ -81,4 +104,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{favoriteId}
         </foreach>
     </delete>
+
+    <delete id="deleteByUserAndTarget">
+        delete from creative_favorite_follow
+        where user_id = #{userId} and target_type = #{targetType} and target_id = #{targetId}
+    </delete>
+
+    <select id="countByUserAndTarget" resultType="int">
+        select count(1) from creative_favorite_follow
+        where user_id = #{userId} and target_type = #{targetType} and target_id = #{targetId}
+    </select>
 </mapper>

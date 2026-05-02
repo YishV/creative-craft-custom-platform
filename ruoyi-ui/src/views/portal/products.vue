@@ -138,6 +138,9 @@ export default {
   created() {
     this.refreshCartCount()
     this.getList()
+    if (this.$route.query.productId) {
+      this.showDetail({ productId: this.$route.query.productId })
+    }
   },
   methods: {
     getList() {
