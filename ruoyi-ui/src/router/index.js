@@ -44,7 +44,20 @@ export const constantRoutes = [
   {
     path: '/login',
     component: () => import('@/views/login'),
-    hidden: true
+    hidden: true,
+    meta: { mode: 'admin' }
+  },
+  {
+    path: '/buyer/login',
+    component: () => import('@/views/login'),
+    hidden: true,
+    meta: { mode: 'buyer' }
+  },
+  {
+    path: '/creator/login',
+    component: () => import('@/views/login'),
+    hidden: true,
+    meta: { mode: 'creator' }
   },
   {
     path: '/register',

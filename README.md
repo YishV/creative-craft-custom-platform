@@ -6,6 +6,8 @@
 
 本项目由 **Claude / Codex / Gemini** 三方 AI 协作开发，完整协作过程与每日进度见 [`docs/collaboration.md`](docs/collaboration.md)。
 
+> 🚀 **第一次拿到代码、想把项目跑起来？** 直接看 [`docs/setup.md`](docs/setup.md)（部署运行手册：环境要求、数据库初始化、前后端启动、默认账号、FAQ）。
+
 ---
 
 ## 一、课题背景与意义

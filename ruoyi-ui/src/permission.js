@@ -9,7 +9,8 @@ import { isRelogin } from '@/utils/request'
 
 NProgress.configure({ showSpinner: false })
 
-const whiteList = ['/login', '/register']
+const whiteList = ['/login', '/register', '/buyer/login', '/creator/login']
+const loginPaths = ['/login', '/buyer/login', '/creator/login']
 
 const isWhiteList = (path) => {
   return whiteList.some(pattern => isPathMatch(pattern, path))
@@ -21,7 +22,7 @@ router.beforeEach((to, from, next) => {
     to.meta.title && store.dispatch('settings/setTitle', to.meta.title)
     const isLock = store.getters.isLock
     /* has token*/
-    if (to.path === '/login') {
+    if (loginPaths.includes(to.path)) {
       next({ path: '/' })
       NProgress.done()
     } else if (isWhiteList(to.path)) {

@@ -15,11 +15,11 @@
 
     <el-row :gutter="16" class="quick-row">
       <el-col :xs="12" :sm="6" v-for="item in quickLinks" :key="item.title">
-        <button class="quick-card" type="button" @click="$router.push(item.path)">
+        <div class="quick-card" role="button" tabindex="0" @click="$router.push(item.path)" @keyup.enter="$router.push(item.path)">
           <i :class="item.icon"></i>
-          <span>{{ item.title }}</span>
-          <small>{{ item.desc }}</small>
-        </button>
+          <span class="quick-title">{{ item.title }}</span>
+          <small class="quick-desc">{{ item.desc }}</small>
+        </div>
       </el-col>
     </el-row>
 
@@ -192,32 +192,43 @@ export default {
 
 .quick-card {
   width: 100%;
-  height: 96px;
+  min-height: 104px;
   border: 0;
-  text-align: left;
   padding: 16px;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  outline: none;
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+
+.quick-card:hover,
+.quick-card:focus-visible {
+  box-shadow: 0 4px 12px rgba(15, 35, 52, .1);
+  transform: translateY(-1px);
 }
 
 .quick-card i {
   color: #297e7b;
   font-size: 24px;
+  line-height: 1;
 }
 
-.quick-card span,
-.quick-card small {
-  display: block;
-}
-
-.quick-card span {
+.quick-title {
   margin-top: 8px;
   color: #1f2937;
   font-weight: 700;
+  font-size: 15px;
+  line-height: 1.4;
 }
 
-.quick-card small {
+.quick-desc {
   margin-top: 4px;
   color: #6b7280;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .stat-card {

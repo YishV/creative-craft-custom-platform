@@ -27,6 +27,14 @@ import com.ruoyi.system.service.ISysUserService;
 @Component
 public class SysRegisterService
 {
+    /** 买家部门，对应 sql/install/04_system_menus.sql 中的"买家" */
+    private static final Long BUYER_DEPT_ID = 200L;
+
+    /** 卖家部门，对应 sql/install/04_system_menus.sql 中的"卖家"；以创作者身份注册的用户先入此部门，认证后正式获得 creator 角色 */
+    private static final Long SELLER_DEPT_ID = 201L;
+
+    private static final String IDENTITY_CREATOR = "creator";
+
     @Autowired
     private ISysUserService userService;
 
@@ -77,6 +85,7 @@ public class SysRegisterService
         else
         {
             sysUser.setNickName(username);
+            sysUser.setDeptId(IDENTITY_CREATOR.equalsIgnoreCase(registerBody.getIdentityType()) ? SELLER_DEPT_ID : BUYER_DEPT_ID);
             sysUser.setPwdUpdateDate(DateUtils.getNowDate());
             sysUser.setPassword(SecurityUtils.encryptPassword(password));
             boolean regFlag = userService.registerUser(sysUser);
