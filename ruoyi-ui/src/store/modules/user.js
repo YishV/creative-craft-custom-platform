@@ -3,7 +3,7 @@ import router from '@/router'
 import cache from '@/plugins/cache'
 import { MessageBox, } from 'element-ui'
 import { login, logout, getInfo } from '@/api/login'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { getAuthType, getToken, setToken, removeToken } from '@/utils/auth'
 import { isHttp, isEmpty } from "@/utils/validate"
 import defAva from '@/assets/images/profile.jpg'
 
@@ -49,10 +49,13 @@ const user = {
       const password = userInfo.password
       const code = userInfo.code
       const uuid = userInfo.uuid
+      const authType = getAuthType()
       return new Promise((resolve, reject) => {
         login(username, password, code, uuid).then(res => {
-          setToken(res.token)
+          setToken(res.token, authType)
           commit('SET_TOKEN', res.token)
+          commit('SET_ROLES', [])
+          commit('SET_PERMISSIONS', [])
           store.dispatch('lock/unlockScreen')
           resolve()
         }).catch(error => {
@@ -107,7 +110,7 @@ const user = {
           commit('SET_TOKEN', '')
           commit('SET_ROLES', [])
           commit('SET_PERMISSIONS', [])
-          removeToken()
+          removeToken(getAuthType())
           resolve()
         }).catch(error => {
           reject(error)
@@ -119,7 +122,7 @@ const user = {
     FedLogOut({ commit }) {
       return new Promise(resolve => {
         commit('SET_TOKEN', '')
-        removeToken()
+        removeToken(getAuthType())
         resolve()
       })
     }

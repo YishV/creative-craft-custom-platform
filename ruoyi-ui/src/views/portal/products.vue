@@ -13,6 +13,7 @@
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
+        <el-button type="warning" icon="el-icon-shopping-cart-2" @click="$router.push('/portal/cart')">购物车({{ cartCount }})</el-button>
       </el-form-item>
     </el-form>
 
@@ -30,7 +31,12 @@
           <div class="foot">
             <strong>￥{{ money(item.price) }}</strong>
             <div>
-              <el-button size="mini" icon="el-icon-star-off" @click="favoriteProduct(item)">收藏</el-button>
+              <el-button
+                size="mini"
+                :type="favoriteMap[item.productId] ? 'success' : 'default'"
+                :icon="favoriteMap[item.productId] ? 'el-icon-check' : 'el-icon-star-off'"
+                @click="favoriteProduct(item)"
+              >{{ favoriteMap[item.productId] ? '已收藏' : '收藏' }}</el-button>
               <el-button size="mini" icon="el-icon-shopping-cart-2" @click="addToCart(item)">加入购物车</el-button>
               <el-button type="primary" plain size="mini" @click="showDetail(item)">查看详情</el-button>
             </div>
@@ -83,7 +89,11 @@
       <div slot="footer">
         <el-button @click="detailOpen = false">关闭</el-button>
         <el-button icon="el-icon-chat-dot-round" type="success" @click="handleContact(detail)">联系创作者</el-button>
-        <el-button icon="el-icon-star-off" @click="favoriteProduct(detail)">收藏商品</el-button>
+        <el-button
+          :type="favoriteMap[detail.productId] ? 'success' : 'default'"
+          :icon="favoriteMap[detail.productId] ? 'el-icon-check' : 'el-icon-star-off'"
+          @click="favoriteProduct(detail)"
+        >{{ favoriteMap[detail.productId] ? '已收藏' : '收藏商品' }}</el-button>
         <el-button type="primary" icon="el-icon-shopping-cart-2" @click="addToCart(detail)">加入购物车</el-button>
       </div>
     </el-dialog>
@@ -91,9 +101,9 @@
 </template>
 
 <script>
-import { addPortalFavorite, listPortalProduct, getPortalProduct } from '@/api/creative/portal'
+import { addPortalFavorite, cancelPortalFavorite, listPortalFavorite, listPortalProduct, getPortalProduct } from '@/api/creative/portal'
 import { openSession } from '@/api/creative/chat'
-import { addCartItem } from '@/utils/portalCart'
+import { addCartItem, getCartItems } from '@/utils/portalCart'
 import { listComments, addComment, toggleLike, checkInteractionStatus, addShare } from '@/api/creative/interaction'
 
 export default {
@@ -115,6 +125,8 @@ export default {
       commentTotal: 0,
       newComment: '',
       isLiked: false,
+      cartCount: 0,
+      favoriteMap: {},
       queryParams: {
         pageNum: 1,
         pageSize: 8,
@@ -124,6 +136,7 @@ export default {
     }
   },
   created() {
+    this.refreshCartCount()
     this.getList()
   },
   methods: {
@@ -132,8 +145,23 @@ export default {
       listPortalProduct(this.queryParams).then(res => {
         this.products = res.rows || []
         this.total = res.total || 0
+        this.loadFavoriteMap()
       }).finally(() => {
         this.loading = false
+      })
+    },
+    refreshCartCount() {
+      this.cartCount = getCartItems().reduce((sum, item) => sum + Number(item.quantity || 0), 0)
+    },
+    loadFavoriteMap() {
+      listPortalFavorite({ pageNum: 1, pageSize: 1000, targetType: 'product' }).then(res => {
+        const map = {}
+        ;(res.rows || []).forEach(item => {
+          if (item.targetId) {
+            map[item.targetId] = item.favoriteId
+          }
+        })
+        this.favoriteMap = map
       })
     },
     handleQuery() {
@@ -185,12 +213,22 @@ export default {
       })
     },
     addToCart(product) {
-      addCartItem(product, 1)
+      const items = addCartItem(product, 1)
+      this.cartCount = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)
       this.$modal.msgSuccess('已加入购物车')
     },
     favoriteProduct(product) {
+      const favoriteId = this.favoriteMap[product.productId]
+      if (favoriteId) {
+        cancelPortalFavorite(favoriteId).then(() => {
+          this.$delete(this.favoriteMap, product.productId)
+          this.$modal.msgSuccess('已取消收藏')
+        })
+        return
+      }
       addPortalFavorite({ targetType: 'product', targetId: product.productId }).then(() => {
         this.$modal.msgSuccess('已收藏商品')
+        this.loadFavoriteMap()
       })
     },
     handleContact(product) {

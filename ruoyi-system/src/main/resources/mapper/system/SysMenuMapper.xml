@@ -29,24 +29,29 @@
 	</resultMap>
 
 	<sql id="selectMenuVo">
-        select menu_id, menu_name, parent_id, order_num, path, component, `query`, route_name, is_frame, is_cache, menu_type, visible, status, ifnull(perms,'') as perms, icon, create_time 
-		from sys_menu
+        select m.menu_id, m.menu_name,
+               case when m.parent_id = 0 then '主类目' else pm.menu_name end as parent_name,
+               m.parent_id, m.order_num, m.path, m.component, m.`query`, m.route_name,
+               m.is_frame, m.is_cache, m.menu_type, m.visible, m.status,
+               ifnull(m.perms,'') as perms, m.icon, m.create_time
+		from sys_menu m
+		left join sys_menu pm on pm.menu_id = m.parent_id
     </sql>
     
     <select id="selectMenuList" parameterType="SysMenu" resultMap="SysMenuResult">
 		<include refid="selectMenuVo"/>
 		<where>
 			<if test="menuName != null and menuName != ''">
-				AND menu_name like concat('%', #{menuName}, '%')
+				AND m.menu_name like concat('%', #{menuName}, '%')
 			</if>
 			<if test="visible != null and visible != ''">
-				AND visible = #{visible}
+				AND m.visible = #{visible}
 			</if>
 			<if test="status != null and status != ''">
-				AND status = #{status}
+				AND m.status = #{status}
 			</if>
 		</where>
-		order by parent_id, order_num
+		order by m.parent_id, m.order_num
 	</select>
 	
 	<select id="selectMenuTreeAll" resultMap="SysMenuResult">
@@ -121,7 +126,7 @@
 	
 	<select id="selectMenuById" parameterType="Long" resultMap="SysMenuResult">
 		<include refid="selectMenuVo"/>
-		where menu_id = #{menuId}
+		where m.menu_id = #{menuId}
 	</select>
 	
 	<select id="hasChildByMenuId" resultType="Integer">
@@ -130,12 +135,12 @@
 	
 	<select id="checkMenuNameUnique" parameterType="SysMenu" resultMap="SysMenuResult">
 		<include refid="selectMenuVo"/>
-		where menu_name= #{menuName} and parent_id = #{parentId} limit 1
+		where m.menu_name= #{menuName} and m.parent_id = #{parentId} limit 1
 	</select>
 	
 	<select id="selectMenusByPathOrRouteName" parameterType="SysMenu" resultMap="SysMenuResult">
 		<include refid="selectMenuVo"/>
-		where menu_type in ('M', 'C') and (path = #{path} or path = #{routeName} or route_name = #{path} or route_name = #{routeName})
+		where m.menu_type in ('M', 'C') and (m.path = #{path} or m.path = #{routeName} or m.route_name = #{path} or m.route_name = #{routeName})
 	</select>
 	
 	<update id="updateMenu" parameterType="SysMenu">

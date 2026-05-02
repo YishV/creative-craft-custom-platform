@@ -108,6 +108,19 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/creative/creator/me',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/creative/me/index'),
+        name: 'CreativeMe',
+        meta: { title: '我的店铺', icon: 'user', activeMenu: '/creative/creator' }
+      }
+    ]
+  },
+  {
     path: '/portal',
     component: Layout,
     redirect: '/portal/index',

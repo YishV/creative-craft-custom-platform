@@ -16,6 +16,37 @@
 -- truncate table creative_creator;
 -- truncate table creative_category;
 
+-- 0. 演示账号（密码统一 admin123，BCrypt 哈希取自 admin 用户）
+--    user_id 11~20 = 创作者 creator01~10，归属卖家部门(201)，绑 buyer + creator 双角色
+--    user_id 21~30 = 买家 buyer01~10，归属买家部门(200)，绑 buyer 角色
+INSERT INTO sys_user (user_id, dept_id, user_name, nick_name, user_type, email, phonenumber, sex, avatar, password, status, del_flag, login_ip, login_date, pwd_update_date, create_by, create_time, update_by, update_time, remark) VALUES
+(11, 201, 'creator01', '天工开物',  '00', 'creator01@demo.com', '13900000011', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示创作者：木艺'),
+(12, 201, 'creator02', '泥火之歌',  '00', 'creator02@demo.com', '13900000012', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示创作者：陶艺'),
+(13, 201, 'creator03', '锦线慢作',  '00', 'creator03@demo.com', '13900000013', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示创作者：刺绣'),
+(14, 201, 'creator04', '银月工坊',  '00', 'creator04@demo.com', '13900000014', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示创作者：银饰'),
+(15, 201, 'creator05', '一针一线',  '00', 'creator05@demo.com', '13900000015', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示创作者：布艺'),
+(16, 201, 'creator06', '皮革先生',  '00', 'creator06@demo.com', '13900000016', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示创作者：皮具'),
+(17, 201, 'creator07', '竹影手造',  '00', 'creator07@demo.com', '13900000017', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示创作者：竹编'),
+(18, 201, 'creator08', '瓦蓝陶舍',  '00', 'creator08@demo.com', '13900000018', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示创作者：陶器'),
+(19, 201, 'creator09', '流光珐琅',  '00', 'creator09@demo.com', '13900000019', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示创作者：珐琅'),
+(20, 201, 'creator10', '纸上花开',  '00', 'creator10@demo.com', '13900000020', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示创作者：纸艺'),
+(21, 200, 'buyer01',   '张三',      '00', 'buyer01@demo.com',   '13800000021', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示买家'),
+(22, 200, 'buyer02',   '李四',      '00', 'buyer02@demo.com',   '13800000022', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示买家'),
+(23, 200, 'buyer03',   '王五',      '00', 'buyer03@demo.com',   '13800000023', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示买家'),
+(24, 200, 'buyer04',   '赵六',      '00', 'buyer04@demo.com',   '13800000024', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示买家'),
+(25, 200, 'buyer05',   '钱七',      '00', 'buyer05@demo.com',   '13800000025', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示买家'),
+(26, 200, 'buyer06',   '孙八',      '00', 'buyer06@demo.com',   '13800000026', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示买家'),
+(27, 200, 'buyer07',   '周九',      '00', 'buyer07@demo.com',   '13800000027', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示买家'),
+(28, 200, 'buyer08',   '吴十',      '00', 'buyer08@demo.com',   '13800000028', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示买家'),
+(29, 200, 'buyer09',   '郑十一',    '00', 'buyer09@demo.com',   '13800000029', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示买家'),
+(30, 200, 'buyer10',   '冯十二',    '00', 'buyer10@demo.com',   '13800000030', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), 'admin', sysdate(), '', null, '演示买家');
+
+-- 角色绑定（role_id=100=普通买家，role_id=101=创作者/卖家）
+INSERT INTO sys_user_role (user_id, role_id) VALUES
+(11, 100), (11, 101), (12, 100), (12, 101), (13, 100), (13, 101), (14, 100), (14, 101), (15, 100), (15, 101),
+(16, 100), (16, 101), (17, 100), (17, 101), (18, 100), (18, 101), (19, 100), (19, 101), (20, 100), (20, 101),
+(21, 100), (22, 100), (23, 100), (24, 100), (25, 100), (26, 100), (27, 100), (28, 100), (29, 100), (30, 100);
+
 -- 1. 分类数据
 INSERT INTO creative_category (category_id, parent_id, category_name, category_code, sort_num, status, create_by, create_time) VALUES
 (1, 0, '木艺手工', 'wood', 1, '0', 'admin', sysdate()),
@@ -29,18 +60,18 @@ INSERT INTO creative_category (category_id, parent_id, category_name, category_c
 (9, 4, '银饰定制', 'silver_jewelry', 1, '0', 'admin', sysdate()),
 (10, 5, '手缝皮包', 'handmade_leather_bag', 1, '0', 'admin', sysdate());
 
--- 2. 创作者数据（user_id 对应演示用户，可按实际账号调整）
+-- 2. 创作者档案数据（user_id 对应 §0 中 creator01~10 的 user_id 11~20）
 INSERT INTO creative_creator (creator_id, user_id, creator_name, store_name, creator_level, status, audit_status, audit_by, audit_time, create_by, create_time) VALUES
-(1, 1, '天工开物', '天工木艺坊', 'master', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
-(2, 2, '泥火之歌', '景德镇陶艺社', 'master', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
-(3, 3, '锦线慢作', '苏绣生活馆', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
-(4, 4, '银月工坊', '银月首饰定制', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
-(5, 5, '一针一线', '手作布艺研究所', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
-(6, 6, '皮革先生', '慢裁皮具', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
-(7, 7, '竹影手造', '竹影器物', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
-(8, 8, '瓦蓝陶舍', '瓦蓝陶舍', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
-(9, 9, '流光珐琅', '流光珐琅社', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
-(10, 10, '纸上花开', '纸艺花园', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate());
+(1, 11, '天工开物', '天工木艺坊', 'master', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
+(2, 12, '泥火之歌', '景德镇陶艺社', 'master', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
+(3, 13, '锦线慢作', '苏绣生活馆', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
+(4, 14, '银月工坊', '银月首饰定制', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
+(5, 15, '一针一线', '手作布艺研究所', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
+(6, 16, '皮革先生', '慢裁皮具', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
+(7, 17, '竹影手造', '竹影器物', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
+(8, 18, '瓦蓝陶舍', '瓦蓝陶舍', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
+(9, 19, '流光珐琅', '流光珐琅社', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate()),
+(10, 20, '纸上花开', '纸艺花园', 'normal', '0', 'approved', 'admin', sysdate(), 'admin', sysdate());
 
 -- 3. 商品数据
 INSERT INTO creative_product (product_id, creator_id, category_id, product_name, product_type, price, status, audit_status, audit_by, audit_time, remark, create_by, create_time) VALUES

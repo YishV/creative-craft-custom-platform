@@ -162,6 +162,7 @@
 import { getCodeImg, register } from "@/api/login"
 import Cookies from "js-cookie"
 import { encrypt, decrypt } from '@/utils/jsencrypt'
+import { setAuthType } from '@/utils/auth'
 import passwordRule from "@/utils/passwordRule"
 import defaultSettings from '@/settings'
 
@@ -226,6 +227,8 @@ const MODE_CONFIG = {
     ]
   }
 }
+
+const rememberKey = (mode, key) => `${mode || 'admin'}-${key}`
 
 export default {
   name: "Login",
@@ -297,14 +300,17 @@ export default {
   watch: {
     $route: {
       handler: function(route) {
+        this.mode = (route && route.meta && route.meta.mode) || 'admin'
+        setAuthType(this.mode)
         this.redirect = route.query && route.query.redirect
+        this.getCookie()
       },
       immediate: true
     }
   },
   created() {
+    setAuthType(this.mode)
     this.getCode()
-    this.getCookie()
   },
   methods: {
     getCode() {
@@ -318,9 +324,9 @@ export default {
       })
     },
     getCookie() {
-      const username = Cookies.get("username")
-      const password = Cookies.get("password")
-      const rememberMe = Cookies.get('rememberMe')
+      const username = Cookies.get(rememberKey(this.mode, "username"))
+      const password = Cookies.get(rememberKey(this.mode, "password"))
+      const rememberMe = Cookies.get(rememberKey(this.mode, 'rememberMe'))
       this.loginForm = {
         ...this.loginForm,
         username: username === undefined ? this.loginForm.username : username,
@@ -331,15 +337,16 @@ export default {
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
+          setAuthType(this.mode)
           this.loading = true
           if (this.loginForm.rememberMe) {
-            Cookies.set("username", this.loginForm.username, { expires: 30 })
-            Cookies.set("password", encrypt(this.loginForm.password), { expires: 30 })
-            Cookies.set('rememberMe', this.loginForm.rememberMe, { expires: 30 })
+            Cookies.set(rememberKey(this.mode, "username"), this.loginForm.username, { expires: 30 })
+            Cookies.set(rememberKey(this.mode, "password"), encrypt(this.loginForm.password), { expires: 30 })
+            Cookies.set(rememberKey(this.mode, 'rememberMe'), this.loginForm.rememberMe, { expires: 30 })
           } else {
-            Cookies.remove("username")
-            Cookies.remove("password")
-            Cookies.remove('rememberMe')
+            Cookies.remove(rememberKey(this.mode, "username"))
+            Cookies.remove(rememberKey(this.mode, "password"))
+            Cookies.remove(rememberKey(this.mode, 'rememberMe'))
           }
           this.$store.dispatch("Login", this.loginForm).then(() => {
             const target = this.redirect || this.modeConfig.defaultRedirect
