@@ -7,6 +7,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap id="CreativePostResult" type="com.ruoyi.system.domain.creative.CreativePost">
         <result property="postId" column="post_id"/>
         <result property="creatorId" column="creator_id"/>
+        <result property="creatorName" column="creator_name"/>
+        <result property="storeName" column="store_name"/>
         <result property="postTitle" column="post_title"/>
         <result property="postType" column="post_type"/>
         <result property="status" column="status"/>
@@ -18,23 +20,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectCreativePostVo">
-        select post_id, creator_id, post_title, post_type, status, create_by, create_time, update_by, update_time, remark
-        from creative_post
+        select p.post_id, p.creator_id, c.creator_name, c.store_name,
+               p.post_title, p.post_type, p.status, p.create_by, p.create_time, p.update_by, p.update_time, p.remark
+        from creative_post p
+        left join creative_creator c on c.creator_id = p.creator_id
     </sql>
 
     <select id="selectCreativePostByPostId" parameterType="Long" resultMap="CreativePostResult">
         <include refid="selectCreativePostVo"/>
-        where post_id = #{postId}
+        where p.post_id = #{postId}
     </select>
 
     <select id="selectCreativePostList" parameterType="com.ruoyi.system.domain.creative.CreativePost" resultMap="CreativePostResult">
         <include refid="selectCreativePostVo"/>
         <where>
-            <if test="postTitle != null and postTitle != ''">and post_title like concat('%', #{postTitle}, '%')</if>
-            <if test="postType != null and postType != ''">and post_type = #{postType}</if>
-            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="postTitle != null and postTitle != ''">and p.post_title like concat('%', #{postTitle}, '%')</if>
+            <if test="postType != null and postType != ''">and p.post_type = #{postType}</if>
+            <if test="status != null and status != ''">and p.status = #{status}</if>
         </where>
-        order by post_id desc
+        order by p.post_id desc
     </select>
 
     <insert id="insertCreativePost" parameterType="com.ruoyi.system.domain.creative.CreativePost" useGeneratedKeys="true" keyProperty="postId">

@@ -8,6 +8,8 @@ public class CreativePost extends BaseEntity
 
     private Long postId;
     private Long creatorId;
+    private String creatorName;
+    private String storeName;
     private String postTitle;
     private String postType;
     private String status;
@@ -30,6 +32,26 @@ public class CreativePost extends BaseEntity
     public void setCreatorId(Long creatorId)
     {
         this.creatorId = creatorId;
+    }
+
+    public String getCreatorName()
+    {
+        return creatorName;
+    }
+
+    public void setCreatorName(String creatorName)
+    {
+        this.creatorName = creatorName;
+    }
+
+    public String getStoreName()
+    {
+        return storeName;
+    }
+
+    public void setStoreName(String storeName)
+    {
+        this.storeName = storeName;
     }
 
     public String getPostTitle()

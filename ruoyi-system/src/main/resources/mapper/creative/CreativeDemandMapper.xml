@@ -7,6 +7,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap id="CreativeDemandResult" type="com.ruoyi.system.domain.creative.CreativeDemand">
         <result property="demandId" column="demand_id"/>
         <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
         <result property="categoryId" column="category_id"/>
         <result property="demandTitle" column="demand_title"/>
         <result property="budgetAmount" column="budget_amount"/>
@@ -19,23 +20,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectCreativeDemandVo">
-        select demand_id, user_id, category_id, demand_title, budget_amount, demand_status, create_by, create_time, update_by, update_time, remark
-        from creative_demand
+        select d.demand_id, d.user_id, coalesce(u.nick_name, u.user_name) as user_name,
+               d.category_id, d.demand_title, d.budget_amount, d.demand_status,
+               d.create_by, d.create_time, d.update_by, d.update_time, d.remark
+        from creative_demand d
+        left join sys_user u on u.user_id = d.user_id
     </sql>
 
     <select id="selectCreativeDemandByDemandId" parameterType="Long" resultMap="CreativeDemandResult">
         <include refid="selectCreativeDemandVo"/>
-        where demand_id = #{demandId}
+        where d.demand_id = #{demandId}
     </select>
 
     <select id="selectCreativeDemandList" parameterType="com.ruoyi.system.domain.creative.CreativeDemand" resultMap="CreativeDemandResult">
         <include refid="selectCreativeDemandVo"/>
         <where>
-            <if test="demandTitle != null and demandTitle != ''">and demand_title like concat('%', #{demandTitle}, '%')</if>
-            <if test="demandStatus != null and demandStatus != ''">and demand_status = #{demandStatus}</if>
-            <if test="categoryId != null">and category_id = #{categoryId}</if>
+            <if test="demandTitle != null and demandTitle != ''">and d.demand_title like concat('%', #{demandTitle}, '%')</if>
+            <if test="demandStatus != null and demandStatus != ''">and d.demand_status = #{demandStatus}</if>
+            <if test="categoryId != null">and d.category_id = #{categoryId}</if>
+            <if test="userId != null">and d.user_id = #{userId}</if>
         </where>
-        order by demand_id desc
+        order by d.demand_id desc
     </select>
 
     <insert id="insertCreativeDemand" parameterType="com.ruoyi.system.domain.creative.CreativeDemand" useGeneratedKeys="true" keyProperty="demandId">

@@ -146,7 +146,7 @@ npm run dev
 | 入口 URL | 角色 | 默认账号 | 登录后跳转 |
 |---|---|---|---|
 | `/login` | 系统管理员 | `admin` / `admin123` | `/index`（后台首页） |
-| `/buyer/login` | 买家 | 注册即可，或用 `buyer01` ~ `buyer10` / `admin123` | `/portal/index`（前台首页） |
+| `/buyer/login` | 买家 | 注册即可，或用 `  ` ~ `buyer10` / `admin123` | `/portal/index`（前台首页） |
 | `/creator/login` | 创作者/卖家 | 注册即可，或用 `creator01` ~ `creator10` / `admin123` | `/creative/creator/me`（我的店铺） |
 
 > 三个登录页底部都有"切换其他入口"链接，互通无障碍。

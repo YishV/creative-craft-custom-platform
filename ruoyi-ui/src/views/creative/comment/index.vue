@@ -41,7 +41,9 @@
       <el-table-column label="所属作品" align="center" prop="postId" width="180">
         <template slot-scope="scope">{{ postTitle(scope.row.postId) }}</template>
       </el-table-column>
-      <el-table-column label="评论用户" align="center" prop="userId" width="100" />
+      <el-table-column label="评论用户" align="center" prop="userName" width="120">
+        <template slot-scope="scope">{{ scope.row.userName || (scope.row.userId ? `#${scope.row.userId}` : '-') }}</template>
+      </el-table-column>
       <el-table-column label="评论内容" align="center" prop="commentContent" :show-overflow-tooltip="true" />
       <el-table-column label="审核状态" align="center" prop="auditStatus" width="100">
         <template slot-scope="scope">

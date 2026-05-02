@@ -40,7 +40,9 @@
         <template slot-scope="scope">{{ scope.row.sourceName || '-' }} × {{ scope.row.quantity || 1 }}</template>
       </el-table-column>
       <el-table-column label="买家/卖家" width="160">
-        <template slot-scope="scope">#{{ scope.row.buyerId || '-' }} / #{{ scope.row.sellerId || '-' }}</template>
+        <template slot-scope="scope">
+          {{ scope.row.buyerName || ('#' + (scope.row.buyerId || '-')) }} / {{ scope.row.sellerName || ('#' + (scope.row.sellerId || '-')) }}
+        </template>
       </el-table-column>
       <el-table-column label="收货信息" prop="addressSnapshot" min-width="220" :show-overflow-tooltip="true" />
       <el-table-column label="操作" width="230" align="center">

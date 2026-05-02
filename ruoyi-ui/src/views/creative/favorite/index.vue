@@ -39,14 +39,16 @@
     <el-table v-loading="loading" :data="favoriteList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="收藏ID" align="center" prop="favoriteId" width="80" />
-      <el-table-column label="用户ID" align="center" prop="userId" width="100" />
+      <el-table-column label="收藏人" align="center" prop="userName" width="120">
+        <template slot-scope="scope">{{ scope.row.userName || (scope.row.userId ? `#${scope.row.userId}` : '-') }}</template>
+      </el-table-column>
       <el-table-column label="目标类型" align="center" prop="targetType" width="120">
         <template slot-scope="scope">
           <el-tag size="mini" :type="targetTagType(scope.row.targetType)">{{ targetTypeText(scope.row.targetType) }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="目标" align="center" prop="targetId" :show-overflow-tooltip="true">
-        <template slot-scope="scope">{{ targetLabel(scope.row.targetType, scope.row.targetId) }}</template>
+        <template slot-scope="scope">{{ scope.row.targetName || targetLabel(scope.row.targetType, scope.row.targetId) }}</template>
       </el-table-column>
       <el-table-column label="状态" align="center" prop="status" width="90">
         <template slot-scope="scope">
@@ -185,17 +187,17 @@ export default {
     targetLabel(type, id) {
       if (type === 'product') {
         const p = this.productOptions.find(i => i.productId === id)
-        return p ? p.productName : id
+        return p ? p.productName : (id ? `#${id}` : '-')
       }
       if (type === 'creator') {
         const c = this.creatorOptions.find(i => i.creatorId === id)
-        return c ? c.creatorName : id
+        return c ? (c.storeName || c.creatorName) : (id ? `#${id}` : '-')
       }
       if (type === 'post') {
         const p = this.postOptions.find(i => i.postId === id)
-        return p ? p.postTitle : id
+        return p ? p.postTitle : (id ? `#${id}` : '-')
       }
-      return id
+      return id ? `#${id}` : '-'
     },
     onTargetTypeChange() {
       this.form.targetId = undefined

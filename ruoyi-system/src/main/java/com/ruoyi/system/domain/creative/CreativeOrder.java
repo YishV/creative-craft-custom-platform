@@ -11,6 +11,8 @@ public class CreativeOrder extends BaseEntity
     private String orderNo;
     private Long buyerId;
     private Long sellerId;
+    private String buyerName;
+    private String sellerName;
     private BigDecimal orderAmount;
     private String orderStatus;
     private String payStatus;
@@ -58,6 +60,26 @@ public class CreativeOrder extends BaseEntity
     public void setSellerId(Long sellerId)
     {
         this.sellerId = sellerId;
+    }
+
+    public String getBuyerName()
+    {
+        return buyerName;
+    }
+
+    public void setBuyerName(String buyerName)
+    {
+        this.buyerName = buyerName;
+    }
+
+    public String getSellerName()
+    {
+        return sellerName;
+    }
+
+    public void setSellerName(String sellerName)
+    {
+        this.sellerName = sellerName;
     }
 
     public BigDecimal getOrderAmount()

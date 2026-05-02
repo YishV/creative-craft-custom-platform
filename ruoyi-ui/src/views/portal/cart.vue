@@ -16,7 +16,7 @@
       <el-table-column label="商品" min-width="220">
         <template slot-scope="scope">
           <strong>{{ scope.row.productName }}</strong>
-          <div class="muted">创作者 #{{ scope.row.creatorId || '-' }}</div>
+          <div class="muted">{{ creatorLabel(scope.row) }}</div>
         </template>
       </el-table-column>
       <el-table-column label="单价" width="120">
@@ -74,6 +74,12 @@ export default {
     },
     money(value) {
       return Number(value || 0).toFixed(2)
+    },
+    creatorLabel(item) {
+      if (!item) {
+        return '-'
+      }
+      return item.storeName || item.creatorName || (item.creatorId ? `#${item.creatorId}` : '-')
     }
   }
 }

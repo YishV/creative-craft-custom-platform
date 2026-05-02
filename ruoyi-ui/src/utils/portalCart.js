@@ -24,6 +24,8 @@ export function addCartItem(product, quantity = 1) {
       productName: product.productName,
       productType: product.productType,
       creatorId: product.creatorId,
+      creatorName: product.creatorName,
+      storeName: product.storeName,
       price: Number(product.price || 0),
       remark: product.remark,
       quantity

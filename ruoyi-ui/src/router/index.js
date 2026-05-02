@@ -124,6 +124,7 @@ export const constantRoutes = [
     path: '/portal',
     component: Layout,
     redirect: '/portal/index',
+    meta: { title: '买家端', icon: 'education' },
     children: [
       {
         path: 'index',

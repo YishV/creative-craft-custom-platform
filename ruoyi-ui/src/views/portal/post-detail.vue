@@ -5,7 +5,7 @@
       <div class="content">
         <div class="meta">
           <el-tag>{{ typeLabel(post.postType) }}</el-tag>
-          <span>创作者 #{{ post.creatorId || '-' }}</span>
+          <span>{{ creatorLabel(post) }}</span>
         </div>
         <h1>{{ post.postTitle || '作品详情' }}</h1>
         <p>{{ post.remark || '暂无作品说明' }}</p>
@@ -126,6 +126,12 @@ export default {
     },
     typeLabel(type) {
       return { work: '作品分享', process: '制作过程', idea: '灵感记录' }[type] || '作品'
+    },
+    creatorLabel(post) {
+      if (!post) {
+        return '-'
+      }
+      return post.storeName || post.creatorName || (post.creatorId ? `#${post.creatorId}` : '-')
     }
   }
 }

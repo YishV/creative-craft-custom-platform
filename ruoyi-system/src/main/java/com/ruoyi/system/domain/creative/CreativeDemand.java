@@ -9,6 +9,7 @@ public class CreativeDemand extends BaseEntity
 
     private Long demandId;
     private Long userId;
+    private String userName;
     private Long categoryId;
     private String demandTitle;
     private BigDecimal budgetAmount;
@@ -32,6 +33,16 @@ public class CreativeDemand extends BaseEntity
     public void setUserId(Long userId)
     {
         this.userId = userId;
+    }
+
+    public String getUserName()
+    {
+        return userName;
+    }
+
+    public void setUserName(String userName)
+    {
+        this.userName = userName;
     }
 
     public Long getCategoryId()

@@ -24,7 +24,7 @@
         <div class="body">
           <div class="meta">
             <el-tag size="mini">{{ typeLabel(item.postType) }}</el-tag>
-            <span>创作者 #{{ item.creatorId || '-' }}</span>
+            <span>{{ creatorLabel(item) }}</span>
           </div>
           <h2>{{ item.postTitle }}</h2>
           <p>{{ item.remark || '创作者暂未填写作品说明' }}</p>
@@ -90,6 +90,12 @@ export default {
     },
     typeLabel(type) {
       return { work: '作品分享', process: '制作过程', idea: '灵感记录' }[type] || '作品'
+    },
+    creatorLabel(item) {
+      if (!item) {
+        return '-'
+      }
+      return item.storeName || item.creatorName || (item.creatorId ? `#${item.creatorId}` : '-')
     }
   }
 }

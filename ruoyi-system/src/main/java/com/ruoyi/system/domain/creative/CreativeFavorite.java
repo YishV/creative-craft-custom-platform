@@ -8,8 +8,10 @@ public class CreativeFavorite extends BaseEntity
 
     private Long favoriteId;
     private Long userId;
+    private String userName;
     private String targetType;
     private Long targetId;
+    private String targetName;
     private String status;
 
     public Long getFavoriteId()
@@ -32,6 +34,16 @@ public class CreativeFavorite extends BaseEntity
         this.userId = userId;
     }
 
+    public String getUserName()
+    {
+        return userName;
+    }
+
+    public void setUserName(String userName)
+    {
+        this.userName = userName;
+    }
+
     public String getTargetType()
     {
         return targetType;
@@ -50,6 +62,16 @@ public class CreativeFavorite extends BaseEntity
     public void setTargetId(Long targetId)
     {
         this.targetId = targetId;
+    }
+
+    public String getTargetName()
+    {
+        return targetName;
+    }
+
+    public void setTargetName(String targetName)
+    {
+        this.targetName = targetName;
     }
 
     public String getStatus()

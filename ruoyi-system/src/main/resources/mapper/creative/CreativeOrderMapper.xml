@@ -9,6 +9,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="orderNo" column="order_no"/>
         <result property="buyerId" column="buyer_id"/>
         <result property="sellerId" column="seller_id"/>
+        <result property="buyerName" column="buyer_name"/>
+        <result property="sellerName" column="seller_name"/>
         <result property="orderAmount" column="order_amount"/>
         <result property="orderStatus" column="order_status"/>
         <result property="payStatus" column="pay_status"/>
@@ -25,27 +27,33 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectCreativeOrderVo">
-        select order_id, order_no, buyer_id, seller_id, order_amount, order_status, pay_status, source_type, source_id, source_name, quantity, address_snapshot, create_by, create_time, update_by, update_time, remark
-        from creative_custom_order
+        select o.order_id, o.order_no, o.buyer_id, o.seller_id,
+               coalesce(bu.nick_name, bu.user_name) as buyer_name,
+               coalesce(sc.store_name, sc.creator_name) as seller_name,
+               o.order_amount, o.order_status, o.pay_status, o.source_type, o.source_id, o.source_name,
+               o.quantity, o.address_snapshot, o.create_by, o.create_time, o.update_by, o.update_time, o.remark
+        from creative_custom_order o
+        left join sys_user bu on bu.user_id = o.buyer_id
+        left join creative_creator sc on sc.creator_id = o.seller_id
     </sql>
 
     <select id="selectCreativeOrderByOrderId" parameterType="Long" resultMap="CreativeOrderResult">
         <include refid="selectCreativeOrderVo"/>
-        where order_id = #{orderId}
+        where o.order_id = #{orderId}
     </select>
 
     <select id="selectCreativeOrderList" parameterType="com.ruoyi.system.domain.creative.CreativeOrder" resultMap="CreativeOrderResult">
         <include refid="selectCreativeOrderVo"/>
         <where>
-            <if test="orderNo != null and orderNo != ''">and order_no like concat('%', #{orderNo}, '%')</if>
-            <if test="orderStatus != null and orderStatus != ''">and order_status = #{orderStatus}</if>
-            <if test="payStatus != null and payStatus != ''">and pay_status = #{payStatus}</if>
-            <if test="buyerId != null">and buyer_id = #{buyerId}</if>
-            <if test="sellerId != null">and seller_id = #{sellerId}</if>
-            <if test="sourceType != null and sourceType != ''">and source_type = #{sourceType}</if>
-            <if test="sourceId != null">and source_id = #{sourceId}</if>
+            <if test="orderNo != null and orderNo != ''">and o.order_no like concat('%', #{orderNo}, '%')</if>
+            <if test="orderStatus != null and orderStatus != ''">and o.order_status = #{orderStatus}</if>
+            <if test="payStatus != null and payStatus != ''">and o.pay_status = #{payStatus}</if>
+            <if test="buyerId != null">and o.buyer_id = #{buyerId}</if>
+            <if test="sellerId != null">and o.seller_id = #{sellerId}</if>
+            <if test="sourceType != null and sourceType != ''">and o.source_type = #{sourceType}</if>
+            <if test="sourceId != null">and o.source_id = #{sourceId}</if>
         </where>
-        order by order_id desc
+        order by o.order_id desc
     </select>
 
     <insert id="insertCreativeOrder" parameterType="com.ruoyi.system.domain.creative.CreativeOrder" useGeneratedKeys="true" keyProperty="orderId">

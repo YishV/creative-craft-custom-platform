@@ -33,10 +33,10 @@
       <el-table-column label="订单ID" align="center" prop="orderId" width="90" />
       <el-table-column label="订单编号" align="center" prop="orderNo" :show-overflow-tooltip="true" />
       <el-table-column label="买家" align="center" prop="buyerId" width="120">
-        <template slot-scope="scope">{{ userName(scope.row.buyerId) }}</template>
+        <template slot-scope="scope">{{ scope.row.buyerName || userName(scope.row.buyerId) }}</template>
       </el-table-column>
       <el-table-column label="卖家(创作者)" align="center" prop="sellerId" width="140">
-        <template slot-scope="scope">{{ creatorName(scope.row.sellerId) }}</template>
+        <template slot-scope="scope">{{ scope.row.sellerName || creatorName(scope.row.sellerId) }}</template>
       </el-table-column>
       <el-table-column label="金额" align="center" prop="orderAmount" width="110" />
       <el-table-column label="状态" align="center" prop="orderStatus" width="110">

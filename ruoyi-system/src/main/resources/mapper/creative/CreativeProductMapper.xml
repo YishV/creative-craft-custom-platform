@@ -7,6 +7,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap id="CreativeProductResult" type="com.ruoyi.system.domain.creative.CreativeProduct">
         <result property="productId"   column="product_id"/>
         <result property="creatorId"   column="creator_id"/>
+        <result property="creatorName" column="creator_name"/>
+        <result property="storeName"   column="store_name"/>
         <result property="categoryId"  column="category_id"/>
         <result property="productName" column="product_name"/>
         <result property="productType" column="product_type"/>
@@ -24,26 +26,29 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectCreativeProductVo">
-        select product_id, creator_id, category_id, product_name, product_type, price, status,
-               audit_status, audit_remark, audit_by, audit_time,
-               create_by, create_time, update_by, update_time, remark
-        from creative_product
+        select p.product_id, p.creator_id, c.creator_name, c.store_name,
+               p.category_id, p.product_name, p.product_type, p.price, p.status,
+               p.audit_status, p.audit_remark, p.audit_by, p.audit_time,
+               p.create_by, p.create_time, p.update_by, p.update_time, p.remark
+        from creative_product p
+        left join creative_creator c on c.creator_id = p.creator_id
     </sql>
 
     <select id="selectCreativeProductByProductId" parameterType="Long" resultMap="CreativeProductResult">
         <include refid="selectCreativeProductVo"/>
-        where product_id = #{productId}
+        where p.product_id = #{productId}
     </select>
 
     <select id="selectCreativeProductList" parameterType="com.ruoyi.system.domain.creative.CreativeProduct" resultMap="CreativeProductResult">
         <include refid="selectCreativeProductVo"/>
         <where>
-            <if test="productName != null and productName != ''">and product_name like concat('%', #{productName}, '%')</if>
-            <if test="productType != null and productType != ''">and product_type = #{productType}</if>
-            <if test="status != null and status != ''">and status = #{status}</if>
-            <if test="auditStatus != null and auditStatus != ''">and audit_status = #{auditStatus}</if>
+            <if test="productName != null and productName != ''">and p.product_name like concat('%', #{productName}, '%')</if>
+            <if test="productType != null and productType != ''">and p.product_type = #{productType}</if>
+            <if test="creatorId != null">and p.creator_id = #{creatorId}</if>
+            <if test="status != null and status != ''">and p.status = #{status}</if>
+            <if test="auditStatus != null and auditStatus != ''">and p.audit_status = #{auditStatus}</if>
         </where>
-        order by product_id desc
+        order by p.product_id desc
     </select>
 
     <insert id="insertCreativeProduct" parameterType="com.ruoyi.system.domain.creative.CreativeProduct" useGeneratedKeys="true" keyProperty="productId">

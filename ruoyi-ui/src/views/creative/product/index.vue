@@ -47,7 +47,7 @@
       <el-table-column label="商品ID" align="center" prop="productId" width="90" />
       <el-table-column label="商品名称" align="center" prop="productName" :show-overflow-tooltip="true" />
       <el-table-column label="创作者" align="center" prop="creatorId" width="140">
-        <template slot-scope="scope">{{ creatorName(scope.row.creatorId) }}</template>
+        <template slot-scope="scope">{{ scope.row.storeName || scope.row.creatorName || creatorName(scope.row.creatorId) }}</template>
       </el-table-column>
       <el-table-column label="分类" align="center" prop="categoryId" width="120">
         <template slot-scope="scope">{{ categoryName(scope.row.categoryId) }}</template>

@@ -38,7 +38,7 @@
       <el-table-column label="需求ID" align="center" prop="demandId" width="90" />
       <el-table-column label="需求标题" align="center" prop="demandTitle" :show-overflow-tooltip="true" />
       <el-table-column label="买家" align="center" prop="userId" width="100">
-        <template slot-scope="scope">{{ userName(scope.row.userId) }}</template>
+        <template slot-scope="scope">{{ scope.row.userName || userName(scope.row.userId) }}</template>
       </el-table-column>
       <el-table-column label="分类" align="center" prop="categoryId" width="120">
         <template slot-scope="scope">{{ categoryName(scope.row.categoryId) }}</template>

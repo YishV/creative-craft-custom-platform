@@ -24,7 +24,7 @@
         <div class="body">
           <div class="meta">
             <el-tag size="mini" :type="item.productType === 'custom' ? 'warning' : 'success'">{{ item.productType === 'custom' ? '可定制' : '现货' }}</el-tag>
-            <span>创作者 #{{ item.creatorId || '-' }}</span>
+            <span>{{ creatorLabel(item) }}</span>
           </div>
           <h2>{{ item.productName }}</h2>
           <p>{{ item.remark || '这件商品暂未填写详细介绍' }}</p>
@@ -57,7 +57,7 @@
       <el-descriptions :column="1" border>
         <el-descriptions-item label="商品类型">{{ detail.productType === 'custom' ? '可定制' : '现货' }}</el-descriptions-item>
         <el-descriptions-item label="价格">￥{{ money(detail.price) }}</el-descriptions-item>
-        <el-descriptions-item label="创作者">#{{ detail.creatorId || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="创作者">{{ creatorLabel(detail) }}</el-descriptions-item>
         <el-descriptions-item label="说明">{{ detail.remark || '暂无商品说明' }}</el-descriptions-item>
       </el-descriptions>
 
@@ -244,6 +244,12 @@ export default {
     },
     money(value) {
       return Number(value || 0).toFixed(2)
+    },
+    creatorLabel(item) {
+      if (!item) {
+        return '-'
+      }
+      return item.storeName || item.creatorName || (item.creatorId ? `#${item.creatorId}` : '-')
     }
   }
 }

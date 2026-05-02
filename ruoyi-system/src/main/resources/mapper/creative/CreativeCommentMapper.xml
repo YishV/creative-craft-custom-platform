@@ -8,6 +8,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="commentId" column="comment_id"/>
         <result property="postId" column="post_id"/>
         <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
         <result property="commentContent" column="comment_content"/>
         <result property="auditStatus" column="audit_status"/>
         <result property="createBy" column="create_by"/>
@@ -18,23 +19,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectCreativeCommentVo">
-        select comment_id, post_id, user_id, comment_content, audit_status, create_by, create_time, update_by, update_time, remark
-        from creative_comment
+        select c.comment_id, c.post_id, c.user_id, coalesce(u.nick_name, u.user_name) as user_name,
+               c.comment_content, c.audit_status, c.create_by, c.create_time, c.update_by, c.update_time, c.remark
+        from creative_comment c
+        left join sys_user u on u.user_id = c.user_id
     </sql>
 
     <select id="selectCreativeCommentByCommentId" parameterType="Long" resultMap="CreativeCommentResult">
         <include refid="selectCreativeCommentVo"/>
-        where comment_id = #{commentId}
+        where c.comment_id = #{commentId}
     </select>
 
     <select id="selectCreativeCommentList" parameterType="com.ruoyi.system.domain.creative.CreativeComment" resultMap="CreativeCommentResult">
         <include refid="selectCreativeCommentVo"/>
         <where>
-            <if test="postId != null">and post_id = #{postId}</if>
-            <if test="userId != null">and user_id = #{userId}</if>
-            <if test="auditStatus != null and auditStatus != ''">and audit_status = #{auditStatus}</if>
+            <if test="postId != null">and c.post_id = #{postId}</if>
+            <if test="userId != null">and c.user_id = #{userId}</if>
+            <if test="auditStatus != null and auditStatus != ''">and c.audit_status = #{auditStatus}</if>
         </where>
-        order by comment_id desc
+        order by c.comment_id desc
     </select>
 
     <insert id="insertCreativeComment" parameterType="com.ruoyi.system.domain.creative.CreativeComment" useGeneratedKeys="true" keyProperty="commentId">
