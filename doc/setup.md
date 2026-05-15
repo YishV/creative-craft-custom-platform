@@ -45,17 +45,7 @@ USE ruoyi;
 
 ### 3.2 灌入表结构与初始数据
 
-按顺序执行 `<项目根目录>/sql/install/` 下的 5 个 SQL，详细见 [`sql/README.md`](../sql/README.md)：
-
-```sql
-SOURCE <项目根目录>/sql/install/01_framework_base.sql;
-SOURCE <项目根目录>/sql/install/02_business_core.sql;
-SOURCE <项目根目录>/sql/install/03_social_interaction.sql;
-SOURCE <项目根目录>/sql/install/04_system_menus.sql;
-SOURCE <项目根目录>/sql/install/05_test_data.sql;   -- 仅开发演示用，生产可跳过
-```
-
-执行完应有 4×× 张表（`sys_*` 系统表 + `creative_*` 业务表 + Quartz 表）。
+按顺序执行 `<项目根目录>/sql/` 下的 3 个 SQL
 
 ---
 
@@ -120,7 +110,7 @@ npm install
 > Windows 上 npm 命令是 `npm.cmd`，在某些 PowerShell 配置下要写全名。
 > 国内网络如果装不动，可换淘宝镜像：`npm config set registry https://registry.npmmirror.com`。
 
-### 5.2 开发模式（推荐答辩演示）
+### 5.2 开发模式
 
 ```bash
 npm run dev
@@ -141,7 +131,7 @@ npm run dev
 
 ## 6. 默认账号与登录入口
 
-执行 `01_framework_base.sql` 后会有两个内置账号；执行 `05_test_data.sql` 会再灌一批演示用户（`creator01-10`、`buyer01-10`，密码统一 `admin123`）。
+密码统一 `admin123`
 
 | 入口 URL | 角色 | 默认账号 | 登录后跳转 |
 |---|---|---|---|
