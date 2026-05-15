@@ -16,6 +16,7 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.system.domain.creative.CreativeCategory;
 import com.ruoyi.system.service.creative.ICreativeCategoryService;
 
@@ -26,10 +27,13 @@ public class CreativeCategoryController extends BaseController
     @Autowired
     private ICreativeCategoryService creativeCategoryService;
 
-    @PreAuthorize("@ss.hasPermi('creative:category:list')")
     @GetMapping("/list")
     public TableDataInfo list(CreativeCategory creativeCategory)
     {
+        if (!SecurityUtils.hasPermi("creative:category:list"))
+        {
+            creativeCategory.setStatus("0");
+        }
         startPage();
         List<CreativeCategory> list = creativeCategoryService.selectCreativeCategoryList(creativeCategory);
         return getDataTable(list);

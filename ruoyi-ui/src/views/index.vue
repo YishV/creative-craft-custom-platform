@@ -3,6 +3,8 @@
 </template>
 
 <script>
+import { getAuthType } from '@/utils/auth'
+
 export default {
   name: "Index",
   created() {
@@ -13,7 +15,9 @@ export default {
     routeByRole() {
       const roles = (this.$store.getters && this.$store.getters.roles) || []
       let target = "/portal/products"
-      if (roles.includes("admin")) {
+      if (getAuthType() === 'creator') {
+        target = "/creative/creator/me"
+      } else if (roles.includes("admin")) {
         target = "/creative-dashboard"
       } else if (roles.includes("creator")) {
         target = "/creative/creator/me"

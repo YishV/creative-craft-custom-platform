@@ -2,7 +2,27 @@
   <div class="app-container">
     <el-card v-if="!profile.creator" class="empty-card" shadow="never">
       <div slot="header">创作者主页</div>
-      <p>当前账号尚未提交创作者申请。请前往「创作者管理」页提交申请，审核通过后即可入驻并发布商品。</p>
+      <p>当前账号尚未提交创作者申请。请填写下方资料，审核通过后即可入驻并发布商品。</p>
+      <el-form ref="applicationForm" :model="applicationForm" :rules="applicationRules" label-width="90px" class="application-form">
+        <el-form-item label="创作者名" prop="creatorName">
+          <el-input v-model="applicationForm.creatorName" placeholder="请输入创作者名" />
+        </el-form-item>
+        <el-form-item label="店铺名称" prop="storeName">
+          <el-input v-model="applicationForm.storeName" placeholder="请输入店铺名称" />
+        </el-form-item>
+        <el-form-item label="等级" prop="creatorLevel">
+          <el-select v-model="applicationForm.creatorLevel" placeholder="请选择等级">
+            <el-option label="新人" value="newbie" />
+            <el-option label="普通" value="normal" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input v-model="applicationForm.remark" type="textarea" placeholder="可填写主营品类、作品经验等补充说明" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" :loading="submitting" @click="submitApplication">提交申请</el-button>
+        </el-form-item>
+      </el-form>
     </el-card>
 
     <template v-else>
@@ -32,20 +52,53 @@
         <el-col :span="4"><el-card class="stat-card" shadow="never"><div class="stat-label">累计成交额</div><div class="stat-value">¥{{ profile.completedRevenue || 0 }}</div></el-card></el-col>
       </el-row>
 
-      <el-alert v-if="!effective" class="hint" type="info" show-icon :closable="false"
-        :title="hintText" />
+      <el-alert v-if="!effective" class="hint" type="info" show-icon :closable="false" :title="hintText" />
+      <el-card v-if="canReapply" class="reapply-card" shadow="never">
+        <div slot="header">重新提交申请</div>
+        <el-form ref="applicationForm" :model="applicationForm" :rules="applicationRules" label-width="90px" class="application-form">
+          <el-form-item label="创作者名" prop="creatorName">
+            <el-input v-model="applicationForm.creatorName" placeholder="请输入创作者名" />
+          </el-form-item>
+          <el-form-item label="店铺名称" prop="storeName">
+            <el-input v-model="applicationForm.storeName" placeholder="请输入店铺名称" />
+          </el-form-item>
+          <el-form-item label="等级" prop="creatorLevel">
+            <el-select v-model="applicationForm.creatorLevel" placeholder="请选择等级">
+              <el-option label="新人" value="newbie" />
+              <el-option label="普通" value="normal" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="备注" prop="remark">
+            <el-input v-model="applicationForm.remark" type="textarea" placeholder="可填写主营品类、作品经验等补充说明" />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" :loading="submitting" @click="submitApplication">重新提交</el-button>
+          </el-form-item>
+        </el-form>
+      </el-card>
     </template>
   </div>
 </template>
 
 <script>
-import { getMyCreatorProfile } from '@/api/creative/creator'
+import { applyCreator, getMyCreatorProfile } from '@/api/creative/creator'
 
 export default {
   name: 'CreativeMe',
   data() {
     return {
-      profile: { creator: null, productCount: 0, onShelfProductCount: 0, pendingQuoteCount: 0, activeOrderCount: 0, completedOrderCount: 0, completedRevenue: 0 }
+      profile: { creator: null, productCount: 0, onShelfProductCount: 0, pendingQuoteCount: 0, activeOrderCount: 0, completedOrderCount: 0, completedRevenue: 0 },
+      submitting: false,
+      applicationForm: {
+        creatorName: undefined,
+        storeName: undefined,
+        creatorLevel: 'newbie',
+        remark: undefined
+      },
+      applicationRules: {
+        creatorName: [{ required: true, message: '创作者名不能为空', trigger: 'blur' }],
+        storeName: [{ required: true, message: '店铺名称不能为空', trigger: 'blur' }]
+      }
     }
   },
   computed: {
@@ -53,6 +106,9 @@ export default {
       return this.profile.creator
         && this.profile.creator.auditStatus === 'approved'
         && this.profile.creator.status === '0'
+    },
+    canReapply() {
+      return this.profile.creator && this.profile.creator.auditStatus === 'rejected'
     },
     hintText() {
       const c = this.profile.creator
@@ -70,7 +126,36 @@ export default {
       getMyCreatorProfile().then(res => {
         if (res && res.data) {
           this.profile = res.data
+          this.resetApplicationForm()
         }
+      })
+    },
+    resetApplicationForm() {
+      const c = this.profile.creator || {}
+      this.applicationForm = {
+        creatorName: c.creatorName,
+        storeName: c.storeName,
+        creatorLevel: c.creatorLevel || 'newbie',
+        remark: c.remark
+      }
+      this.$nextTick(() => {
+        if (this.$refs.applicationForm) {
+          this.$refs.applicationForm.clearValidate()
+        }
+      })
+    },
+    submitApplication() {
+      this.$refs.applicationForm.validate(valid => {
+        if (!valid) {
+          return
+        }
+        this.submitting = true
+        applyCreator(this.applicationForm).then(() => {
+          this.$modal.msgSuccess('申请提交成功')
+          this.loadProfile()
+        }).finally(() => {
+          this.submitting = false
+        })
       })
     }
   }
@@ -87,4 +172,6 @@ export default {
 .stat-value { font-size: 22px; font-weight: 600; margin-top: 4px; }
 .hint { margin-top: 16px; }
 .empty-card p { color: #666; line-height: 1.8; }
+.application-form { max-width: 560px; margin-top: 18px; }
+.reapply-card { margin-top: 16px; }
 </style>

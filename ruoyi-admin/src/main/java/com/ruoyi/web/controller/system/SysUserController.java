@@ -41,6 +41,8 @@ import com.ruoyi.system.service.ISysUserService;
 @RequestMapping("/system/user")
 public class SysUserController extends BaseController
 {
+    private static final Long BUYER_DEPT_ID = 200L;
+
     @Autowired
     private ISysUserService userService;
 
@@ -56,10 +58,14 @@ public class SysUserController extends BaseController
     /**
      * 获取用户列表
      */
-    @PreAuthorize("@ss.hasPermi('system:user:list')")
     @GetMapping("/list")
     public TableDataInfo list(SysUser user)
     {
+        if (!SecurityUtils.hasPermi("system:user:list"))
+        {
+            user.setDeptId(BUYER_DEPT_ID);
+            user.setStatus("0");
+        }
         startPage();
         List<SysUser> list = userService.selectUserList(user);
         return getDataTable(list);

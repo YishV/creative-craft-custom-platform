@@ -27,10 +27,14 @@ public class CreativeCreatorController extends BaseController
     @Autowired
     private ICreativeCreatorService creativeCreatorService;
 
-    @PreAuthorize("@ss.hasPermi('creative:creator:list')")
     @GetMapping("/list")
     public TableDataInfo list(CreativeCreator creativeCreator)
     {
+        if (!SecurityUtils.hasPermi("creative:creator:list"))
+        {
+            creativeCreator.setStatus("0");
+            creativeCreator.setAuditStatus("approved");
+        }
         startPage();
         List<CreativeCreator> list = creativeCreatorService.selectCreativeCreatorList(creativeCreator);
         return getDataTable(list);
@@ -49,7 +53,6 @@ public class CreativeCreatorController extends BaseController
         return success(creativeCreatorService.selectCreativeCreatorByCreatorId(creatorId));
     }
 
-    @PreAuthorize("@ss.hasPermi('creative:creator:add')")
     @Log(title = "创作者申请", businessType = BusinessType.INSERT)
     @PostMapping("/apply")
     public AjaxResult apply(@RequestBody CreativeCreator creativeCreator)

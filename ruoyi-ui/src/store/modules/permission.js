@@ -75,6 +75,9 @@ function getSidebarDynamicRoutes(authType, routes) {
   if (authType === 'buyer') {
     return []
   }
+  if (authType === 'creator' && !auth.hasRole('creator')) {
+    return []
+  }
   return routes
 }
 

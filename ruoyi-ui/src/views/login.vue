@@ -218,9 +218,9 @@ const MODE_CONFIG = {
     bg: 'linear-gradient(135deg, rgba(24, 81, 110, .72), rgba(41, 126, 123, .58))',
     allowRegister: true,
     identityType: 'creator',
-    registerTip: '注册后先以买家身份进入系统，再去"创作者管理"提交认证申请。',
+    registerTip: '注册后可在"我的店铺"提交认证申请。',
     registerButtonText: '注 册 创 作 者 账 号',
-    registerSuccessTip: '登录后请进入"文创平台 / 创作者管理"提交创作者申请。',
+    registerSuccessTip: '登录后请进入"我的店铺"提交创作者申请。',
     crossLinks: [
       { to: '/buyer/login', text: '我是买家' },
       { to: '/login', text: '管理员入口' }

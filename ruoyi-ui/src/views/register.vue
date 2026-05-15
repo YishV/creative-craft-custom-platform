@@ -151,7 +151,7 @@ export default {
           register(payload).then(() => {
             const username = this.registerForm.username
             const nextTip = this.registerForm.identityType === 'creator'
-              ? "登录后请进入“文创平台 / 创作者管理”提交创作者申请。"
+              ? "登录后请进入“我的店铺”提交创作者申请。"
               : "登录后可进入“文创前台”浏览商品并发布定制需求。"
             this.$alert("<font color='red'>恭喜你，账号 " + username + " 注册成功！</font><br/>" + nextTip, '系统提示', {
               dangerouslyUseHTMLString: true,
